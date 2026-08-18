@@ -1,0 +1,7 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 880, "h": 320, "title": "How the map is built" },
+    { "file": "Flow.dc.html", "x": 0, "y": 400, "w": 880, "h": 460, "title": "One question, one answer" }
+  ],
+  "launch": { "view": "canvas" }
+}
