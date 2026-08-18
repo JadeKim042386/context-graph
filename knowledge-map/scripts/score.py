@@ -1,4 +1,4 @@
-"""지도에 스스로 점수를 매깁니다. 지도는 멀쩡히 만들어지면서 반쪽짜리일 수 있습니다."""
+"""Scores the map against itself. A map can build cleanly and still be half useless."""
 import json
 import os
 import re
@@ -8,7 +8,7 @@ SAMPLE_COUNT = 5
 
 
 def score_map(map_path):
-    """다섯 가지를 재고, 낮은 항목의 원인을 짚어 돌려줍니다."""
+    """Measure five things and point at the cause behind whichever one is low."""
     with open(map_path, encoding="utf-8-sig", errors="replace") as handle:
         graph = json.load(handle)
     nodes, links = graph["nodes"], graph["links"]
@@ -37,7 +37,8 @@ def score_map(map_path):
             stack.extend(neighbours[current] - seen)
     isolated = sum(1 for node_id in neighbours if not neighbours[node_id])
 
-    # 표본: 숫자가 든 문장 노드를 정해진 방식(정렬)으로 골라 늘 같은 것이 뽑히게 합니다.
+    # Samples: pick statement nodes that carry a number in a fixed way (sorted), so the
+    # same ones come out every time.
     candidates = sorted(
         (node for node in nodes
          if node.get("kind") == "statement" and NUMBER_PATTERN.search(node["label"] or "")),
@@ -48,13 +49,16 @@ def score_map(map_path):
 
     hints = []
     if located_ratio < 0.8:
-        hints.append(f"위치 정보 {located_ratio:.0%} — 소제목만 있고 그 아래 본문이 안 담긴 문서가 많습니다")
+        hints.append(f"located {located_ratio:.0%} — many documents carry headings only,"
+                     " with no body text under them")
     if document_node_ratio > 0.5:
-        hints.append(f"문서 통짜 노드 {document_node_ratio:.0%} — 지도가 문서 목록에 가깝습니다")
+        hints.append(f"whole-document nodes {document_node_ratio:.0%} — the map is closer"
+                     " to a list of documents")
     if len({link["relation"] for link in links}) <= 2:
-        hints.append("관계 종류가 적습니다 — `- <낱말> [[대상]]` 꼴이 거의 없습니다")
+        hints.append("few relation kinds — the `- <word> [[target]]` shape is almost absent")
     if components > max(1, len(nodes) // 50):
-        hints.append(f"덩어리 {components}개 — 문서끼리 링크가 드뭅니다. 길 찾기는 기대하기 어렵습니다")
+        hints.append(f"{components} components — documents rarely link to each other,"
+                     " so path finding will not get far")
 
     return {"nodes": len(nodes), "links": len(links),
             "located_ratio": located_ratio, "document_node_ratio": document_node_ratio,
@@ -64,14 +68,17 @@ def score_map(map_path):
 
 
 def format_score(score):
-    """평소 갱신 때 보여줄 한 줄로 바꿉니다."""
-    return (f"노드 {score['nodes']} · 연결 {score['links']} · "
-            f"위치 {score['located_ratio']:.1%} · 관계 {score['relation_kinds']}종 · "
-            f"덩어리 {score['components']}개")
+    """Format the one line shown on an ordinary refresh."""
+    return (f"nodes {score['nodes']} · links {score['links']} · "
+            f"located {score['located_ratio']:.1%} · relations {score['relation_kinds']} kinds · "
+            f"components {score['components']}")
 
 
 def verify_samples(score):
-    """표본 문장을 원본 파일의 그 줄과 대조합니다. 하나라도 어긋나면 그 자리에서 드러납니다."""
+    """Check each sample statement against that line in the source file.
+
+    One mismatch shows up right here.
+    """
     checked, matched, failed = 0, 0, []
     for sample in score["samples"]:
         source_file, line_number = sample["source_file"], sample["source_location"]

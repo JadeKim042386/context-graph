@@ -1,15 +1,15 @@
-"""마크다운 한 편을 조각(소제목·문장·연결)으로 바꿉니다. 지도가 무엇인지는 모릅니다."""
+"""Turns one markdown document into pieces (headings, statements, links). It knows nothing about the map."""
 import re
 
 HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.*\S)\s*$")
 WIKILINK_PATTERN = re.compile(r"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]")
-# 관계 줄: "- <낱말> [[대상]]" 꼴만 관계로 봅니다. 절 이름에 기대지 않습니다.
+# Relation line: only the shape "- <word> [[target]]" counts as a relation. Section names are not relied on.
 RELATION_PATTERN = re.compile(r"^\s*[-*]\s+([A-Za-z_][A-Za-z0-9_]*)\s+\[\[([^\]|]+)(?:\|[^\]]*)?\]\]\s*$")
 LIST_ITEM_PATTERN = re.compile(r"^\s*[-*]\s+(.*\S)\s*$")
 
 
 def parse_markdown(text):
-    """한 편을 훑어 조각들을 돌려줍니다. 줄 번호는 1부터입니다."""
+    """Scan one document and return its pieces. Line numbers start at 1."""
     lines = text.split("\n")
     sections, statements, links = [], [], []
     current_section = ""
@@ -35,8 +35,9 @@ def parse_markdown(text):
             links.append({"target": relation.group(2).strip(),
                           "relation": relation.group(1),
                           "line": line_number})
-            # 여기서 줄을 끊지 않습니다. 관계 줄도 아래에서 문장으로 함께 남겨야
-            # 관계 절 뒤에 본문이 붙은 문서에서 값이 든 문장을 잃지 않습니다.
+            # Do not stop here. The relation line has to be kept as a statement below
+            # as well, or documents that continue with prose after the relation section
+            # lose the statements that carry the values.
         else:
             for target in WIKILINK_PATTERN.findall(line):
                 links.append({"target": target.strip(), "relation": None, "line": line_number})

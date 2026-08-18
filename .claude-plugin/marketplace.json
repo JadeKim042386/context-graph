@@ -5,7 +5,7 @@
     {
       "name": "knowledge-map",
       "source": "./knowledge-map",
-      "description": "지식 문서에 이미 적힌 구조를 그대로 옮겨 값·연결·계보를 함께 답하는 지도를 만듭니다.",
+      "description": "Builds a map by copying the structure already written in your knowledge documents, answering with values, connections and lineage.",
       "version": "0.1.0"
     }
   ]

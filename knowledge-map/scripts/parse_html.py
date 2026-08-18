@@ -1,6 +1,7 @@
-"""HTML 한 편을 마크다운 파서와 같은 모양의 조각으로 바꿉니다.
+"""Turns one HTML document into the same shape of pieces the markdown parser produces.
 
-그림·꾸밈·스크립트는 버리되 SVG 안의 글자는 건집니다. 도식에 담긴 요지가 거기 있습니다.
+Images, styling and scripts are dropped, but text inside SVG is kept: the point
+a diagram makes usually lives in that text.
 """
 from html.parser import HTMLParser
 
@@ -58,7 +59,7 @@ class _Collector(HTMLParser):
 
 
 def parse_html(text):
-    """한 편을 훑어 조각들을 돌려줍니다. 줄 번호는 원본 파일의 실제 줄입니다."""
+    """Scan one document and return its pieces. Line numbers are real lines in the source file."""
     collector = _Collector()
     collector.feed(text)
     return {"sections": collector.sections,

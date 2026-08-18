@@ -1,7 +1,8 @@
-"""그림에서 뽑은 글자를 캐시에 두고 씁니다.
+"""Caches and reuses text pulled out of images.
 
-열쇠는 파일 시각이 아니라 그림 내용의 해시입니다. 이름을 바꾸거나 다시 저장만 해도
-다시 읽지 않습니다. 지도를 만들 때는 이 캐시를 읽기만 하므로 재생성 시간이 그대로입니다.
+The key is a hash of the image contents, not the file timestamp. Renaming or
+re-saving an image does not force a re-read. Building the map only reads this
+cache, so build time is unchanged.
 """
 import hashlib
 import json
@@ -9,13 +10,13 @@ import os
 
 
 def image_hash(image_path):
-    """그림 내용의 해시. 같은 그림이면 이름이 달라도 같은 열쇠입니다."""
+    """Hash of the image contents. The same image gives the same key under any file name."""
     with open(image_path, "rb") as handle:
         return hashlib.sha256(handle.read()).hexdigest()
 
 
 def load_cache(cache_path):
-    """캐시를 읽습니다. 없으면 빈 것을 돌려줍니다."""
+    """Read the cache. Return an empty one if there is no file."""
     if not os.path.exists(cache_path):
         return {}
     with open(cache_path, encoding="utf-8-sig", errors="replace") as handle:
@@ -23,19 +24,19 @@ def load_cache(cache_path):
 
 
 def save_cache(cache_path, cache):
-    """캐시를 씁니다. 폴더가 없으면 만듭니다."""
+    """Write the cache, creating the folder if it does not exist."""
     os.makedirs(os.path.dirname(cache_path) or ".", exist_ok=True)
     with open(cache_path, "w", encoding="utf-8") as handle:
         json.dump(cache, handle, ensure_ascii=False, indent=1, sort_keys=True)
 
 
 def pending_images(image_paths, cache):
-    """아직 읽지 않은 그림만 골라 돌려줍니다."""
+    """Return only the images that have not been read yet."""
     return [path for path in sorted(image_paths) if image_hash(path) not in cache]
 
 
 def apply_cache(cache, image_paths):
-    """캐시에 있는 글자를 문장 조각으로 바꿉니다. 기계가 읽은 것이라고 표시합니다."""
+    """Turn cached text into statement pieces, marked as machine-read."""
     statements = []
     for path in sorted(image_paths):
         entry = cache.get(image_hash(path))
