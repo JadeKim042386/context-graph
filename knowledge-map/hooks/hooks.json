@@ -1,0 +1,56 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\" --quiet",
+            "timeout": 60,
+            "statusMessage": "지식 지도 갱신 중..."
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\" --quiet",
+            "timeout": 60,
+            "statusMessage": "지식 지도 갱신 중(맡긴 작업 종료)..."
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "echo '[압축 직전 — 세션 내용을 지식 문서에 적습니다]'",
+            "timeout": 600,
+            "statusMessage": "세션 내용을 지식 문서에 적는 중..."
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\"",
+            "timeout": 60,
+            "statusMessage": "지식 지도 갱신 중(압축 후)..."
+          }
+        ]
+      }
+    ]
+  }
+}

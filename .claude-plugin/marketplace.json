@@ -1,0 +1,12 @@
+{
+  "name": "knowledge-map",
+  "owner": { "name": "KimJooYoung" },
+  "plugins": [
+    {
+      "name": "knowledge-map",
+      "source": "./knowledge-map",
+      "description": "지식 문서에 이미 적힌 구조를 그대로 옮겨 값·연결·계보를 함께 답하는 지도를 만듭니다.",
+      "version": "0.1.0"
+    }
+  ]
+}
