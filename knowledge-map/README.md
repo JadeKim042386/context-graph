@@ -1,38 +1,44 @@
-# 지식 지도
+# Knowledge Map
 
-지식 문서(마크다운·HTML)에 **이미 적혀 있는 구조를 그대로 옮겨** 지도를 만듭니다.
-언어 모델을 쓰지 않아 문서 수백 편에 1초가 안 걸리고, 같은 입력이면 같은 결과가 나옵니다.
+Builds a map by **copying the structure already written in your knowledge documents**
+(markdown and HTML). No language model is involved, so hundreds of documents take under
+a second, and the same input always gives the same output.
 
-## 무엇이 되나
+## What you get
 
-- **값 찾기** — 답에 문장과 **파일·줄 번호**가 함께 옵니다.
-- **연결 보기** — 서로 다른 문서가 어디서 만나는지.
-- **계보 따라가기** — 문서에 `- <낱말> [[대상]]` 꼴로 적어 둔 관계를 그대로 씁니다.
+- **Value lookup** — the answer carries the statement together with its **file and line number**.
+- **Connections** — where separate documents meet.
+- **Lineage** — the relations you wrote as `- <word> [[target]]`, used exactly as written.
 
-## 처음 쓸 때
+## First run
 
-1. 지식 문서가 어디 있는지 답합니다.
-2. 필요한 도구 둘(`graphify`, `obsidian-second-brain`)을 깔지 묻습니다. 거절해도 지도 만들기는 됩니다.
-3. 지도를 만들고 **점수**를 보여줍니다. 점수가 낮으면 무엇이 문제인지 짚습니다.
-4. 압축 기준을 고릅니다.
+1. You answer where the knowledge documents live.
+2. It asks whether to install the two tools it uses (`graphify`, `obsidian-second-brain`).
+   Decline and the map still builds.
+3. It builds the map and shows a **score**. A low score comes with what is wrong.
+4. You pick the compaction threshold.
 
-## 어떻게 묻나
+## How to ask
 
-    python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" "<물음>"
-    python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" --path "<가>" "<나>"
-    python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" --explain "<노드>"
+    python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" "<question>"
+    python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" --path "<a>" "<b>"
+    python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" --explain "<node>"
 
-## 언제 갱신되나
+## When it refreshes
 
-세션 시작·맡긴 작업 종료·압축 직전·압축 직후, 이 네 자리에서만 돕니다. 묻는다고 갱신되지 않습니다.
-지도가 문서보다 뒤처졌으면 답 끝에 그 사실이 함께 옵니다.
+Only at four points: session start, when a delegated task ends, right before compaction,
+and right after it. Asking does not refresh anything. If the map lags the documents, the
+answer says so.
 
-## 한계
+## Limits
 
-- **지식 문서에 적힌 언어로 물어야 합니다.** 다른 언어로 물으면 한 건도 안 걸립니다.
-- **답 분량 한도는 20,000입니다.** 낮추면 값이 든 문장이 잘려 나옵니다(실측).
-- **좁게 물어야 합니다.** 값 하나를 찾는 물음("트레이 조각 길이 중앙값")은 답이 수백 자로 와서
-  파일을 여는 것보다 훨씬 쌉니다. 반면 주제를 통째로 훑는 물음("클러스터링 목적함수 전반")은
-  한도를 꽉 채운 **잘린 목록**이 와서 노트 하나를 통째로 읽는 것보다 비쌉니다. 주제를 훑어야
-  하면 서브에이전트에 맡겨 결론만 받으십시오.
-- 문서가 800개를 넘으면 답 찾기가 5초를 넘습니다. 그때는 지도를 갈래로 나누는 것을 검토하십시오.
+- **Ask in the language the knowledge documents are written in.** A question in another
+  language matches nothing.
+- **The answer budget is 20,000.** Lower it and statements carrying values come back cut.
+- **Ask narrowly.** A question after a single value ("tray piece length median") comes back
+  in a few hundred characters, far cheaper than opening the file. A question that sweeps a
+  whole topic ("clustering objective function overall") fills the budget with a **truncated
+  list**, more expensive than reading one note whole. To sweep a topic, hand it to a
+  subagent and take only the conclusion.
+- Past 800 documents a query takes more than 5 seconds. At that point consider splitting the
+  map into branches.

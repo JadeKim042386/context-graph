@@ -1,6 +1,6 @@
 {
   "name": "knowledge-map",
-  "description": "지식 문서(마크다운·HTML)를 훑어 값과 줄 번호를 함께 답하는 지식 지도",
+  "description": "A knowledge map over your markdown and HTML documents that answers with the value and the line number it came from",
   "version": "0.1.0",
   "keywords": ["knowledge", "graph", "markdown", "obsidian"]
 }

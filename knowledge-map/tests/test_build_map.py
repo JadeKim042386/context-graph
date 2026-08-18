@@ -7,54 +7,54 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 from build_map import build_map
 
 
-def _문서를_만든다(folder, name, text):
+def _write_document(folder, name, text):
     path = os.path.join(folder, name)
     with open(path, "w", encoding="utf-8") as handle:
         handle.write(text)
     return path
 
 
-def test_문장에_파일과_줄번호가_붙는다(tmp_path):
+def test_a_statement_carries_its_file_and_line_number(tmp_path):
     source = str(tmp_path / "docs"); os.makedirs(source)
-    _문서를_만든다(source, "크기.md", "## 크기\n\n중앙값은 1.19 m 입니다.\n")
+    _write_document(source, "size.md", "## Size\n\nThe median is 1.19 m.\n")
     map_path = str(tmp_path / "map" / "graph.json")
     build_map([source], map_path)
     with open(map_path, encoding="utf-8-sig") as handle:
         graph = json.load(handle)
-    값노드 = [n for n in graph["nodes"] if "1.19" in n["label"]]
-    assert len(값노드) == 1
-    assert 값노드[0]["source_location"] == 3
-    assert 값노드[0]["source_file"].endswith("크기.md")
+    value_nodes = [n for n in graph["nodes"] if "1.19" in n["label"]]
+    assert len(value_nodes) == 1
+    assert value_nodes[0]["source_location"] == 3
+    assert value_nodes[0]["source_file"].endswith("size.md")
 
 
-def test_관계_이름이_그대로_남는다(tmp_path):
+def test_the_relation_name_is_kept_as_written(tmp_path):
     source = str(tmp_path / "docs"); os.makedirs(source)
-    _문서를_만든다(source, "가.md", "## 절\n\n- supersedes [[나]]\n")
-    _문서를_만든다(source, "나.md", "## 절\n\n내용\n")
+    _write_document(source, "a.md", "## Section\n\n- supersedes [[b]]\n")
+    _write_document(source, "b.md", "## Section\n\nbody\n")
     map_path = str(tmp_path / "map" / "graph.json")
     build_map([source], map_path)
     with open(map_path, encoding="utf-8-sig") as handle:
         graph = json.load(handle)
-    관계 = [link for link in graph["links"] if link["relation"] == "supersedes"]
-    assert len(관계) == 1
+    relations = [link for link in graph["links"] if link["relation"] == "supersedes"]
+    assert len(relations) == 1
 
 
-def test_없는_대상도_이름뿐인_노드로_잇는다(tmp_path):
+def test_a_missing_target_still_becomes_a_name_only_node(tmp_path):
     source = str(tmp_path / "docs"); os.makedirs(source)
-    _문서를_만든다(source, "가.md", "## 절\n\n- relates_to [[없는문서]]\n")
+    _write_document(source, "a.md", "## Section\n\n- relates_to [[missing document]]\n")
     map_path = str(tmp_path / "map" / "graph.json")
     build_map([source], map_path)
     with open(map_path, encoding="utf-8-sig") as handle:
         graph = json.load(handle)
-    이름뿐 = [n for n in graph["nodes"] if n["kind"] == "name_only"]
-    assert [n["label"] for n in 이름뿐] == ["없는문서"]
-    assert 이름뿐[0]["source_location"] is None
+    name_only = [n for n in graph["nodes"] if n["kind"] == "name_only"]
+    assert [n["label"] for n in name_only] == ["missing document"]
+    assert name_only[0]["source_location"] is None
 
 
-def test_두_번_만들면_바이트까지_같다(tmp_path):
+def test_building_twice_gives_byte_identical_output(tmp_path):
     source = str(tmp_path / "docs"); os.makedirs(source)
-    for name in ["다.md", "가.md", "나.md"]:
-        _문서를_만든다(source, name, f"## {name}\n\n내용 {name}\n\n- relates_to [[가]]\n")
+    for name in ["c.md", "a.md", "b.md"]:
+        _write_document(source, name, f"## {name}\n\nbody {name}\n\n- relates_to [[a]]\n")
     map_path = str(tmp_path / "map" / "graph.json")
     build_map([source], map_path)
     first = open(map_path, "rb").read()
@@ -62,10 +62,10 @@ def test_두_번_만들면_바이트까지_같다(tmp_path):
     assert open(map_path, "rb").read() == first
 
 
-def test_지식_문서를_고치지_않는다(tmp_path):
+def test_the_knowledge_documents_are_never_modified(tmp_path):
     source = str(tmp_path / "docs"); os.makedirs(source)
-    path = _문서를_만든다(source, "가.md", "## 절\n\n내용\n")
+    path = _write_document(source, "a.md", "## Section\n\nbody\n")
     before = open(path, "rb").read()
     build_map([source], str(tmp_path / "map" / "graph.json"))
     assert open(path, "rb").read() == before
-    assert sorted(os.listdir(source)) == ["가.md"]
+    assert sorted(os.listdir(source)) == ["a.md"]

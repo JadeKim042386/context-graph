@@ -1,36 +1,39 @@
 ---
 name: knowledge-map
-description: 지식 문서에서 값·결정·연결을 찾을 때 씁니다. 파일을 통째로 열기 전에 먼저 부릅니다.
+description: Use when looking for a value, a decision or a connection in the knowledge documents. Call this before opening a whole file.
 ---
 
-# 지식 지도
+# Knowledge Map
 
-지식 문서에 적힌 값이나 결정을 찾을 때, **파일을 열기 전에 먼저 여기에 묻습니다.**
+When you need a value or a decision written in the knowledge documents, **ask here before
+you open a file.**
 
-## 어떻게 쓰나
+## How to use it
 
-    python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" "<물음>"
-    python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" --path "<가>" "<나>"
-    python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" --explain "<노드>"
+    python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" "<question>"
+    python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" --path "<a>" "<b>"
+    python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" --explain "<node>"
 
-## 순서
+## Order of work
 
-1. 무엇을 묻는지 가릅니다 — 우리가 적어 둔 지식이면 여기, 코드면 코드 지도.
-2. **지식 문서에 적힌 언어로** 묻습니다. 다른 언어로 물으면 한 건도 안 걸립니다.
-3. **좁게** 묻습니다. 아래 규칙을 지키십시오.
-4. 답에 문장과 파일·줄 번호가 함께 옵니다. 대개 여기서 끝납니다.
-5. 확인이 필요할 때만 그 줄 앞뒤를 엽니다. **파일 전체를 열지 않습니다.**
-6. 볼 곳이 셋 이상이면 따로 맡기고 결론만 받습니다.
+1. Decide what you are asking about — knowledge we wrote goes here, code goes to the code map.
+2. Ask **in the language the knowledge documents are written in**. Another language matches nothing.
+3. Ask **narrowly**. Follow the three rules below.
+4. The answer carries the statement with its file and line number. That is usually the end of it.
+5. Open the lines around it only when you need to confirm. **Do not open the whole file.**
+6. If three or more places need looking at, delegate and take only the conclusion.
 
-## 반드시 지킬 규칙 셋
+## Three rules you must follow
 
-- **지식 문서에 적힌 언어로 물으십시오.** 다른 언어로 물으면 한 건도 안 걸립니다.
-- **답 분량 한도는 20,000입니다.** 낮추면 값이 든 문장이 잘려 나옵니다.
-- **좁게 물으십시오.** 값 하나를 찾는 물음은 답이 짧게 와서 파일을 여는 것보다 훨씬 쌉니다.
-  주제를 통째로 훑는 물음은 한도를 꽉 채운 **잘린 목록**이 와서 노트 하나를 통째로 읽는 것보다
-  비쌉니다. 주제를 훑어야 하면 서브에이전트에 맡겨 결론만 받으십시오.
+- **Ask in the language the knowledge documents are written in.** A question in another
+  language matches nothing.
+- **The answer budget is 20,000.** Lower it and statements carrying values come back cut.
+- **Ask narrowly.** A question after a single value comes back short, far cheaper than
+  opening the file. A question that sweeps a whole topic fills the budget with a
+  **truncated list**, more expensive than reading one note whole. To sweep a topic, hand it
+  to a subagent and take only the conclusion.
 
-## 갱신
+## Refreshing
 
-묻는다고 갱신되지 않습니다. 세션 시작·맡긴 작업 종료·압축 전후에만 돕니다.
-지도가 뒤처졌으면 답 끝에 그 사실이 함께 옵니다.
+Asking does not refresh anything. Refreshes run at session start, when a delegated task
+ends, and before and after compaction. If the map lags, the answer says so.
