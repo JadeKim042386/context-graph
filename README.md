@@ -21,10 +21,7 @@
 
 ---
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/structure-dark.svg">
-  <img alt="Statements and the relations you wrote are copied into one map that answers with values, connections and lineage" src="assets/structure-light.svg">
-</picture>
+<img alt="Statements and the relations you wrote are copied into one map that answers with a value, a connection or a lineage" src="assets/structure.png" width="880">
 
 ---
 
@@ -244,10 +241,7 @@ but text inside SVG is kept** — the point a diagram makes usually lives in tha
 
 ### From a question to an answer
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/flow-dark.svg">
-  <img alt="A question goes to the map, the answer carries the statement and its file and line, and the map is rebuilt at four points" src="assets/flow-light.svg">
-</picture>
+<img alt="A question goes to the map, the answer carries the statement and its file and line, and the map is rebuilt at four points" src="assets/flow.png" width="880">
 
 ---
 
