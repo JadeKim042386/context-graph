@@ -7,83 +7,102 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap">
   <style>
     body { margin: 0; background: #fbfaf8; }
     a { color: #1f6f5c; } a:hover { color: #14503f; }
   </style>
 </helmet>
 
-<div style="width: 880px; padding: 40px 44px; box-sizing: border-box; background: #fbfaf8; font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif; color: #17211d;">
+<div style="width: 880px; height: 380px; background: #fbfaf8;">
+  <svg width="880" height="380" viewBox="0 0 880 380" fill="none" xmlns="http://www.w3.org/2000/svg"
+       font-family="'IBM Plex Mono', ui-monospace, monospace">
 
-  <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px;">
-    <div style="font-size: 22px; font-weight: 700; letter-spacing: -0.4px;">How the map is built</div>
-    <div style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; color: #6d7d76;">nothing is guessed</div>
-  </div>
-  <div style="height: 3px; width: 64px; background: #1f6f5c; margin-bottom: 30px;"></div>
+    <!-- 쌓인 문서. 뒤의 두 장은 기울여 두께를 보입니다 -->
+    <g opacity="0.35">
+      <rect x="54" y="86" width="150" height="196" rx="4" fill="#ffffff" stroke="#d8d2c8" transform="rotate(-7 129 184)"/>
+      <rect x="62" y="80" width="150" height="196" rx="4" fill="#ffffff" stroke="#d8d2c8" transform="rotate(-3.5 137 178)"/>
+    </g>
+    <rect x="70" y="74" width="150" height="196" rx="4" fill="#ffffff" stroke="#cfc8bd"/>
 
-  <div style="display: flex; align-items: stretch; gap: 20px;">
+    <!-- 문서 안의 글줄. 대부분은 그냥 회색 -->
+    <g stroke="#d3ccc1" stroke-width="3" stroke-linecap="round">
+      <path d="M86 96 H176"/>
+      <path d="M86 108 H196"/>
+      <path d="M86 132 H168"/>
+      <path d="M86 156 H190"/>
+      <path d="M86 168 H150"/>
+      <path d="M86 216 H186"/>
+      <path d="M86 240 H162"/>
+      <path d="M86 252 H196"/>
+    </g>
 
-    <div style="flex: 0 0 236px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #ddd8d0; border-radius: 10px; padding: 18px; background: #ffffff;">
-      <div style="font-size: 14px; font-weight: 700;">Your documents</div>
-      <div style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; color: #6d7d76; margin-bottom: 2px;">markdown &amp; html · read only</div>
+    <!-- 값이 든 줄과 관계를 적은 줄만 색이 있습니다 -->
+    <g stroke-width="4" stroke-linecap="round">
+      <path d="M86 120 H184" stroke="#1f6f5c"/>
+      <path d="M86 144 H172" stroke="#1f6f5c"/>
+      <path d="M86 228 H178" stroke="#c2703a"/>
+      <path d="M86 204 H166" stroke="#1f6f5c"/>
+    </g>
 
-      <div style="border-left: 3px solid #1f6f5c; padding: 8px 0 8px 12px;">
-        <div style="font-size: 13px; font-weight: 700;">Statements</div>
-        <div style="font-size: 12px; color: #6d7d76; line-height: 1.5;">the figures live in these</div>
-      </div>
+    <!-- 그 줄들이 그대로 건너가 점과 이음이 됩니다 -->
+    <g fill="none" stroke-width="1.6" opacity="0.85">
+      <path d="M188 120 C300 116 380 92 470 96" stroke="#1f6f5c"/>
+      <path d="M176 144 C300 148 400 168 512 158" stroke="#1f6f5c"/>
+      <path d="M170 204 C300 208 396 236 500 232" stroke="#1f6f5c"/>
+      <path d="M182 228 C300 244 392 286 476 292" stroke="#c2703a"/>
+    </g>
 
-      <div style="border-left: 3px solid #c2703a; padding: 8px 0 8px 12px;">
-        <div style="font-size: 13px; font-weight: 700;">Relations you wrote</div>
-        <div style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; color: #6d7d76; line-height: 1.6;">- supersedes [[...]]</div>
-      </div>
-    </div>
+    <!-- 지도. 점은 문장이고 선은 적어 둔 관계입니다 -->
+    <g stroke="#b9b2a7" stroke-width="1.2">
+      <path d="M478 96 L556 60"/>
+      <path d="M478 96 L520 158"/>
+      <path d="M520 158 L604 140"/>
+      <path d="M604 140 L688 104"/>
+      <path d="M604 140 L664 200"/>
+      <path d="M508 232 L604 140"/>
+      <path d="M508 232 L586 268"/>
+      <path d="M586 268 L664 200"/>
+      <path d="M484 292 L586 268"/>
+      <path d="M664 200 L744 168"/>
+      <path d="M744 168 L688 104"/>
+      <path d="M744 168 L800 232"/>
+      <path d="M586 268 L692 302"/>
+      <path d="M692 302 L800 232"/>
+    </g>
+    <g stroke="#c2703a" stroke-width="1.8">
+      <path d="M484 292 L586 268"/>
+      <path d="M508 232 L604 140"/>
+    </g>
 
-    <div style="flex: 0 0 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;">
-      <svg width="32" height="16" viewBox="0 0 32 16" fill="none" stroke="#1f6f5c" stroke-width="1.6">
-        <path d="M0 8 H26" /><path d="M20 3 L26 8 L20 13" />
-      </svg>
-      <div style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 10px; color: #1f6f5c; letter-spacing: 0.4px;">COPY</div>
-    </div>
+    <g>
+      <circle cx="556" cy="60" r="5" fill="#fbfaf8" stroke="#a49c90" stroke-width="1.6"/>
+      <circle cx="688" cy="104" r="5" fill="#fbfaf8" stroke="#a49c90" stroke-width="1.6"/>
+      <circle cx="664" cy="200" r="5" fill="#fbfaf8" stroke="#a49c90" stroke-width="1.6"/>
+      <circle cx="744" cy="168" r="5" fill="#fbfaf8" stroke="#a49c90" stroke-width="1.6"/>
+      <circle cx="800" cy="232" r="5" fill="#fbfaf8" stroke="#a49c90" stroke-width="1.6"/>
+      <circle cx="692" cy="302" r="5" fill="#fbfaf8" stroke="#a49c90" stroke-width="1.6"/>
+      <circle cx="586" cy="268" r="5" fill="#fbfaf8" stroke="#a49c90" stroke-width="1.6"/>
 
-    <div style="flex: 0 0 216px; display: flex; flex-direction: column; justify-content: center; gap: 10px; border: 1.5px solid #1f6f5c; border-radius: 10px; padding: 20px 18px; background: #f0f6f3;">
-      <div style="font-size: 15px; font-weight: 700; line-height: 1.35;">Copied across,<br>never inferred</div>
-      <div style="font-size: 12px; color: #43544d; line-height: 1.6;">statement becomes a node, word for word · the relation keeps its own name · every node carries its file and line</div>
-      <div style="display: flex; flex-direction: column; gap: 2px; margin-top: 4px; padding-top: 12px; border-top: 1px solid #cfe0d8;">
-        <div style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 18px; font-weight: 600; color: #1f6f5c;">0.10s</div>
-        <div style="font-size: 11.5px; color: #6d7d76;">175 documents · no model calls</div>
-      </div>
-    </div>
+      <circle cx="478" cy="96" r="7" fill="#1f6f5c"/>
+      <circle cx="520" cy="158" r="7" fill="#1f6f5c"/>
+      <circle cx="508" cy="232" r="7" fill="#1f6f5c"/>
+      <circle cx="484" cy="292" r="7" fill="#c2703a"/>
+      <circle cx="604" cy="140" r="8.5" fill="#1f6f5c"/>
+    </g>
 
-    <div style="flex: 0 0 32px; display: flex; align-items: center; justify-content: center;">
-      <svg width="32" height="16" viewBox="0 0 32 16" fill="none" stroke="#17211d" stroke-width="1.6">
-        <path d="M0 8 H26" /><path d="M20 3 L26 8 L20 13" />
-      </svg>
-    </div>
+    <!-- 어느 점이든 자기가 나온 줄로 되짚어 갑니다 -->
+    <path d="M604 148 C600 236 420 262 232 216" stroke="#1f6f5c" stroke-width="1.2"
+          stroke-dasharray="3 4" opacity="0.75"/>
+    <circle cx="228" cy="214" r="3" fill="#1f6f5c"/>
 
-    <div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 8px;">
-      <div style="font-size: 14px; font-weight: 700; margin-bottom: 2px;">One map answers three ways</div>
+    <text x="70" y="300" font-size="11" fill="#8d857a" letter-spacing="0.8">YOUR PAGES</text>
+    <text x="70" y="318" font-size="11" fill="#b0a89c">what you already wrote</text>
+    <text x="478" y="340" font-size="11" fill="#8d857a" letter-spacing="0.8">THE MAP</text>
+    <text x="478" y="358" font-size="11" fill="#b0a89c">the same lines, and the threads back to them</text>
 
-      <div style="display: flex; align-items: baseline; gap: 10px; border-bottom: 1px solid #e6e1d9; padding-bottom: 8px;">
-        <div style="flex: 0 0 76px; font-size: 13px; font-weight: 700; color: #1f6f5c;">Value</div>
-        <div style="font-size: 12.5px; color: #43544d;">the statement, and <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace;">file:line</span></div>
-      </div>
-      <div style="display: flex; align-items: baseline; gap: 10px; border-bottom: 1px solid #e6e1d9; padding-bottom: 8px;">
-        <div style="flex: 0 0 76px; font-size: 13px; font-weight: 700; color: #1f6f5c;">Connection</div>
-        <div style="font-size: 12.5px; color: #43544d;">what touches what</div>
-      </div>
-      <div style="display: flex; align-items: baseline; gap: 10px; border-bottom: 1px solid #e6e1d9; padding-bottom: 8px;">
-        <div style="flex: 0 0 76px; font-size: 13px; font-weight: 700; color: #1f6f5c;">Lineage</div>
-        <div style="font-size: 12.5px; color: #43544d;">what superseded what</div>
-      </div>
-
-      <div style="margin-top: 10px; padding: 14px 16px; background: #17211d; border-radius: 8px;">
-        <div style="font-size: 13.5px; font-weight: 700; color: #f5f2ec;">Open only the line it cites</div>
-        <div style="font-size: 12px; color: #a8b5ae; margin-top: 3px;">never the whole file</div>
-      </div>
-    </div>
-
-  </div>
+    <text x="286" y="72" font-size="11" fill="#1f6f5c" letter-spacing="0.8">COPIED, NOT INFERRED</text>
+  </svg>
 </div>
 </x-dc>
 <script data-dc-script data-props='{}'>
