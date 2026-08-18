@@ -86,7 +86,7 @@ In Claude Code:
 ### 3. Install the plugin
 
 ```
-/plugin install knowledge-map
+/plugin install context-graph
 ```
 
 Installing brings the skill, the commands and the refresh hooks with it. **Restart Claude
@@ -98,12 +98,12 @@ Code for it to take effect.**
 /plugin
 ```
 
-Seeing `knowledge-map` in the list is enough.
+Seeing `context-graph` in the list is enough.
 
 ### Uninstall
 
 ```
-/plugin uninstall knowledge-map
+/plugin uninstall context-graph
 ```
 
 The map file and the config live **outside** the knowledge documents, so removing the plugin
@@ -399,7 +399,7 @@ Both can be installed **with your approval** during the first run.
 ## Tests
 
 ```bash
-python -m pytest knowledge-map/tests -v
+python -m pytest context-graph/tests -v
 ```
 
 **All 52 pass.** Three of them matter most.

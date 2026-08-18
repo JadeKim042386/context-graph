@@ -23,7 +23,7 @@ def load_config(config_path):
 def default_config_path():
     """Where the config lives. An environment variable overrides it, so each machine can differ."""
     return os.environ.get("KNOWLEDGE_MAP_CONFIG") or os.path.join(
-        os.path.expanduser("~"), ".claude", "knowledge-map", "config.json")
+        os.path.expanduser("~"), ".claude", "context-graph", "config.json")
 
 
 def save_config(config_path, config):
