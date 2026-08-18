@@ -1,5 +1,6 @@
 """지도에 스스로 점수를 매깁니다. 지도는 멀쩡히 만들어지면서 반쪽짜리일 수 있습니다."""
 import json
+import os
 import re
 
 NUMBER_PATTERN = re.compile(r"\d")
@@ -67,3 +68,25 @@ def format_score(score):
     return (f"노드 {score['nodes']} · 연결 {score['links']} · "
             f"위치 {score['located_ratio']:.1%} · 관계 {score['relation_kinds']}종 · "
             f"덩어리 {score['components']}개")
+
+
+def verify_samples(score):
+    """표본 문장을 원본 파일의 그 줄과 대조합니다. 하나라도 어긋나면 그 자리에서 드러납니다."""
+    checked, matched, failed = 0, 0, []
+    for sample in score["samples"]:
+        source_file, line_number = sample["source_file"], sample["source_location"]
+        if not source_file or line_number is None:
+            continue
+        checked += 1
+        try:
+            with open(source_file, encoding="utf-8-sig", errors="replace") as handle:
+                lines = handle.read().split("\n")
+            original = lines[line_number - 1] if 0 < line_number <= len(lines) else ""
+        except OSError:
+            original = ""
+        if sample["label"].strip() and sample["label"].strip() in original:
+            sample["matched"] = True
+            matched += 1
+        else:
+            failed.append(f"{os.path.basename(source_file)}:{line_number}")
+    return {"checked": checked, "matched": matched, "failed": failed}
