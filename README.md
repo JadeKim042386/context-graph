@@ -21,23 +21,10 @@
 
 ---
 
-```mermaid
-flowchart LR
-    subgraph docs["Your documents (read only)"]
-        S["Statements<br/><i>the figures live here</i>"]
-        R["Relations you wrote<br/><code>- supersedes [[...]]</code>"]
-    end
-
-    docs -->|copy, do not guess| B["No language model<br/><b>0.10 s for 175 documents</b>"]
-
-    B --> V["<b>Value</b><br/>the statement, and file:line"]
-    B --> C["<b>Connection</b><br/>what touches what"]
-    B --> L["<b>Lineage</b><br/>what superseded what"]
-
-    V --> READ["Open only the line it cites<br/><i>never the whole file</i>"]
-    C --> READ
-    L --> READ
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/structure-dark.svg">
+  <img alt="Statements and the relations you wrote are copied into one map that answers with values, connections and lineage" src="assets/structure-light.svg">
+</picture>
 
 ---
 
@@ -257,26 +244,10 @@ but text inside SVG is kept** — the point a diagram makes usually lives in tha
 
 ### From a question to an answer
 
-```mermaid
-flowchart LR
-    Q["A question<br/><i>what was that figure?</i>"] --> ASK["Ask the map<br/><i>in the language the documents use</i>"]
-    ASK --> A["The answer<br/>the statement, and file:line"]
-    A -->|usually the end of it| DONE["Answer, with the source<br/><i>a few hundred characters</i>"]
-    A -.->|need more| OPEN["Open those lines only"]
-    A -.->|three or more places| SUB["Delegate, keep the conclusion"]
-    OPEN --> DONE
-    SUB --> DONE
-```
-
-The map is rebuilt at four points, never on a question.
-
-```mermaid
-flowchart LR
-    A["session starts"] --> M(("rebuild<br/>0.10 s"))
-    B["delegated work ends"] --> M
-    C["just before compaction<br/><i>writes the session down</i>"] --> M
-    D["just after compaction"] --> M
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/flow-dark.svg">
+  <img alt="A question goes to the map, the answer carries the statement and its file and line, and the map is rebuilt at four points" src="assets/flow-light.svg">
+</picture>
 
 ---
 
