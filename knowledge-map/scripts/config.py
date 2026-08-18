@@ -20,6 +20,12 @@ def load_config(config_path):
     return config
 
 
+def default_config_path():
+    """설정 파일 자리. 환경 변수로 바꿀 수 있어 컴퓨터마다 다른 자리를 쓸 수 있습니다."""
+    return os.environ.get("KNOWLEDGE_MAP_CONFIG") or os.path.join(
+        os.path.expanduser("~"), ".claude", "knowledge-map", "config.json")
+
+
 def save_config(config_path, config):
     """설정을 씁니다. 폴더가 없으면 만듭니다."""
     os.makedirs(os.path.dirname(config_path) or ".", exist_ok=True)
