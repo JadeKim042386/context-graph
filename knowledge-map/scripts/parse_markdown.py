@@ -35,10 +35,11 @@ def parse_markdown(text):
             links.append({"target": relation.group(2).strip(),
                           "relation": relation.group(1),
                           "line": line_number})
-            continue
-
-        for target in WIKILINK_PATTERN.findall(line):
-            links.append({"target": target.strip(), "relation": None, "line": line_number})
+            # 여기서 줄을 끊지 않습니다. 관계 줄도 아래에서 문장으로 함께 남겨야
+            # 관계 절 뒤에 본문이 붙은 문서에서 값이 든 문장을 잃지 않습니다.
+        else:
+            for target in WIKILINK_PATTERN.findall(line):
+                links.append({"target": target.strip(), "relation": None, "line": line_number})
 
         list_item = LIST_ITEM_PATTERN.match(line)
         content = list_item.group(1) if list_item else line.strip()
