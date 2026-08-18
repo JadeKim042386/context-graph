@@ -21,7 +21,7 @@ def check_dependencies():
         },
         "obsidian_second_brain": {
             "installed": os.path.isdir(OBSIDIAN_SKILL_DIR),
-            "install_hint": ("git clone https://github.com/wshobson/obsidian-second-brain "
+            "install_hint": ("git clone https://github.com/eugeniughelbur/obsidian-second-brain "
                              f'"{OBSIDIAN_SKILL_DIR}"'),
             "why": "대화가 압축될 때 세션 내용을 지식 문서에 적는 데 씁니다.",
         },
