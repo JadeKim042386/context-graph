@@ -7,85 +7,87 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap">
   <style>
     body { margin: 0; background: #fbfaf8; }
     a { color: #1f6f5c; } a:hover { color: #14503f; }
   </style>
 </helmet>
 
-<div style="width: 880px; padding: 40px 44px; box-sizing: border-box; background: #fbfaf8; font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif; color: #17211d;">
+<div style="width: 880px; height: 420px; background: #fbfaf8;">
+  <svg width="880" height="420" viewBox="0 0 880 420" fill="none" xmlns="http://www.w3.org/2000/svg"
+       font-family="'IBM Plex Mono', ui-monospace, monospace">
 
-  <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px;">
-    <div style="font-size: 22px; font-weight: 700; letter-spacing: -0.4px;">One question, one answer</div>
-    <div style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; color: #6d7d76;">and when the map is rebuilt</div>
-  </div>
-  <div style="height: 3px; width: 64px; background: #c2703a; margin-bottom: 30px;"></div>
+    <!-- 왼쪽: 지금. 답 하나를 얻으려 페이지 전체를 읽습니다 -->
+    <rect x="56" y="56" width="150" height="200" rx="4" fill="#ffffff" stroke="#cfc8bd"/>
+    <g stroke="#17211d" stroke-width="3.4" stroke-linecap="round" opacity="0.82">
+      <path d="M72 78 H180"/><path d="M72 92 H166"/><path d="M72 106 H186"/>
+      <path d="M72 120 H158"/><path d="M72 134 H182"/><path d="M72 148 H170"/>
+      <path d="M72 162 H190"/><path d="M72 176 H154"/><path d="M72 190 H178"/>
+      <path d="M72 204 H164"/><path d="M72 218 H188"/><path d="M72 232 H150"/>
+    </g>
+    <text x="56" y="282" font-size="11" fill="#8d857a" letter-spacing="0.8">TODAY</text>
+    <text x="56" y="300" font-size="11" fill="#b0a89c">every line read, one line wanted</text>
 
-  <div style="display: flex; align-items: stretch; gap: 14px; margin-bottom: 14px;">
+    <!-- 가운데: 물음이 지도를 지나갑니다 -->
+    <circle cx="262" cy="156" r="9" fill="#c2703a"/>
+    <path d="M276 156 C320 156 340 140 372 132" stroke="#c2703a" stroke-width="1.6"/>
+    <text x="248" y="132" font-size="11" fill="#c2703a">?</text>
 
-    <div style="flex: 1 1 0; border: 1px solid #ddd8d0; border-radius: 10px; padding: 16px; background: #ffffff;">
-      <div style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 10px; color: #b2a99c; letter-spacing: 0.6px; margin-bottom: 8px;">01</div>
-      <div style="font-size: 13.5px; font-weight: 700;">A question</div>
-      <div style="font-size: 12px; color: #6d7d76; line-height: 1.55; margin-top: 4px;">what was that figure?</div>
-    </div>
+    <g stroke="#cfc8bd" stroke-width="1.2">
+      <path d="M380 130 L444 92"/><path d="M380 130 L420 190"/>
+      <path d="M444 92 L516 118"/><path d="M420 190 L488 176"/>
+      <path d="M516 118 L488 176"/><path d="M488 176 L556 214"/>
+      <path d="M516 118 L580 96"/><path d="M420 190 L452 250"/>
+      <path d="M452 250 L556 214"/><path d="M580 96 L624 150"/>
+      <path d="M624 150 L556 214"/>
+    </g>
+    <g fill="#fbfaf8" stroke="#bdb5a9" stroke-width="1.6">
+      <circle cx="380" cy="130" r="5"/><circle cx="444" cy="92" r="5"/>
+      <circle cx="420" cy="190" r="5"/><circle cx="516" cy="118" r="5"/>
+      <circle cx="452" cy="250" r="5"/><circle cx="580" cy="96" r="5"/>
+      <circle cx="624" cy="150" r="5"/><circle cx="556" cy="214" r="5"/>
+    </g>
 
-    <div style="flex: 0 0 24px; display: flex; align-items: center; justify-content: center;">
-      <svg width="24" height="14" viewBox="0 0 24 14" fill="none" stroke="#b2a99c" stroke-width="1.5"><path d="M0 7 H18"/><path d="M13 2.5 L18 7 L13 11.5"/></svg>
-    </div>
+    <!-- 하나만 켜집니다 -->
+    <circle cx="488" cy="176" r="19" fill="#1f6f5c" opacity="0.12"/>
+    <circle cx="488" cy="176" r="12" fill="#1f6f5c" opacity="0.22"/>
+    <circle cx="488" cy="176" r="7" fill="#1f6f5c"/>
 
-    <div style="flex: 1 1 0; border: 1px solid #ddd8d0; border-radius: 10px; padding: 16px; background: #ffffff;">
-      <div style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 10px; color: #b2a99c; letter-spacing: 0.6px; margin-bottom: 8px;">02</div>
-      <div style="font-size: 13.5px; font-weight: 700;">Ask the map</div>
-      <div style="font-size: 12px; color: #6d7d76; line-height: 1.55; margin-top: 4px;">in the language the documents are written in</div>
-    </div>
+    <!-- 켜진 점이 자기 줄로 실을 내립니다 -->
+    <path d="M495 182 C560 236 620 250 690 202" stroke="#1f6f5c" stroke-width="1.6"/>
 
-    <div style="flex: 0 0 24px; display: flex; align-items: center; justify-content: center;">
-      <svg width="24" height="14" viewBox="0 0 24 14" fill="none" stroke="#b2a99c" stroke-width="1.5"><path d="M0 7 H18"/><path d="M13 2.5 L18 7 L13 11.5"/></svg>
-    </div>
+    <!-- 오른쪽: 그 줄 하나만 열립니다 -->
+    <rect x="690" y="56" width="150" height="200" rx="4" fill="#ffffff" stroke="#cfc8bd"/>
+    <g stroke="#e2dcd2" stroke-width="3.4" stroke-linecap="round">
+      <path d="M706 78 H814"/><path d="M706 92 H800"/><path d="M706 106 H820"/>
+      <path d="M706 120 H792"/><path d="M706 134 H816"/><path d="M706 148 H804"/>
+      <path d="M706 176 H788"/><path d="M706 190 H812"/>
+      <path d="M706 204 H798"/><path d="M706 218 H822"/><path d="M706 232 H784"/>
+    </g>
+    <path d="M706 162 H824" stroke="#1f6f5c" stroke-width="4.6" stroke-linecap="round"/>
+    <rect x="698" y="153" width="134" height="18" rx="4" fill="#1f6f5c" opacity="0.10"/>
+    <text x="690" y="282" font-size="11" fill="#1f6f5c" letter-spacing="0.8">AFTER</text>
+    <text x="690" y="300" font-size="11" fill="#b0a89c">one line, with its source</text>
 
-    <div style="flex: 1.25 1 0; border: 1.5px solid #1f6f5c; border-radius: 10px; padding: 16px; background: #f0f6f3;">
-      <div style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 10px; color: #1f6f5c; letter-spacing: 0.6px; margin-bottom: 8px;">03</div>
-      <div style="font-size: 13.5px; font-weight: 700;">The answer carries its source</div>
-      <div style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11.5px; color: #1f6f5c; line-height: 1.6; margin-top: 6px;">median 1.19 m<br>facts/WHRP - Facts.md:192</div>
-      <div style="font-size: 12px; color: #43544d; margin-top: 8px;">a few hundred characters, and usually the end of it</div>
-    </div>
-  </div>
-
-  <div style="display: flex; gap: 14px; margin-bottom: 30px; padding-left: 8px;">
-    <div style="flex: 0 0 auto; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 10.5px; color: #b2a99c; padding-top: 3px;">IF NOT ENOUGH</div>
-    <div style="flex: 1 1 0; font-size: 12px; color: #43544d; line-height: 1.6;">open just those lines — never the file</div>
-    <div style="flex: 1 1 0; font-size: 12px; color: #43544d; line-height: 1.6;">three or more places: delegate, keep the conclusion</div>
-  </div>
-
-  <div style="border-top: 1px solid #e6e1d9; padding-top: 22px;">
-    <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px;">
-      <div style="font-size: 14px; font-weight: 700;">Rebuilt at four points</div>
-      <div style="font-size: 12px; color: #6d7d76;">— never on a question</div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
-      <div style="border: 1px solid #ddd8d0; border-radius: 8px; padding: 13px 14px; background: #ffffff;">
-        <div style="font-size: 12.5px; font-weight: 700;">session starts</div>
-        <div style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; color: #1f6f5c; margin-top: 5px;">0.10s</div>
-      </div>
-      <div style="border: 1px solid #ddd8d0; border-radius: 8px; padding: 13px 14px; background: #ffffff;">
-        <div style="font-size: 12.5px; font-weight: 700;">delegated work ends</div>
-        <div style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; color: #1f6f5c; margin-top: 5px;">0.10s</div>
-      </div>
-      <div style="border: 1px solid #c2703a; border-radius: 8px; padding: 13px 14px; background: #fbf1e9;">
-        <div style="font-size: 12.5px; font-weight: 700;">just before compaction</div>
-        <div style="font-size: 11px; color: #8a5a33; margin-top: 5px;">the session is written down first</div>
-      </div>
-      <div style="border: 1px solid #ddd8d0; border-radius: 8px; padding: 13px 14px; background: #ffffff;">
-        <div style="font-size: 12.5px; font-weight: 700;">just after compaction</div>
-        <div style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; color: #1f6f5c; margin-top: 5px;">0.10s</div>
-      </div>
-    </div>
-
-    <div style="font-size: 12px; color: #6d7d76; margin-top: 14px; line-height: 1.6;">In between, it checks in 3 ms how far behind it is, says so, and answers anyway.</div>
-  </div>
-
+    <!-- 아래: 지도가 다시 만들어지는 자리 넷 -->
+    <path d="M56 366 H824" stroke="#e2dcd2" stroke-width="1.4"/>
+    <g>
+      <circle cx="140" cy="366" r="16" fill="#1f6f5c" opacity="0.10"/>
+      <circle cx="140" cy="366" r="6" fill="#1f6f5c"/>
+      <circle cx="340" cy="366" r="16" fill="#1f6f5c" opacity="0.10"/>
+      <circle cx="340" cy="366" r="6" fill="#1f6f5c"/>
+      <circle cx="540" cy="366" r="20" fill="#c2703a" opacity="0.12"/>
+      <circle cx="540" cy="366" r="7.5" fill="#c2703a"/>
+      <circle cx="740" cy="366" r="16" fill="#1f6f5c" opacity="0.10"/>
+      <circle cx="740" cy="366" r="6" fill="#1f6f5c"/>
+    </g>
+    <text x="56" y="344" font-size="11" fill="#8d857a" letter-spacing="0.8">REBUILT HERE, NEVER ON A QUESTION</text>
+    <text x="140" y="398" font-size="10.5" fill="#b0a89c" text-anchor="middle">session opens</text>
+    <text x="340" y="398" font-size="10.5" fill="#b0a89c" text-anchor="middle">delegated work ends</text>
+    <text x="540" y="398" font-size="10.5" fill="#c2703a" text-anchor="middle">compaction</text>
+    <text x="740" y="398" font-size="10.5" fill="#b0a89c" text-anchor="middle">and just after</text>
+  </svg>
 </div>
 </x-dc>
 <script data-dc-script data-props='{}'>
