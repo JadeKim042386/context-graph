@@ -67,30 +67,27 @@ from tens of thousands of characters to a few hundred.
 
 ## Install
 
-### 1. Clone the repository
+Two commands in Claude Code, then a restart.
 
-```bash
-git clone https://github.com/JadeKim042386/context-graph.git
-```
-
-Remember where you put it. Below it is written as `<clone-path>`.
-
-### 2. Register the marketplace
-
-In Claude Code:
+### 1. Add the marketplace
 
 ```
-/plugin marketplace add <clone-path>
+/plugin marketplace add JadeKim042386/context-graph
 ```
 
-### 3. Install the plugin
+Nothing to clone — Claude Code fetches it for you.
+
+### 2. Install the plugin
 
 ```
 /plugin install context-graph
 ```
 
-Installing brings the skill, the commands and the refresh hooks with it. **Restart Claude
-Code for it to take effect.**
+This brings the skill, the commands and the refresh hooks with it.
+
+### 3. Restart Claude Code
+
+The hooks and the skill only attach on start.
 
 ### 4. Check that it took
 
@@ -100,10 +97,33 @@ Code for it to take effect.**
 
 Seeing `context-graph` in the list is enough.
 
+### Installing from a local clone instead
+
+Use this when you want to change the code and see it immediately.
+
+```bash
+git clone https://github.com/JadeKim042386/context-graph.git
+```
+
+```
+/plugin marketplace add <clone-path>
+/plugin install context-graph
+```
+
+A marketplace added from a directory reads the files as they are on disk, so an edit shows up
+on the next restart without any publishing step.
+
+### Updating
+
+```
+/plugin marketplace update context-graph
+```
+
 ### Uninstall
 
 ```
 /plugin uninstall context-graph
+/plugin marketplace remove context-graph
 ```
 
 The map file and the config live **outside** the knowledge documents, so removing the plugin
