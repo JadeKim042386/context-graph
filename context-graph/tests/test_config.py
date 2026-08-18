@@ -36,4 +36,4 @@ def test_an_environment_variable_moves_the_config(monkeypatch, tmp_path):
     monkeypatch.setenv("KNOWLEDGE_MAP_CONFIG", moved_path)
     assert default_config_path() == moved_path
     monkeypatch.delenv("KNOWLEDGE_MAP_CONFIG")
-    assert default_config_path().endswith(os.path.join("knowledge-map", "config.json"))
+    assert default_config_path().endswith(os.path.join("context-graph", "config.json"))

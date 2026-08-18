@@ -1,5 +1,5 @@
 ---
-name: knowledge-map
+name: context-graph
 description: Use when looking for a value, a decision or a connection in the knowledge documents. Call this before opening a whole file.
 ---
 
