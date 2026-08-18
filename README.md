@@ -21,6 +21,13 @@
 
 ---
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/structure-dark.svg">
+  <img alt="Statements and the relations you wrote are copied into one map that answers with values, connections and lineage" src="assets/structure-light.svg">
+</picture>
+
+---
+
 ## Contents
 
 - [The problem](#the-problem)
@@ -237,12 +244,10 @@ but text inside SVG is kept** — the point a diagram makes usually lives in tha
 
 ### From a question to an answer
 
-```
-question
- |- ask the map - statement + file and line number       <- usually the end
- |- open the surrounding lines if needed                    a few hundred characters
- `- three or more places to look: delegate, take the conclusion only
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/flow-dark.svg">
+  <img alt="A question goes to the map, the answer carries the statement and its file and line, and the map is rebuilt at four points" src="assets/flow-light.svg">
+</picture>
 
 ---
 
