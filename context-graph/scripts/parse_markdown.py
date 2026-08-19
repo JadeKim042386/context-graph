@@ -4,7 +4,42 @@ import re
 HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.*\S)\s*$")
 WIKILINK_PATTERN = re.compile(r"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]")
 # Relation line: only the shape "- <word> [[target]]" counts as a relation. Section names are not relied on.
-RELATION_PATTERN = re.compile(r"^\s*[-*]\s+([A-Za-z_][A-Za-z0-9_]*)\s+\[\[([^\]|]+)(?:\|[^\]]*)?\]\]\s*$")
+# The word may be written in any script, so a Korean note keeps its relations instead of losing them
+# to an unnamed mention. Digits and underscores cannot open the word, which keeps list items such as
+# "- 3 [[target]]" out.
+RELATION_PATTERN = re.compile(r"^\s*[-*]\s+([^\W\d_]\w*)\s+\[\[([^\]|]+)(?:\|[^\]]*)?\]\]\s*$",
+                              re.UNICODE)
+
+# Korean relation words, mapped onto the English names the rest of the map already uses, so that
+# "- 대체함 [[X]]" and "- supersedes [[X]]" end up as the same relation and a path can run through
+# both. This is a fixed table, not a translation service - nothing here calls a model. A word that
+# is not in the table is kept exactly as it was written.
+KOREAN_RELATION_NAMES = {
+    "대체함": "supersedes",
+    "대체": "supersedes",
+    "부분대체함": "supersedes_partially",
+    "부분대체": "supersedes_partially",
+    "관련": "relates_to",
+    "관련됨": "relates_to",
+    "참고": "relates_to",
+    "후속": "follows",
+    "따름": "follows",
+    "선행": "precedes",
+    "정정함": "corrects",
+    "정정": "corrects",
+    "포함": "part_of",
+    "속함": "part_of",
+    "확장": "extends",
+    "구현": "implements",
+    "반박": "contradicts",
+    "출처": "sources",
+    "근거": "sources",
+}
+
+
+def relation_name(written_word):
+    """The relation name to store. A Korean word becomes its English name; anything else is kept as written."""
+    return KOREAN_RELATION_NAMES.get(written_word, written_word)
 LIST_ITEM_PATTERN = re.compile(r"^\s*[-*]\s+(.*\S)\s*$")
 
 
@@ -33,7 +68,7 @@ def parse_markdown(text):
         relation = RELATION_PATTERN.match(line)
         if relation:
             links.append({"target": relation.group(2).strip(),
-                          "relation": relation.group(1),
+                          "relation": relation_name(relation.group(1)),
                           "line": line_number})
             # Do not stop here. The relation line has to be kept as a statement below
             # as well, or documents that continue with prose after the relation section

@@ -49,3 +49,20 @@ def test_statement_labels_are_never_cut():
     long_line = "short opening " + "x" * 500 + " ending in 42 items"
     parsed = parse_markdown("## Section\n\n" + long_line + "\n")
     assert parsed["statements"][0]["text"].endswith("42 items")
+
+
+def test_a_korean_relation_word_is_kept_and_named_in_english():
+    parsed = parse_markdown("## Relations\n\n- 대체함 [[earlier decision]]\n- 참고 [[related fact]]\n")
+    relations = [(link["relation"], link["target"]) for link in parsed["links"] if link["relation"]]
+    assert relations == [("supersedes", "earlier decision"), ("relates_to", "related fact")]
+
+
+def test_a_korean_word_outside_the_table_is_kept_as_written():
+    parsed = parse_markdown("- 검토함 [[a decision]]\n")
+    relations = [(link["relation"], link["target"]) for link in parsed["links"] if link["relation"]]
+    assert relations == [("검토함", "a decision")]
+
+
+def test_several_words_before_the_link_are_still_only_a_mention():
+    parsed = parse_markdown("- this decision supersedes [[ADR 7]]\n")
+    assert [link["relation"] for link in parsed["links"]] == [None]
