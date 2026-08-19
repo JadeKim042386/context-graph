@@ -44,6 +44,20 @@ def _title_key(text):
     return " ".join(lowered.split())
 
 
+def _drop_mentions_that_repeat_a_named_relation(links):
+    """Remove the plain mention between two documents that a named relation already covers.
+
+    A decision usually names the decision it replaces twice: once in the relations line
+    (`- supersedes [[...]]`) and again in the prose above it. Both become a link, and a path
+    running between the two documents can then come back labelled `mentions`, hiding the
+    lineage the relations line spelled out. The named one wins.
+    """
+    named_pairs = {(link["source"], link["target"])
+                   for link in links if link["relation"] != "mentions"}
+    return [link for link in links
+            if link["relation"] != "mentions" or (link["source"], link["target"]) not in named_pairs]
+
+
 def build_map(source_dirs, map_path):
     """Scan the knowledge documents, build the map, return a summary. Sources are read only."""
     started_at = time.time()
@@ -83,6 +97,7 @@ def build_map(source_dirs, map_path):
             links.append({"source": document_id, "target": by_key[key],
                           "relation": link["relation"] or "mentions"})
 
+    links = _drop_mentions_that_repeat_a_named_relation(links)
     nodes.sort(key=lambda node: node["id"])
     links.sort(key=lambda link: (link["source"], link["target"], link["relation"]))
 

@@ -69,3 +69,17 @@ def test_the_knowledge_documents_are_never_modified(tmp_path):
     build_map([source], str(tmp_path / "map" / "graph.json"))
     assert open(path, "rb").read() == before
     assert sorted(os.listdir(source)) == ["a.md"]
+
+
+def test_a_named_relation_beats_a_bare_mention_between_the_same_two_documents(tmp_path):
+    source = tmp_path / "docs"; source.mkdir()
+    (source / "later.md").write_text(
+        "# Later\n\n- The earlier call was [[earlier]], now revisited.\n\n## Relations\n"
+        "- supersedes [[earlier]]\n", encoding="utf-8")
+    (source / "earlier.md").write_text("# Earlier\n\n- The first call.\n", encoding="utf-8")
+    map_path = tmp_path / "graph.json"
+    build_map([str(source)], str(map_path))
+    graph = json.loads(map_path.read_text(encoding="utf-8"))
+    between = [link["relation"] for link in graph["links"]
+               if link["source"] == "doc_later" and link["target"] == "doc_earlier"]
+    assert between == ["supersedes"]
