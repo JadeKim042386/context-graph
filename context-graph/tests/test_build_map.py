@@ -4,7 +4,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
-from build_map import build_map
+from build_map import build_map, folder_notes
 
 
 def _write_document(folder, name, text):
@@ -83,3 +83,20 @@ def test_a_named_relation_beats_a_bare_mention_between_the_same_two_documents(tm
     between = [link["relation"] for link in graph["links"]
                if link["source"] == "doc_later" and link["target"] == "doc_earlier"]
     assert between == ["supersedes"]
+
+
+def test_a_folder_that_is_not_there_is_named(tmp_path):
+    notes = folder_notes([str(tmp_path / "typo")], document_count=0)
+    assert notes == [f"[the document folder in the config is not there - {tmp_path / 'typo'}]"]
+
+
+def test_a_folder_with_no_documents_says_so(tmp_path):
+    empty = tmp_path / "empty"; empty.mkdir()
+    notes = folder_notes([str(empty)], document_count=0)
+    assert notes == [f"[no .md, .markdown, .html or .htm documents under {empty}]"]
+
+
+def test_a_folder_holding_documents_says_nothing(tmp_path):
+    source = tmp_path / "docs"; source.mkdir()
+    (source / "a.md").write_text("# A\n\n- A statement.\n", encoding="utf-8")
+    assert folder_notes([str(source)], document_count=1) == []
