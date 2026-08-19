@@ -44,6 +44,21 @@ def _title_key(text):
     return " ".join(lowered.split())
 
 
+def folder_notes(source_dirs, document_count):
+    """Say why the map came out empty, when it did.
+
+    A folder named in the config that is not there and a folder with nothing in it both
+    end at `nodes 0`, so a typo in the path looks exactly like an empty set of documents.
+    Name the cause instead of leaving someone to guess.
+    """
+    notes = [f"[the document folder in the config is not there - {source_dir}]"
+             for source_dir in sorted(source_dirs) if not os.path.isdir(source_dir)]
+    if not notes and document_count == 0:
+        where = ", ".join(sorted(source_dirs))
+        notes.append(f"[no .md, .markdown, .html or .htm documents under {where}]")
+    return notes
+
+
 def _drop_mentions_that_repeat_a_named_relation(links):
     """Remove the plain mention between two documents that a named relation already covers.
 
@@ -108,7 +123,7 @@ def build_map(source_dirs, map_path):
                   ensure_ascii=False, indent=1, sort_keys=True)
     os.replace(temporary_path, map_path)   # swap the whole file, so nobody reads a half-written map
 
-    return {"nodes": len(nodes), "links": len(links),
+    return {"documents": len(parsed_documents), "nodes": len(nodes), "links": len(links),
             "located": sum(1 for node in nodes if node["source_location"] is not None),
             "relation_kinds": len({link["relation"] for link in links}),
             "elapsed": time.time() - started_at}
@@ -139,6 +154,8 @@ def main(argv):
         return 0   # this runs from a hook, so stay quiet until the setup flow has run
 
     summary = build_map(source_dirs, map_path)
+    for note in folder_notes(source_dirs, summary["documents"]):
+        print(note)          # printed even when quiet: a wrong path is the thing worth saying
     if not options.quiet:
         from score import format_score, score_map
         print(format_score(score_map(map_path)) + f" · {summary['elapsed']:.2f}s")
