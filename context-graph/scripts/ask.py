@@ -5,6 +5,7 @@ delegated task ends, and right before and after compaction. It does, however,
 report how many documents the map is behind.
 """
 import os
+import re
 import subprocess
 import sys
 
@@ -63,6 +64,65 @@ def build_graphify_command(mode, arguments, map_path, budget):
     return command
 
 
+ANSWER_NODE_PATTERN = re.compile(
+    r"^NODE (?P<label>.*?) \[src=(?P<source>.*?) loc=(?P<line>\S+)(?: community=\S*)?\]\s*$")
+TRAVERSAL_START_PATTERN = re.compile(r"Start: \[(?P<seeds>.*?)\] \|")
+QUOTED_SEED_PATTERN = re.compile(r"'((?:[^'\\]|\\.)*)'|\"((?:[^\"\\]|\\.)*)\"")
+
+
+def matched_labels(raw_answer):
+    """The labels the query tool actually matched, in the order it listed them.
+
+    The tool walks outwards from those, so everything else in the answer is a neighbour
+    that came along for the ride. Keeping the order lets the statement that answers the
+    question stay at the top instead of landing somewhere in the middle.
+    """
+    header = TRAVERSAL_START_PATTERN.search(raw_answer)
+    if not header:
+        return []
+    return [(single or double).replace("\\'", "'").replace('\\"', '"')
+            for single, double in QUOTED_SEED_PATTERN.findall(header.group("seeds"))]
+
+
+def condense_answer(raw_answer):
+    """Keep the statements out of a query answer and drop the traversal noise.
+
+    The query tool prints its traversal header, every node it walked through and every
+    edge between them. The statements carrying the values are in there, buried. Keep
+    those with their file and line, name the documents they came from once at the end,
+    and drop the rest. A node with no location is a name someone linked to and never
+    wrote, so it has no value to return.
+    """
+    seeds = matched_labels(raw_answer)
+    statements, documents = [], []
+    for line in raw_answer.splitlines():
+        found = ANSWER_NODE_PATTERN.match(line)
+        if not found:
+            continue
+        label, source, line_number = (found.group("label").strip(),
+                                      found.group("source").strip(),
+                                      found.group("line"))
+        if not source or line_number == "None":
+            continue
+        if line_number == "1":                       # the node standing for the whole document
+            if label not in documents:
+                documents.append(label)
+            continue
+        rank = seeds.index(label) if label in seeds else len(seeds)
+        statements.append((rank, f"NODE {label}\n     [src={source} loc={line_number}]"))
+
+    if not statements:
+        return raw_answer                            # nothing recognised - show what the tool said
+    ordered = [text for _, text in sorted(statements, key=lambda pair: pair[0])]
+    condensed = "\n".join(ordered)
+    if documents:
+        # Naming every document turns the tail into a wall of text of its own, so name a few.
+        shown = ", ".join(documents[:4])
+        rest = f" and {len(documents) - 4} more" if len(documents) > 4 else ""
+        condensed += f"\n\n[also touched: {shown}{rest}]"
+    return condensed
+
+
 def truncation_notice(answer):
     """Return the notice to print when the answer filled the budget. Empty if it did not."""
     if "budget" in answer and "cut by" in answer:
@@ -79,7 +139,7 @@ def run(mode, arguments, source_dirs, map_path, budget):
                                env=dict(os.environ, PYTHONIOENCODING="utf-8"),
                                capture_output=True)
     answer = completed.stdout.decode("utf-8", "replace")
-    sys.stdout.write(answer)
+    sys.stdout.write(condense_answer(answer) + "\n" if mode == "query" else answer)
     notice = truncation_notice(answer)
     if notice:
         print(notice)
