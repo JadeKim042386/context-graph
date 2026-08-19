@@ -6,7 +6,7 @@
 
 **Copies the structure already written in your documents · No language model · 100% local**
 
-[![Tests](https://img.shields.io/badge/tests-52%20passing-brightgreen.svg)](#tests)
+[![Tests](https://img.shields.io/badge/tests-65%20passing-brightgreen.svg)](#tests)
 [![No LLM](https://img.shields.io/badge/build-no%20LLM%20calls-brightgreen.svg)](#why-no-language-model)
 [![Deterministic](https://img.shields.io/badge/output-byte--identical-brightgreen.svg)](#same-input-same-output)
 [![Python](https://img.shields.io/badge/python-3.9%2B%20stdlib%20only-blue.svg)](#requirements)
@@ -57,11 +57,19 @@ Context Graph turns that around.
 ```
 $ python ask.py "tray piece length median"
 
-NODE Piece size: longest edge min 0.05 m, median 1.19 m, max 99.44 m.
-     [src=facts/WHRP Plant - Model Contents and Structure Regions - Facts.md loc=192]
-
-[the map is current - 3 ms to check, 1.76 s to answer]
+NODE Piece size: longest edge min 0.05 m, **median 1.19 m**, max 99.44 m.
+     [src=knowledgeacts\WHRP Plant - Model Contents and Structure Regions - Facts.md loc=192]
+NODE Tray pieces attached to no structure rise from 1,033 (18.2%) to 1,141 (25.8%) - the
+     structure areas now cover less of the routing.
+     [src=knowledge\decisions\ADR 0086 APOC Drops 20 Structure Areas and Their Trays.md loc=33]
+...
+[also touched: cable_project Handoff, index, WHRP Plant - Model Contents and Structure
+ Regions - Facts, Browser 3D Viewers - Facts and 10 more]
 ```
+
+The statement that matched comes first, the statements around it follow, and the documents they
+sit in are named once at the end. Long answers keep going in the same shape; the middle of this
+one is cut here to keep the example short.
 
 **You get the statement itself, plus the file and line number it sits on.** That is usually
 the end of it; you open the surrounding lines only when you need to confirm. Reading drops
@@ -226,8 +234,18 @@ at 400 characters and the figures at the end disappear from the answers.
 
 ```
 - <word> [[target]]   ->  that word is the relation name (supersedes, follows, corrects ...)
+- 대체함 [[target]]     ->  a Korean relation word, stored under its English name (supersedes)
    [[target]]          ->  a mention
 ```
+
+**A relation word may be written in any script.** Korean notes keep their lineage instead of
+losing it to an unnamed mention. The common Korean words are mapped onto the English names the
+rest of the map uses — `대체함`/`대체` to `supersedes`, `관련`/`참고` to `relates_to`, `후속` to
+`follows`, `정정` to `corrects`, `포함` to `part_of`, and a few more — so a path can run through
+documents written in both languages. This is a fixed table in the source, not a translation
+service: **no model is called**, and a word outside the table is kept exactly as it was written.
+The word still has to be the only thing between the bullet and the link — `- this decision
+supersedes [[X]]` is a mention, not a relation.
 
 **It reads the shape of the line, not the name of the section.** So it works on documents with
 no `## Relations` section. When a name does not match, it retries with punctuation swapped
@@ -261,10 +279,17 @@ python ask.py "chunk boundary equipment endpoint density"
 Shows the shortest chain linking two nodes. Use it to **follow the lineage of a decision**.
 
 ```
-ADR 0037  --supersedes_partially-->  ADR 0023
-          --supersedes-->            ADR 0019
-          --supersedes-->            GNN Input Feature Spec
+$ python ask.py --path "ADR 0024 endpoint_dist Global Normalization Replaces Per-Chunk Min-Max"                 "ADR 0023 GNN Coordinates from Excel mm + Per-Chunk MinMax Normalization"
+
+Shortest path (1 hops):
+  ADR 0024 endpoint_dist Global Normalization Replaces Per-Chunk Min-Max
+  --supersedes_partially--> ADR 0023 GNN Coordinates from Excel mm + Per-Chunk MinMax Normalization
 ```
+
+Names have to be given in full, and the chain is labelled with the relation words as they were
+written. Where a decision both names an earlier one in prose and lists it under `## Relations`,
+the named relation is the one that shows — the bare mention is dropped so it cannot hide the
+lineage.
 
 ### `ask.py --explain "<node>"`
 
@@ -332,8 +357,8 @@ things.
 | **Sampled value lookup** | the four above can look fine and it still finds nothing |
 
 **The sampled lookup runs automatically.** It picks statements carrying numbers in a fixed way,
-actually asks for them, opens the file and line the answer points at, and **compares the text
-character for character**.
+actually asks for them, opens the file and line the answer points at, and **checks that the
+statement is still there on that line, word for word**.
 
 A low score comes with the cause.
 
@@ -343,6 +368,22 @@ few relation kinds - the `- <word> [[target]]` shape is almost absent
 ```
 
 **A low score does not block anything.** You get to use it knowing what does not work.
+
+### An empty map says why
+
+A map that comes out with nothing in it names the cause, at every refresh point, whether or not
+the score is being printed.
+
+```
+[the document folder in the config is not there - C:
+otesualt]
+[no .md, .markdown, .html or .htm documents under C:
+otes]
+```
+
+**A mistyped path and an empty folder used to look identical** — both ended at `nodes 0`. Now the
+first line appears when the folder named in the config is not on disk, and the second when the
+folder is there but holds no documents.
 
 ---
 
@@ -377,6 +418,9 @@ Stated plainly. All three are measured.
 
 The map does not recognise the same meaning in different words. Ask in Korean about English
 documents and **nothing matches at all.** Whatever language you ask in, match **the documents**.
+
+Relation words are the one exception: `- 대체함 [[X]]` and `- supersedes [[X]]` end up as the
+same relation, so lineage still runs across a set of documents written in both languages.
 
 ### 2. Ask narrowly
 
@@ -421,7 +465,7 @@ Both can be installed **with your approval** during the first run.
 python -m pytest context-graph/tests -v
 ```
 
-**All 52 pass.** Three of them matter most.
+**All 65 pass.** Three of them matter most.
 
 - **Same input, same output** — build twice, compare byte for byte
 - **Sampled value lookup** — compare a statement in the map against that line in the source file
