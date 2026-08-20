@@ -6,8 +6,6 @@ DEFAULT_CONFIG = {
     "source_dirs": [],            # where the knowledge documents live
     "map_path": "",               # where the map goes (outside the knowledge documents)
     "answer_budget": 20000,       # answer size limit. Lower it and statements carrying values get cut
-    "image_text_enabled": False,  # pull text out of images. Off by default
-    "autocompact": "auto",        # compaction threshold (auto, or 100000-1000000)
 }
 
 

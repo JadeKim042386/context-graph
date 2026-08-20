@@ -6,7 +6,7 @@
 
 **A Claude Code plugin · Copies the structure you already wrote · No language model · 100% local**
 
-[![Tests](https://img.shields.io/badge/tests-66%20passing-brightgreen.svg)](#tests)
+[![Tests](https://img.shields.io/badge/tests-57%20passing-brightgreen.svg)](#tests)
 [![No LLM](https://img.shields.io/badge/build-no%20LLM%20calls-brightgreen.svg)](#why-it-copies-instead-of-inferring)
 [![Deterministic](https://img.shields.io/badge/output-byte--identical-brightgreen.svg)](#same-input-same-output)
 [![Python](https://img.shields.io/badge/python-3.9%2B%20stdlib%20only-blue.svg)](#requirements)
@@ -466,7 +466,7 @@ Nothing in the build or the query reaches the network.
 python -m pytest context-graph/tests -v
 ```
 
-**All 66 pass.** Three of them matter most.
+**All 57 pass.** Three of them matter most.
 
 - **Same input, same output** — build twice, compare byte for byte
 - **Sampled value lookup** — compare a statement in the map against that line in the source file

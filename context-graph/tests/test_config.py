@@ -10,7 +10,6 @@ def test_reading_a_missing_file_gives_the_defaults(tmp_path):
     config = load_config(os.path.join(str(tmp_path), "missing.json"))
     assert config == DEFAULT_CONFIG
     assert config["answer_budget"] == 20000
-    assert config["image_text_enabled"] is False
     assert config["source_dirs"] == []
 
 
