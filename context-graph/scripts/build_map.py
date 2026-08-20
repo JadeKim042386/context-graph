@@ -157,8 +157,16 @@ def main(argv):
     for note in folder_notes(source_dirs, summary["documents"]):
         print(note)          # printed even when quiet: a wrong path is the thing worth saying
     if not options.quiet:
-        from score import format_score, score_map
-        print(format_score(score_map(map_path)) + f" · {summary['elapsed']:.2f}s")
+        from score import format_score, score_map, verify_samples
+        score = score_map(map_path)
+        # The sampled check is the only measure that catches a map that scores well and still
+        # answers with nothing, so it runs on every build, not only in the tests.
+        sampled = verify_samples(score)
+        sample_line = (f" · samples {sampled['matched']}/{sampled['checked']} verbatim"
+                       if sampled["checked"] else "")
+        print(format_score(score) + sample_line + f" · {summary['elapsed']:.2f}s")
+        for failure in sampled["failed"]:
+            print(f"[a sampled statement is no longer on that line - {failure}]")
     return 0
 
 

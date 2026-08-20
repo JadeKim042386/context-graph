@@ -5,6 +5,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 from build_map import build_map, folder_notes
+from build_map import main as build_map_main
 
 
 def _write_document(folder, name, text):
@@ -100,3 +101,10 @@ def test_a_folder_holding_documents_says_nothing(tmp_path):
     source = tmp_path / "docs"; source.mkdir()
     (source / "a.md").write_text("# A\n\n- A statement.\n", encoding="utf-8")
     assert folder_notes([str(source)], document_count=1) == []
+
+
+def test_the_build_reports_the_sampled_check(tmp_path, capsys):
+    source = tmp_path / "docs"; source.mkdir()
+    (source / "facts.md").write_text("# Facts\n\n- The median is 1.19 m.\n", encoding="utf-8")
+    build_map_main(["--source", str(source), "--out", str(tmp_path / "graph.json")])
+    assert "samples 1/1 verbatim" in capsys.readouterr().out
