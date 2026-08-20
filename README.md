@@ -2,9 +2,9 @@
 
 # Context Graph
 
-### Stop reading whole knowledge documents. Read only the line you need.
+### Ask your notes a question. Get the sentence back, with the file and line it sits on.
 
-**Copies the structure already written in your documents · No language model · 100% local**
+**A Claude Code plugin · Copies the structure you already wrote · No language model · 100% local**
 
 [![Tests](https://img.shields.io/badge/tests-65%20passing-brightgreen.svg)](#tests)
 [![No LLM](https://img.shields.io/badge/build-no%20LLM%20calls-brightgreen.svg)](#why-no-language-model)
@@ -21,7 +21,20 @@
 
 ---
 
-<img alt="Statements and the relations you wrote are copied into one map that answers with a value, a connection or a lineage" src="assets/structure.png" width="880">
+<div align="center">
+<img alt="Asking the map a question returns the statement with its file and line, and asking for a path walks the supersedes chain between two decisions" src="assets/demo.gif" width="880">
+</div>
+
+**What it is** — your notes already say what links to what. This copies that structure into one
+map, then answers a question with **the statement itself, its file and its line number**, instead
+of making you open the file. Nothing is guessed: a statement in the map is the statement in the
+document, word for word. Building 175 documents takes 0.1 s and calls no model.
+
+| Ask this | Get this |
+|---|---|
+| `ask.py "<question>"` | the statements that match, each with its file and line |
+| `ask.py --path "<a>" "<b>"` | the chain of relations linking two decisions |
+| `ask.py --explain "<node>"` | one node and its neighbours |
 
 ---
 
@@ -217,6 +230,8 @@ compares it byte for byte. That test has to pass before any of the others mean a
 ---
 
 ## How it works
+
+<img alt="Statements and the relations you wrote are copied into one map that answers with a value, a connection or a lineage" src="assets/structure.png" width="880">
 
 ### What becomes a node
 
