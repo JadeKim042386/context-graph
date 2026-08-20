@@ -22,7 +22,7 @@
 ---
 
 <div align="center">
-<img alt="The terminal on the left and the map on the right: documents and statements become nodes, a question lights up the statement that matches along with the nodes around it, a path walks the supersedes chain between decisions, and the map is rebuilt when the session is written back into the notes" src="assets/demo.gif" width="900">
+<img alt="A Claude Code session on the left and the map on the right: you ask in your own words, the skill runs the lookup, the statement that matches lights up together with the nodes around it, a path walks the supersedes chain between decisions, and at compaction the session is written back into the notes and the map is rebuilt" src="assets/demo.gif" width="900">
 </div>
 
 **What it is** — your notes already say what links to what. This copies that structure into one
@@ -30,11 +30,13 @@ map, then answers a question with **the statement itself, its file and its line 
 of making you open the file. Nothing is guessed: a statement in the map is the statement in the
 document, word for word. Building 175 documents takes 0.1 s and calls no model.
 
-The animation above is the whole loop: every statement in your notes becomes a node and every
-`- supersedes [[...]]` you wrote becomes an edge; a question lights up the statement that matches
-**and the nodes around it**, which is what comes back with the answer; a path walks the relation
-words themselves; and when the conversation is compacted the session is written back into your
-notes and the map is rebuilt, so the next question already finds it.
+The animation above is the whole loop, from the side you use and the side you do not see. You ask
+Claude Code in your own words; the skill turns that into a lookup on the map (the `ask.py` line);
+the statement that matches lights up **together with the nodes around it**, which is what comes
+back with the answer; a second question walks the relation words themselves; and when the
+conversation is compacted the session is written back into your notes and the map is rebuilt, so
+the next question already finds it. Every statement in your notes is a node, and every
+`- supersedes [[...]]` you wrote is an edge.
 
 | Ask this | Get this |
 |---|---|
