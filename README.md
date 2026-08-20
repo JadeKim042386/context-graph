@@ -6,8 +6,8 @@
 
 **A Claude Code plugin · Copies the structure you already wrote · No language model · 100% local**
 
-[![Tests](https://img.shields.io/badge/tests-65%20passing-brightgreen.svg)](#tests)
-[![No LLM](https://img.shields.io/badge/build-no%20LLM%20calls-brightgreen.svg)](#why-no-language-model)
+[![Tests](https://img.shields.io/badge/tests-66%20passing-brightgreen.svg)](#tests)
+[![No LLM](https://img.shields.io/badge/build-no%20LLM%20calls-brightgreen.svg)](#why-it-copies-instead-of-inferring)
 [![Deterministic](https://img.shields.io/badge/output-byte--identical-brightgreen.svg)](#same-input-same-output)
 [![Python](https://img.shields.io/badge/python-3.9%2B%20stdlib%20only-blue.svg)](#requirements)
 
@@ -15,7 +15,7 @@
 [![macOS](https://img.shields.io/badge/macOS-supported-blue.svg)](#requirements)
 [![Linux](https://img.shields.io/badge/Linux-supported-blue.svg)](#requirements)
 
-**175 documents · 8,198 nodes · rebuilt in 0.10 s**
+**182 documents · 8,524 nodes · rebuilt in 0.11 s**
 
 </div>
 
@@ -28,7 +28,7 @@
 **What it is** — your notes already say what links to what. This copies that structure into one
 map, then answers a question with **the statement itself, its file and its line number**, instead
 of making you open the file. Nothing is guessed: a statement in the map is the statement in the
-document, word for word. Building 175 documents takes 0.1 s and calls no model.
+document, word for word. Building 182 documents takes about a tenth of a second and calls no model.
 
 The animation above is the whole loop, from the side you use and the side you do not see. You ask
 Claude Code in your own words; the skill turns that into a lookup on the map (the `ask.py` line);
@@ -50,13 +50,12 @@ the next question already finds it. Every statement in your notes is a node, and
 
 - [The problem](#the-problem)
 - [Install](#install)
-- [First run](#first-run)
-- [Why this approach](#why-this-approach)
+- [Point it at your notes](#point-it-at-your-notes)
+- [Why it copies instead of inferring](#why-it-copies-instead-of-inferring)
 - [How it works](#how-it-works)
 - [Command reference](#command-reference)
 - [When it refreshes](#when-it-refreshes)
 - [Quality check](#quality-check)
-- [Configuration](#configuration)
 - [Limits](#limits)
 - [Requirements](#requirements)
 - [Tests](#tests)
@@ -66,20 +65,21 @@ the next question already finds it. Every statement in your notes is a node, and
 
 ## The problem
 
-Once knowledge documents pile up, **a single check means reading a whole file.**
+Once knowledge documents pile up, **a single check means reading a whole file** — and every
+one of those reads lands in the model's context before it can answer anything.
 
-These are measured numbers. Catching up on one thread of progress means reading **289,000
-characters** of two months of notes; finding a document means reading a **49,000 character**
-index. There are **1,746 links** already written between documents, and following one of
-them still means opening a file.
+Counted on the set of documents this was built against: catching up on one thread of work means
+reading **289,000 characters**; finding the right document means reading a **49,000 character**
+index; and the **1,746 links** already written between documents can only be followed by opening
+the file at the other end.
 
-Context Graph turns that around.
+The information was already written down. What cost anything was getting back to it.
 
 ```
 $ python ask.py "tray piece length median"
 
 NODE Piece size: longest edge min 0.05 m, **median 1.19 m**, max 99.44 m.
-     [src=knowledgeacts\WHRP Plant - Model Contents and Structure Regions - Facts.md loc=192]
+     [src=knowledge\facts\WHRP Plant - Model Contents and Structure Regions - Facts.md loc=192]
 NODE Tray pieces attached to no structure rise from 1,033 (18.2%) to 1,141 (25.8%) - the
      structure areas now cover less of the routing.
      [src=knowledge\decisions\ADR 0086 APOC Drops 20 Structure Areas and Their Trays.md loc=33]
@@ -116,7 +116,7 @@ Nothing to clone — Claude Code fetches it for you.
 /plugin install context-graph
 ```
 
-This brings the skill, the commands and the refresh hooks with it.
+This brings the skill and the refresh hooks with it.
 
 ### 3. Restart Claude Code
 
@@ -164,53 +164,56 @@ does not change a single character of them.
 
 ---
 
-## First run
+## Point it at your notes
 
-The first time you call it after installing, five steps run once.
+No path is baked into the code, so the one thing you have to do is say where your documents are.
+Write `~/.claude/context-graph/config.json` (or point the `KNOWLEDGE_MAP_CONFIG` environment
+variable at a file of your own):
 
-| | What | Why |
-|---|---|---|
-| 1 | **Asks where the knowledge documents are** | No path is baked into the code. You can list several places |
-| 2 | **Checks whether the tools it uses are present** | If not, it shows what it would install and why, and asks. It never installs silently |
-| 3 | **Builds the map for the first time** | Hundreds of documents finish in under a second |
-| 4 | **Shows the score** | This is where you find out whether it is any use on your set of documents |
-| 5 | **Asks for the compaction threshold** | How full the conversation gets before compaction. Applies from the next session |
+```json
+{
+  "source_dirs": ["C:/notes", "C:/another/folder"],
+  "map_path": "C:/notes-map/graph.json",
+  "answer_budget": 20000
+}
+```
 
-**Declining the installs still leaves it working.** Without the query tool, building the map
-and scoring work and only asking does not. Without the document tool, only writing the
-session into the knowledge documents at compaction is lost.
+- **`source_dirs`** — one or more folders holding your `.md`, `.markdown`, `.html` or `.htm`
+  documents. They are only ever read
+- **`map_path`** — where the map goes. Keep it **outside** those folders, or the map is picked
+  up as a document on the next build. The query tool needs the `.json` suffix
+- **`answer_budget`** — how large an answer may grow before it is cut. Lower it and long
+  statements lose the tail, which is usually where the figure is
+
+Then build it once:
+
+```bash
+python build_map.py
+```
+
+```
+nodes 8524 · links 9749 · located 99.8% · relations 28 kinds · components 3 · samples 5/5 verbatim · 0.11s
+```
+
+**That line is where you find out whether it is any use on your set of documents** — what it
+means is under [Quality check](#quality-check). If the folder is missing or holds no documents, the
+build says so instead of quietly producing an empty map.
+
+### The two tools it leans on
+
+| | Without it |
+|---|---|
+| [graphify](https://github.com/safishamsi/graphify) — runs the queries | building and scoring still work; asking does not |
+| [obsidian-second-brain](https://github.com/eugeniughelbur/obsidian-second-brain) — writes a session into your notes | everything works except the write-back at compaction |
+
+Neither is installed for you.
 
 ---
 
-## Why this approach
+## Why it copies instead of inferring
 
-### Three versions were built and compared
-
-The same 99 decision records were turned into a map three times. The first two handed the
-folder to a tool and let **a language model guess the relations**; the third **copied what the
-documents already said**.
-
-| | ① delegated · light model | ② delegated · mid model | ③ **copy what is written** |
-|---|---|---|---|
-| Nodes / links | 149 / 148 | 185 / 446 | **629 / 950** |
-| **Nodes carrying a line number** | 6 (4%) | **0** | **626 (99.5%)** |
-| Relation kinds | 29 | **4** | **32** |
-| Lineage (supersedes, follows) | present | **none at all** | **24, chains intact** |
-| Components / isolated nodes | 26 / 18 | 1 / 0 | **1 / 0** |
-| Build time | 5 min | 16 min | **0.1 s** |
-
-### The first two produced no values at all
-
-Their nodes had names but **no body and no line number**, so no amount of rephrasing produced
-a figure. The maps built cleanly and the cluster names looked plausible, but asking returned
-nothing.
-
-**That was a property of the extraction, not of graphs.** Changing what counts as a node
-brought the values, the locations and the lineage back at once.
-
-### Why no language model
-
-The structure is **already written** in the knowledge documents.
+The relations between documents are **already written down**, by hand, by the person who wrote
+the notes.
 
 ```markdown
 ## Decision
@@ -221,10 +224,10 @@ The structure is **already written** in the knowledge documents.
 - relates_to [[related fact]]
 ```
 
-A person wrote that by hand. **There is nothing to guess.** It only has to be copied across.
-Which is why it is
+Asking a model to infer that relation would be paying to guess at something already stated.
+Copying it across instead is what makes the map
 
-- **fast** — 0.10 s for 175 documents
+- **fast** — 0.11 s for 182 documents
 - **free** — zero model calls
 - **not wrong** — a statement in the map is the statement in the document, verbatim
 - **repeatable** — build twice, get byte-identical output
@@ -246,7 +249,7 @@ compares it byte for byte. That test has to pass before any of the others mean a
 | Node | What it is | Location |
 |---|---|---|
 | Document | one file | file + line 1 |
-| Heading | `##`, `###` (`h1`-`h3` in HTML), including the body under it | file + line |
+| Heading | any of `#` to `######` (`h1`-`h3` in HTML), including the body under it | file + line |
 | **Statement** | one paragraph or list item under a heading | file + line |
 | Name-only node | a target that is pointed at but exists in no document | none |
 
@@ -318,10 +321,6 @@ lineage.
 
 Shows one node and its neighbours. Use it the first time you meet an unfamiliar term.
 
-### `ask.py --rebuild "<question>"`
-
-Rebuilds the map right now, then asks. Not normally needed.
-
 ### `build_map.py`
 
 Rebuilds the map. This is what the refresh hooks call.
@@ -342,24 +341,25 @@ python build_map.py --quiet            # no score printed
 |---|---|
 | A session starts or resumes | rebuild the map |
 | **A delegated task (subagent) ends** | rebuild the map |
-| Right before the conversation is compacted | write the session into the knowledge documents |
+| Right before the conversation is compacted | ask for the session to be written into the knowledge documents |
 | Right after the conversation is compacted | rebuild the map |
 
-**Why compaction is two points** — writing just before and building just after means **what was
-just written makes it into the map** and carries over into the next conversation. At the exact
-spot where context is squeezed out, the knowledge moves onto the map.
+**Why compaction is two points** — the first hook prints the reminder that the session should be
+written into your notes, which the document tool then does; the second rebuilds the map so what
+was just written is on it. At the exact spot where context is squeezed out, the knowledge moves
+onto the map instead of being lost with the conversation.
 
 ### It rebuilds everything
 
-It does not pick out only the changed files. **There is nothing left to gain past 0.1 s**, and
-a change-picking mechanism has to remember "what changed" — and when that memory drifts,
-**stale content survives**.
+It does not pick out only the changed files. At this size there is nothing left to win — a few
+hundred documents rebuild in a tenth of a second — and a change-picking mechanism has to remember
+"what changed", which is a second thing that can drift and leave **stale content alive**.
 
-If a document changes in between, checking costs **2-3 milliseconds** before the question, and
-it only **tells you**.
+Before a question it checks whether any document is newer than the map, which costs a couple of
+milliseconds over a few hundred files, and it only **tells you**.
 
 ```
-[The map is behind 1 document(s) - WHRP Plant... It is refreshed at the next compaction]
+[The map is behind 1 document(s) — WHRP Plant... It is refreshed at the next compaction]
 ```
 
 It never quietly serves a stale answer.
@@ -379,15 +379,16 @@ things.
 | Components and isolated nodes | path finding fails |
 | **Sampled value lookup** | the four above can look fine and it still finds nothing |
 
-**The sampled lookup runs automatically.** It picks statements carrying numbers in a fixed way,
-actually asks for them, opens the file and line the answer points at, and **checks that the
-statement is still there on that line, word for word**.
+**The sampled lookup runs on every build**, and its result is the `samples 5/5 verbatim` part of
+the score line. It picks statements carrying numbers in a fixed way, opens the file and line each
+one points at, and **checks the statement is still there on that line, word for word**. A sample
+that no longer matches is named on the spot.
 
 A low score comes with the cause.
 
 ```
-located 12% - many documents carry headings only, with no body text under them
-few relation kinds - the `- <word> [[target]]` shape is almost absent
+located 12% — many documents carry headings only, with no body text under them
+few relation kinds — the `- <word> [[target]]` shape is almost absent
 ```
 
 **A low score does not block anything.** You get to use it knowing what does not work.
@@ -398,10 +399,8 @@ A map that comes out with nothing in it names the cause, at every refresh point,
 the score is being printed.
 
 ```
-[the document folder in the config is not there - C:
-otesualt]
-[no .md, .markdown, .html or .htm documents under C:
-otes]
+[the document folder in the config is not there - C:\notes\vualt]
+[no .md, .markdown, .html or .htm documents under C:\notes]
 ```
 
 **A mistyped path and an empty folder used to look identical** — both ended at `nodes 0`. Now the
@@ -410,32 +409,9 @@ folder is there but holds no documents.
 
 ---
 
-## Configuration
-
-| Setting | Default | Notes |
-|---|---|---|
-| Where the knowledge documents are | none | asked on the first run. Several places allowed |
-| Where the map goes | outside the knowledge documents | put it inside and the output is picked up as a document |
-| Answer budget | `20000` | a measured value. Lower it and statements carrying values get cut |
-| Image text extraction | `false` | on, it pulls text out of images |
-| Compaction threshold | `auto` | or 100k-1M tokens |
-
-### Image text extraction (optional)
-
-Lets you find tables, error messages and figures inside screenshots. **It is off by default** —
-it sends someone else's images outside, so it is never done without asking.
-
-- The key is a **hash of the image contents**, not the file timestamp. Renaming or re-saving does
-  not trigger reprocessing
-- Building the map **only reads the cache**, so build time is unchanged
-- Nodes coming from images are marked **machine-read**, so they never mix with what a person wrote
-- No descriptions and no summaries are produced. **Text only**
-
----
-
 ## Limits
 
-Stated plainly. All three are measured.
+Three of them, stated plainly. The last two are measured.
 
 ### 1. Ask in the language the knowledge documents are written in
 
@@ -455,17 +431,20 @@ same relation, so lineage still runs across a set of documents written in both l
 To sweep a whole topic, hand it to a subagent and take **the conclusion only**. If an answer is
 truncated, it says so on the spot.
 
-### 3. Past 800 documents, queries get slow
+### 3. Queries slow down as the map grows
 
-Measured at 10x the size (2,480 documents).
+Two sizes were measured, one ten times the other.
 
 | | 248 documents | 2,480 documents |
 |---|---|---|
-| Rebuild | 0.24 s | 2.13 s (tolerable) |
+| Rebuild | 0.24 s | 2.13 s |
 | **Query** | 1.80 s | **15.46 s** |
 
-**What breaks first at scale is the query, not the refresh.** Past that line you need to split
-the map into branches and search only the branch that matches the question.
+**The query is what gives way first, not the refresh.** A rebuild ten times the size is still
+about two seconds; a question at that size takes a quarter of a minute, which is longer than
+opening the file would have taken. Between those two points a question stops feeling instant
+somewhere in the high hundreds of documents. Past that the map has to be split, with the
+question sent only to the branch it belongs to — which this does not do for you.
 
 ---
 
@@ -473,12 +452,11 @@ the map into branches and search only the branch that matches the question.
 
 | | |
 |---|---|
-| Python | 3.9 or newer. **Standard library only** |
+| Python | 3.9 or newer. **Standard library only** — nothing to pip install for the plugin itself |
 | OS | Windows · macOS · Linux |
-| Query tool | [graphify](https://github.com/safishamsi/graphify) — without it, building and scoring work and asking does not |
-| Document tool | [obsidian-second-brain](https://github.com/eugeniughelbur/obsidian-second-brain) — without it, only writing the session at compaction is lost |
+| Queries | [graphify](https://github.com/safishamsi/graphify), a local CLI. See [the two tools it leans on](#the-two-tools-it-leans-on) |
 
-Both can be installed **with your approval** during the first run.
+Nothing in the build or the query reaches the network.
 
 ---
 
@@ -488,12 +466,13 @@ Both can be installed **with your approval** during the first run.
 python -m pytest context-graph/tests -v
 ```
 
-**All 65 pass.** Three of them matter most.
+**All 66 pass.** Three of them matter most.
 
 - **Same input, same output** — build twice, compare byte for byte
 - **Sampled value lookup** — compare a statement in the map against that line in the source file
-- **Malformed documents** — a case met in real use, kept as test material. Miss it and 41
-  value-carrying statements are lost
+- **Odd documents** — cases met in real use, kept as test material: a date read as a relation
+  name, an empty file, and prose continuing after the relations section, which used to drop
+  every statement below it
 
 ---
 
@@ -521,10 +500,10 @@ The question was too broad. Narrow the words, or hand the topic to a subagent.
 ### The map answers with stale content
 
 Refreshes run only at session start, when a delegated task ends, and before and after
-compaction. To reflect changes right now:
+compaction, and the answer tells you when the map is behind. To bring it up to date right now:
 
 ```bash
-python ask.py --rebuild "<question>"
+python build_map.py
 ```
 
 ### The score comes out low
