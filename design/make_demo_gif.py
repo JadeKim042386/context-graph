@@ -127,24 +127,106 @@ def draw_graph(visible_nodes, lit_node="", neighbour_nodes=(), lit_edges=(), chi
     return "\n".join(pieces)
 
 
-# ---------------------------------------------------------------- the terminal on the left
+# ---------------------------------------------------------------- the session on the left
 
-QUESTION = 'ask.py "battery swap threshold"'
-ANSWER = [
-    '<span class="k">NODE</span> <span class="v">Swap threshold: a robot returns to a'
-    ' dock below 18% state of charge.</span>',
-    '     <span class="loc">[src=notes\\facts\\Warehouse Robot Fleet.md loc=10]</span>',
-]
-PATH_QUESTION = 'ask.py --path "ADR 0011" "ADR 0004"'
-PATH_ANSWER = [
-    'Shortest path (2 hops):',
-    '  ADR 0011 <span class="rel">--supersedes--&gt;</span> ADR 0007'
-    ' <span class="rel">--supersedes--&gt;</span> ADR 0004',
-]
-REFRESH_LINES = [
-    '<span class="dim">[before compaction - writing the session into the notes]</span>',
-    '<span class="ok">nodes 32 · links 33 · located 100.0% · 0.00s</span>',
-]
+# What a person actually does is ask Claude Code a question in their own words. Calling
+# ask.py is the plugin's own business, so it is shown the way the session shows it: as the
+# skill's tool line under the question.
+QUESTION = "what was the battery swap threshold again?"
+SKILL_CALL = ['<span class="tool">● context-graph</span>',
+              '<span class="tool">  ⎿ python ask.py "battery swap threshold"</span>']
+TOOL_OUTPUT = ('<span class="tool">    NODE Swap threshold: a robot returns to a dock below'
+               ' 18% state of charge. [loc=10]</span>')
+REPLY = ('<span class="say">●</span> Below <span class="v">18% state of charge</span> — '
+         '<span class="loc">Warehouse Robot Fleet.md:10</span>')
+
+PATH_QUESTION = "and which decision replaced ADR 0004?"
+PATH_CALL = ['<span class="tool">● context-graph</span>',
+             '<span class="tool">  ⎿ python ask.py --path "ADR 0011" "ADR 0004"</span>']
+PATH_REPLY = ('<span class="say">●</span> ADR 0011 <span class="rel">superseded</span> ADR 0007,'
+              ' which <span class="rel">superseded</span> ADR 0004.')
+
+COMPACTING = '<span class="dim">[context is nearly full — compacting the conversation]</span>'
+WRITING = '<span class="tool">  ⎿ writing this session into your notes</span>'
+REBUILT = '<span class="ok">  ⎿ map rebuilt · nodes 32 · links 33 · 0.00s</span>'
+
+
+def asked_line(typed, cursor=True):
+    """The question line as the session shows it, with the block cursor while it is typed."""
+    return ('<span class="p">&gt;</span> <span class="c">' + html.escape(typed) + "</span>"
+            + ('<span class="cur">&nbsp;</span>' if cursor else ""))
+
+
+def typing_frames(question, keystrokes_per_frame=3):
+    """The question appearing a few characters at a time."""
+    return [question[:count] for count in
+            range(0, len(question) + keystrokes_per_frame, keystrokes_per_frame)][1:] + [question]
+
+
+def build_storyboard():
+    """Return (session html, graph svg, caption, milliseconds) for every frame, in order."""
+    frames = []
+    everything = set(FIRST_NODES)
+
+    # 1. the map appears: documents first, then the statements under them, then the links
+    for count in (1, 3, 5, 8):
+        frames.append(("", draw_graph(set(FIRST_NODES[:count]), drawn_edges=False),
+                       "Every heading and every statement in your notes becomes a node.", 260))
+    frames.append(("", draw_graph(everything),
+                   "The links you wrote by hand — <b>supersedes</b>, <b>relates_to</b> — become "
+                   "the edges. No model is asked to guess them.", 1500))
+
+    # 2. a question in your own words
+    frames.append((asked_line(""), draw_graph(everything),
+                   "You ask Claude Code the way you always do.", 700))
+    for typed in typing_frames(QUESTION):
+        frames.append((asked_line(typed), draw_graph(everything),
+                       "You ask Claude Code the way you always do.", 45))
+
+    asked = asked_line(QUESTION, cursor=False)
+    called = asked + "\n\n" + "\n".join(SKILL_CALL)
+    frames.append((called, draw_graph(everything),
+                   "The skill turns the question into a lookup on the map — that is the "
+                   "<b>ask.py</b> line.", 800))
+    frames.append((called, draw_graph(everything, lit_node="swap"),
+                   "The statement that matches lights up.", 500))
+    frames.append((called, draw_graph(everything, lit_node="swap",
+                                      neighbour_nodes=NEIGHBOURS_OF_SWAP),
+                   "The nodes around it come back with it — the document it sits in, and its "
+                   "neighbours.", 800))
+    answered = called + "\n" + TOOL_OUTPUT + "\n\n" + REPLY
+    frames.append((answered, draw_graph(everything, lit_node="swap",
+                                        neighbour_nodes=NEIGHBOURS_OF_SWAP,
+                                        chip=r"notes\facts\Warehouse Robot Fleet.md  loc=10"),
+                   "You get the sentence itself, and the file and line it sits on. No file was "
+                   "opened.", 2800))
+
+    # 3. the lineage
+    for typed in typing_frames(PATH_QUESTION):
+        frames.append((answered + "\n\n" + asked_line(typed), draw_graph(everything),
+                       "Ask how two decisions are related.", 45))
+    path_asked = (answered + "\n\n" + asked_line(PATH_QUESTION, cursor=False)
+                  + "\n\n" + "\n".join(PATH_CALL))
+    frames.append((path_asked, draw_graph(everything, lit_edges=[LINEAGE_EDGES[0]]),
+                   "It walks the relation words someone typed.", 500))
+    walked_graph = draw_graph(everything, lit_edges=LINEAGE_EDGES)
+    frames.append((path_asked, walked_graph,
+                   "It walks the relation words someone typed.", 400))
+    frames.append((path_asked + "\n\n" + PATH_REPLY, walked_graph,
+                   "Which decision replaced which, in the order it happened.", 2600))
+
+    # 4. the refresh, which nobody has to ask for
+    conversation = path_asked + "\n\n" + PATH_REPLY
+    compacting = conversation + "\n\n" + COMPACTING + "\n" + WRITING
+    frames.append((compacting, draw_graph(everything | {"written"}, lit_node="written"),
+                   "When the conversation is compacted, the session is written back into your "
+                   "notes...", 1700))
+    frames.append((compacting + "\n" + REBUILT,
+                   draw_graph(everything | {"written"},
+                              neighbour_nodes=["written", "fact_doc"]),
+                   "...and the map is rebuilt, so your next question already finds it.", 3000))
+    return frames
+
 
 PAGE_TEMPLATE = """<!doctype html>
 <html><head><meta charset="utf-8"><style>
@@ -161,9 +243,10 @@ PAGE_TEMPLATE = """<!doctype html>
   pre{{margin:0;padding:15px 16px;color:#c8d3ea;
       font:13px/1.5 "Cascadia Mono","JetBrains Mono",Consolas,monospace;
       white-space:pre-wrap;word-break:break-word;}}
-  .p{{color:#5eead4}} .c{{color:#e6edff;font-weight:600}} .k{{color:#8ab4ff}}
+  .p{{color:#5eead4;font-weight:700}} .c{{color:#e6edff;font-weight:600}} .k{{color:#8ab4ff}}
   .v{{color:#ffd479}} .loc{{color:#7f8dad}} .rel{{color:#f0a6ff}} .dim{{color:#66748f}}
   .ok{{color:#57d38c}} .cur{{background:#5eead4;color:#5eead4;}}
+  .tool{{color:#66748f}} .say{{color:#57d38c;font-weight:700}}
   .stage{{flex:1;display:flex;align-items:center;justify-content:center;}}
   .caption{{padding:0 14px 12px;color:#8fa3cc;text-align:center;
            font:12.5px/1.45 ui-sans-serif,system-ui,"Segoe UI",sans-serif;}}
@@ -172,7 +255,7 @@ PAGE_TEMPLATE = """<!doctype html>
 <body><div class="wrap">
   <div class="term">
     <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
-      <span class="name">context-graph</span></div>
+      <span class="name">Claude Code</span></div>
 <pre>{terminal}</pre></div>
   <div class="map">
     <div class="bar"><span class="name">the map, built from your notes</span></div>
@@ -181,77 +264,6 @@ PAGE_TEMPLATE = """<!doctype html>
   </div>
 </div></body></html>
 """
-
-
-def prompt_line(typed, cursor=True):
-    """One shell line, optionally with the block cursor sitting after what has been typed."""
-    return ('<span class="p">$</span> <span class="c">' + html.escape(typed) + "</span>"
-            + ('<span class="cur">&nbsp;</span>' if cursor else ""))
-
-
-def typing_frames(command, keystrokes_per_frame=3):
-    """The command appearing a few characters at a time."""
-    return [command[:count] for count in
-            range(0, len(command) + keystrokes_per_frame, keystrokes_per_frame)][1:] + [command]
-
-
-def build_storyboard():
-    """Return (terminal html, graph svg, caption, milliseconds) for every frame, in order."""
-    frames = []
-    intro = '<span class="dim"># your notes, already written</span>'
-
-    # 1. the map appears: documents first, then the statements under them, then the links
-    for count in (1, 3, 5, 8):
-        visible = set(FIRST_NODES[:count])
-        frames.append((intro, draw_graph(visible, drawn_edges=False),
-                       "Every heading and every statement in your notes becomes a node.", 260))
-    frames.append((intro, draw_graph(set(FIRST_NODES)),
-                   "The links you wrote by hand — <b>supersedes</b>, <b>relates_to</b> — become "
-                   "the edges. No model is asked to guess them.", 1500))
-
-    # 2. the question
-    terminal = intro + "\n" + prompt_line("")
-    frames.append((terminal, draw_graph(set(FIRST_NODES)), "Now ask it something.", 700))
-    for typed in typing_frames(QUESTION):
-        frames.append((intro + "\n" + prompt_line(typed), draw_graph(set(FIRST_NODES)),
-                       "Now ask it something.", 45))
-
-    asked = intro + "\n" + prompt_line(QUESTION, cursor=False)
-    frames.append((asked, draw_graph(set(FIRST_NODES), lit_node="swap"),
-                   "The statement that matches lights up.", 420))
-    frames.append((asked, draw_graph(set(FIRST_NODES), lit_node="swap",
-                                     neighbour_nodes=NEIGHBOURS_OF_SWAP),
-                   "The nodes around it come back with it — the document it sits in, and its "
-                   "neighbours.", 700))
-    answered = asked + "\n" + "\n".join(ANSWER)
-    frames.append((answered, draw_graph(set(FIRST_NODES), lit_node="swap",
-                                        neighbour_nodes=NEIGHBOURS_OF_SWAP,
-                                        chip="notes\\facts\\Warehouse Robot Fleet.md  loc=10"),
-                   "You get the sentence itself, with the file and the line it sits on.", 2600))
-
-    # 3. the lineage
-    for typed in typing_frames(PATH_QUESTION):
-        frames.append((answered + "\n\n" + prompt_line(typed), draw_graph(set(FIRST_NODES)),
-                       "Ask how two decisions are related.", 45))
-    path_asked = answered + "\n\n" + prompt_line(PATH_QUESTION, cursor=False)
-    frames.append((path_asked, draw_graph(set(FIRST_NODES), lit_edges=[LINEAGE_EDGES[0]]),
-                   "It walks the relation words someone typed.", 420))
-    walked_graph = draw_graph(set(FIRST_NODES), lit_edges=LINEAGE_EDGES)
-    frames.append((path_asked + "\n" + PATH_ANSWER[0], walked_graph,
-                   "It walks the relation words someone typed.", 320))
-    frames.append((path_asked + "\n" + "\n".join(PATH_ANSWER), walked_graph,
-                   "Which decision replaced which, in the order it happened.", 2400))
-
-    # 4. the refresh
-    written = path_asked + "\n" + "\n".join(PATH_ANSWER) + "\n\n" + REFRESH_LINES[0]
-    frames.append((written, draw_graph(set(FIRST_NODES) | {"written"}, lit_node="written"),
-                   "When the conversation is compacted, the session is written back into your "
-                   "notes...", 1500))
-    frames.append((written + "\n" + REFRESH_LINES[1],
-                   draw_graph(set(FIRST_NODES) | {"written"},
-                              neighbour_nodes=["written", "fact_doc"]),
-                   "...and the map is rebuilt, so the next question can already find it.", 3000))
-    return frames
 
 
 def render(frames):
