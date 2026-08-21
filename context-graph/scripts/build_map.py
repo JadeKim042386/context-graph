@@ -73,6 +73,37 @@ def _drop_mentions_that_repeat_a_named_relation(links):
             if link["relation"] != "mentions" or (link["source"], link["target"]) not in named_pairs]
 
 
+def _fingerprint(source_dirs):
+    """Summarise the documents: how many there are and the newest change time.
+
+    The count is part of it because a deleted document leaves the newest time untouched.
+    """
+    count, newest = 0, 0.0
+    for path in _document_files(source_dirs):
+        count += 1
+        newest = max(newest, os.path.getmtime(path))
+    return {"documents": count, "newest": round(newest, 3)}
+
+
+def _fingerprint_path(map_path):
+    """Where the previous fingerprint is kept — beside the map, hidden."""
+    folder = os.path.dirname(map_path) or "."
+    return os.path.join(folder, "." + os.path.basename(map_path) + ".fingerprint")
+
+
+def unchanged_since_last_build(source_dirs, map_path):
+    """True when no document changed since the map was written, so the scan can be skipped."""
+    record = _fingerprint_path(map_path)
+    if not (os.path.exists(map_path) and os.path.exists(record)):
+        return False
+    try:
+        with open(record, encoding="utf-8") as handle:
+            previous = json.load(handle)
+    except (OSError, ValueError):
+        return False
+    return previous == _fingerprint(source_dirs)
+
+
 def build_map(source_dirs, map_path):
     """Scan the knowledge documents, build the map, return a summary. Sources are read only."""
     started_at = time.time()
@@ -122,6 +153,11 @@ def build_map(source_dirs, map_path):
         json.dump({"nodes": nodes, "links": links}, handle,
                   ensure_ascii=False, indent=1, sort_keys=True)
     os.replace(temporary_path, map_path)   # swap the whole file, so nobody reads a half-written map
+    # Remember what the documents looked like, so the next run can skip an unchanged scan.
+    record = _fingerprint_path(map_path)
+    with open(record + ".tmp", "w", encoding="utf-8") as handle:
+        json.dump(_fingerprint(source_dirs), handle, ensure_ascii=False)
+    os.replace(record + ".tmp", record)
 
     return {"documents": len(parsed_documents), "nodes": len(nodes), "links": len(links),
             "located": sum(1 for node in nodes if node["source_location"] is not None),
@@ -152,6 +188,11 @@ def main(argv):
             print("The config has no document folder or no place for the map. "
                   "Run the first-time setup flow first.")
         return 0   # this runs from a hook, so stay quiet until the setup flow has run
+
+    if unchanged_since_last_build(source_dirs, map_path):
+        if not options.quiet:
+            print("No document changed, so the map was left as it is.")
+        return 0   # the refresh points fire often; an unchanged scan is pure cost
 
     summary = build_map(source_dirs, map_path)
     for note in folder_notes(source_dirs, summary["documents"]):
