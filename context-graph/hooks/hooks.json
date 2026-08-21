@@ -10,7 +10,8 @@
             "timeout": 60,
             "statusMessage": "Refreshing the knowledge map..."
           }
-        ]
+        ],
+        "matcher": "startup|resume|clear"
       }
     ],
     "SubagentStop": [
