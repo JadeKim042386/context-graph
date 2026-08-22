@@ -165,6 +165,36 @@ def build_map(source_dirs, map_path):
             "elapsed": time.time() - started_at}
 
 
+def conflict_paths(map_path):
+    """The sidecar files live beside the map, named after it."""
+    folder = os.path.dirname(map_path) or "."
+    stem = os.path.splitext(os.path.basename(map_path))[0]
+    return (os.path.join(folder, stem + ".conflicts.txt"),
+            os.path.join(folder, stem + ".suppressions.json"))
+
+
+def config_watched_names():
+    """Value names the config asks to watch. Missing key means the built-in list."""
+    from config import default_config_path, load_config
+    return load_config(default_config_path()).get("watched_names")
+
+
+def write_conflict_report(map_path, watched_names=None):
+    """Write the conflicts sidecar. Never fails the build - the map is already written."""
+    try:
+        import conflicts
+
+        with open(map_path, encoding="utf-8") as handle:
+            nodes = json.load(handle)["nodes"]
+        report_path, suppressions_path = conflict_paths(map_path)
+        strong, weak, suppressed, _counts = conflicts.run(nodes, report_path, suppressions_path,
+                                                          watched_names)
+        return ("conflicts %d strong · %d context · %d suppressed"
+                % (len(strong), len(weak), suppressed))
+    except Exception as error:                     # noqa: BLE001 - a sidecar must never break the build
+        return "conflicts (not checked: %s)" % error
+
+
 def main(argv):
     """Entry point for the four refresh points. Paths come from the config; the direct
     arguments exist for the tests."""
@@ -195,6 +225,7 @@ def main(argv):
         return 0   # the refresh points fire often; an unchanged scan is pure cost
 
     summary = build_map(source_dirs, map_path)
+    conflict_line = write_conflict_report(map_path, config_watched_names())
     for note in folder_notes(source_dirs, summary["documents"]):
         print(note)          # printed even when quiet: a wrong path is the thing worth saying
     if not options.quiet:
@@ -206,6 +237,7 @@ def main(argv):
         sample_line = (f" · samples {sampled['matched']}/{sampled['checked']} verbatim"
                        if sampled["checked"] else "")
         print(format_score(score) + sample_line + f" · {summary['elapsed']:.2f}s")
+        print(conflict_line)
         for failure in sampled["failed"]:
             print(f"[a sampled statement is no longer on that line - {failure}]")
     return 0
