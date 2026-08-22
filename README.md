@@ -6,7 +6,7 @@
 
 **A Claude Code plugin · Copies the structure you already wrote · No language model · 100% local**
 
-[![Tests](https://img.shields.io/badge/tests-57%20passing-brightgreen.svg)](#tests)
+[![Tests](https://img.shields.io/badge/tests-70%20passing-brightgreen.svg)](#tests)
 [![No LLM](https://img.shields.io/badge/build-no%20LLM%20calls-brightgreen.svg)](#why-it-copies-instead-of-inferring)
 [![Deterministic](https://img.shields.io/badge/output-byte--identical-brightgreen.svg)](#same-input-same-output)
 [![Python](https://img.shields.io/badge/python-3.9%2B%20stdlib%20only-blue.svg)](#requirements)
@@ -43,6 +43,9 @@ the next question already finds it. Every statement in your notes is a node, and
 | `ask.py "<question>"` | the statements that match, each with its file and line |
 | `ask.py --path "<a>" "<b>"` | the chain of relations linking two decisions |
 | `ask.py --explain "<node>"` | one node and its neighbours |
+| `ask.py --chain "<decision>"` | what a decision came from and what it led to |
+| `ask.py --conflicts` | values two documents state differently |
+| `ask.py --settle "1:2"` | correct the document holding the value you did not pick |
 
 ---
 
@@ -53,6 +56,7 @@ the next question already finds it. Every statement in your notes is a node, and
 - [Point it at your notes](#point-it-at-your-notes)
 - [Why it copies instead of inferring](#why-it-copies-instead-of-inferring)
 - [How it works](#how-it-works)
+- [Next to Semantica](#next-to-semantica)
 - [Command reference](#command-reference)
 - [When it refreshes](#when-it-refreshes)
 - [Quality check](#quality-check)
@@ -289,6 +293,45 @@ but text inside SVG is kept** — the point a diagram makes usually lives in tha
 
 ---
 
+## Next to Semantica
+
+<img alt="Two columns side by side. What goes in: your own markdown and HTML notes, against PDF, DOCX, XLSX, SQL, web and email plus crawlers, repositories and MCP servers. How the graph is made: the relation line you wrote is copied straight across with no model call, against a source passing through an LLM and embeddings that infer the nodes. What it runs on: one JSON file and the Python standard library, against pluggable vector, graph and triple stores plus an LLM and embeddings. What comes back: the statement word for word with its file and line, against an inference carrying its PROV-O lineage" src="assets/compare.png" width="880">
+
+[Semantica](https://github.com/semantica-agi/semantica) &middot; [docs](https://docs.getsemantica.ai/)
+
+### What this does better
+
+- **Nothing is generated.** The answer is the line as it stands in the document, and every build
+  re-checks a sample against the file. There is no step where a figure could be paraphrased.
+- **No model, no key, no service.** The build calls nothing and reaches no network. Semantica
+  infers its graph with an LLM and embeddings, which is a cost and a dependency per document.
+- **The same input gives byte-identical output.** A test builds twice and compares. A pass driven
+  by a model does not offer that.
+- **One JSON file is the whole store.** Nothing to keep running between sessions.
+- **It refreshes itself.** As a plugin it rebuilds at session start, when a subagent ends, and
+  around compaction. Semantica is a library you build an application around.
+
+### What Semantica does better
+
+- **It reads what this cannot.** PDF, DOCX, XLSX, SQL, crawled pages, mailboxes, repositories.
+  This reads markdown and HTML and nothing else.
+- **It matches meaning, not words.** Ask here in words the document does not use and nothing comes
+  back; ask in another language and nothing comes back at all.
+- **It finds relations nobody wrote.** Here the lineage is exactly the `- <word> [[target]]` lines
+  a person typed. A set of notes without them has no lineage at all.
+- **It reasons.** Forward chaining, deductive and abductive inference, SPARQL, Datalog. `--chain`
+  walks three steps along hand-written relations, and that is the whole of it.
+- **It knows about time.** Validity ranges and point-in-time queries answer what held in March.
+  Nothing here carries a date.
+- **It holds at size.** A query here takes 15 s at 2,480 documents, and there is no sharding.
+
+**Pick this** when the notes are already yours, already markdown, and what you want back is the
+sentence with its line number, for nothing. **Pick Semantica** when the sources are mixed, the
+questions are open-ended, and the graph has to answer to an auditor.
+
+
+---
+
 ## Command reference
 
 ### `ask.py "<question>"`
@@ -320,6 +363,82 @@ lineage.
 ### `ask.py --explain "<node>"`
 
 Shows one node and its neighbours. Use it the first time you meet an unfamiliar term.
+
+### `ask.py --chain "<decision>"`
+
+Shows what a decision **came from** and what it **led to**, three steps out, each with its file
+and line. The cause is a line you write in the later decision document:
+
+```markdown
+- caused_by [[ADR 0071 Bend Radius Raised for Signal Cable]]
+```
+
+```
+$ python ask.py --chain "ADR 0086 Tier Gap Reworked"
+
+ADR 0086 Tier Gap Reworked  [decisions\ADR 0086 Tier Gap Reworked.md:1]
+
+came from - 2
+   caused_by · ADR 0071 Bend Radius Raised for Signal Cable  [decisions\ADR 0071 ....md:1]
+     caused_by · ADR 0064 Signal Cable Gets Its Own Tier  [decisions\ADR 0064 ....md:1]
+
+led to - 0
+   none.
+
+nearby decisions (not cause) - 1
+   supersedes · ADR 0064 Signal Cable Gets Its Own Tier  [decisions\ADR 0064 ....md:1]
+```
+
+`caused_by`, `caused`, `causes` and `led_to` count as cause. The relations already in use between
+decisions — `supersedes`, `supersedes_partially`, `corrects`, `refines`, `extends`, `follows`,
+`continues`, `operationalizes` — are listed **apart**, because naming an earlier decision is not
+the same as being caused by it. The walk stops on a cycle, so a miswritten pair cannot loop it.
+**Nothing is read out of prose**: if nobody wrote the cause down, nothing shows.
+
+### `ask.py --conflicts`
+
+Lists values that two documents state differently, ten at a time, with the file and line for each.
+
+```
+$ python ask.py --conflicts
+
+1 conflict(s) - showing the first 1.
+
+1. bend radius
+     1) 0.25 m  <-  facts\North Rack Survey.md:4
+     2) 0.3 m  <-  decisions\ADR 0071 Bend Radius Raised for Signal Cable.md:4
+     3) not a conflict     4) leave it
+```
+
+The list is written fresh at every refresh, into `<map>.conflicts.txt` beside the map. **It is
+never mixed into an answer.** The check is rule-based, so it misfires, and a warning that is
+sometimes wrong drags down the trust in every answer next to it.
+
+Put the value names you care about in the config to have them read first:
+
+```json
+"watched_names": ["bend radius", "tray width", "tier gap"]
+```
+
+### `ask.py --settle "1:2 2:3"`
+
+Reads `conflict number : choice` and acts on each pick — keep the value you chose and correct the
+document holding the other, mark the pair "not a conflict", or leave it.
+
+```
+$ python ask.py --settle "1:2" --dry-run
+
+   (dry run) facts\North Rack Survey.md:4  0.25 m -> 0.3 m
+fixed 1 · marked not a conflict 0 · left 0 · skipped 0
+```
+
+`--dry-run` shows what would change without touching a file.
+
+**It edits the document, not the map.** The map is rebuilt from the documents, so a fix written
+onto the map alone would leave the two disagreeing forever. Every edit is appended to
+`<map>.resolutions.log` with the file, line, old value and new value, and a document that changed
+since the map was built is **skipped rather than overwritten**. A "not a conflict" mark is stored
+with the values it had at the time, so it releases itself as soon as one of them changes.
 
 ### `build_map.py`
 
@@ -466,7 +585,7 @@ Nothing in the build or the query reaches the network.
 python -m pytest context-graph/tests -v
 ```
 
-**All 57 pass.** Three of them matter most.
+**All 70 pass.** Three of them matter most.
 
 - **Same input, same output** — build twice, compare byte for byte
 - **Sampled value lookup** — compare a statement in the map against that line in the source file
