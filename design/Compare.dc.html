@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap">
+  <style>
+    body { margin: 0; background: #fbfaf8; }
+  </style>
+</helmet>
+
+<div style="width: 880px; height: 550px; background: #fbfaf8;">
+  <svg width="880" height="550" viewBox="0 0 880 550" fill="none" xmlns="http://www.w3.org/2000/svg"
+       font-family="'IBM Plex Mono', ui-monospace, monospace">
+
+    <defs>
+      <marker id="tipGreen" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+        <path d="M0 0 L7 3.5 L0 7 z" fill="#1f6f5c"/>
+      </marker>
+      <marker id="tipBlue" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+        <path d="M0 0 L7 3.5 L0 7 z" fill="#3f6b8f"/>
+      </marker>
+    </defs>
+
+    <!-- 두 기둥의 이름. 왼쪽은 이 플러그인, 오른쪽은 비교 대상 -->
+    <text x="40" y="32" font-size="14" font-weight="600" letter-spacing="1.2" fill="#1f6f5c">CONTEXT GRAPH</text>
+    <text x="40" y="50" font-size="11" fill="#b0a89c">a Claude Code plugin</text>
+    <text x="450" y="32" font-size="14" font-weight="600" letter-spacing="1.2" fill="#3f6b8f">SEMANTICA</text>
+    <text x="450" y="50" font-size="11" fill="#b0a89c">a framework you build on</text>
+
+    <!-- 칸을 나누는 가로 실선 -->
+    <g stroke="#e8e2d8" stroke-width="1">
+      <path d="M40 68 H840"/>
+      <path d="M40 174 H840"/>
+      <path d="M40 280 H840"/>
+      <path d="M40 386 H840"/>
+      <path d="M40 506 H840"/>
+    </g>
+
+    <!-- 두 기둥 사이 세로선. 줄 이름이 놓인 자리는 비워 둡니다 -->
+    <g stroke="#e8e2d8" stroke-width="1">
+      <path d="M440 104 V172"/>
+      <path d="M440 210 V278"/>
+      <path d="M440 316 V384"/>
+      <path d="M440 422 V490"/>
+    </g>
+
+    <!-- 줄 이름 -->
+    <g font-size="10" letter-spacing="1.4" fill="#a49c90" text-anchor="middle">
+      <text x="440" y="92">WHAT GOES IN</text>
+      <text x="440" y="198">HOW THE GRAPH IS MADE</text>
+      <text x="440" y="304">WHAT IT RUNS ON</text>
+      <text x="440" y="410">WHAT COMES BACK</text>
+    </g>
+
+    <!-- 1줄 왼쪽: 직접 쓴 노트 두 장 -->
+    <rect x="60" y="110" width="70" height="56" rx="3" fill="#ffffff" stroke="#d8d2c8" transform="rotate(-4 95 138)"/>
+    <rect x="72" y="106" width="70" height="56" rx="3" fill="#ffffff" stroke="#cfc8bd"/>
+    <g stroke-width="2.5" stroke-linecap="round">
+      <path d="M82 118 H130" stroke="#d3ccc1"/>
+      <path d="M82 126 H124" stroke="#1f6f5c"/>
+      <path d="M82 134 H132" stroke="#d3ccc1"/>
+      <path d="M82 142 H120" stroke="#c2703a"/>
+      <path d="M82 150 H128" stroke="#d3ccc1"/>
+    </g>
+    <text x="160" y="126" font-size="11" fill="#6b6459">your own notes</text>
+    <text x="160" y="144" font-size="11" fill="#b0a89c">.md &#183; .markdown &#183; .html</text>
+
+    <!-- 1줄 오른쪽: 온갖 출처 -->
+    <g fill="#ffffff" stroke="#cfd8e2">
+      <rect x="470" y="106" width="58" height="24" rx="3"/>
+      <rect x="536" y="106" width="58" height="24" rx="3"/>
+      <rect x="602" y="106" width="58" height="24" rx="3"/>
+      <rect x="470" y="138" width="58" height="24" rx="3"/>
+      <rect x="536" y="138" width="58" height="24" rx="3"/>
+      <rect x="602" y="138" width="58" height="24" rx="3"/>
+    </g>
+    <g font-size="8.5" fill="#3f6b8f" text-anchor="middle">
+      <text x="499" y="122">PDF</text>
+      <text x="565" y="122">DOCX</text>
+      <text x="631" y="122">XLSX</text>
+      <text x="499" y="154">SQL</text>
+      <text x="565" y="154">WEB</text>
+      <text x="631" y="154">EMAIL</text>
+    </g>
+    <text x="676" y="126" font-size="11" fill="#6b6459">any source</text>
+    <text x="676" y="144" font-size="10" fill="#b0a89c">+ crawlers, repos, MCP</text>
+
+    <!-- 2줄 왼쪽: 사람이 적어 둔 관계 줄이 그대로 건너갑니다 -->
+    <rect x="60" y="222" width="190" height="26" rx="4" fill="#ffffff" stroke="#d8d2c8"/>
+    <text x="70" y="239" font-size="11" fill="#1f6f5c">- supersedes [[X]]</text>
+    <path d="M258 235 H298" stroke="#1f6f5c" stroke-width="1.6" marker-end="url(#tipGreen)"/>
+    <circle cx="312" cy="235" r="7" fill="#1f6f5c"/>
+    <text x="60" y="268" font-size="11" fill="#1f6f5c">copied &#183; 0 model calls</text>
+
+    <!-- 2줄 오른쪽: 모델이 뽑아내는 단계가 사이에 들어갑니다 -->
+    <rect x="470" y="222" width="28" height="26" rx="3" fill="#ffffff" stroke="#cfd8e2"/>
+    <g stroke="#cfd8e2" stroke-width="1.6" stroke-linecap="round">
+      <path d="M476 230 H492"/>
+      <path d="M476 235 H490"/>
+      <path d="M476 240 H492"/>
+    </g>
+    <path d="M506 235 H530" stroke="#3f6b8f" stroke-width="1.6" marker-end="url(#tipBlue)"/>
+    <rect x="538" y="218" width="118" height="34" rx="4" fill="#eef3f8" stroke="#b9cbdc"/>
+    <text x="597" y="239" font-size="10" fill="#3f6b8f" text-anchor="middle">LLM + embeddings</text>
+    <path d="M664 235 H688" stroke="#3f6b8f" stroke-width="1.6" marker-end="url(#tipBlue)"/>
+    <circle cx="702" cy="235" r="7" fill="#3f6b8f"/>
+    <text x="470" y="268" font-size="11" fill="#3f6b8f">inferred, then scored</text>
+
+    <!-- 3줄 왼쪽: 결과물은 파일 하나 -->
+    <path d="M60 322 H98 L112 336 V378 H60 Z" fill="#ffffff" stroke="#cfc8bd"/>
+    <path d="M98 322 V336 H112" fill="none" stroke="#cfc8bd"/>
+    <g stroke="#ddd6cb" stroke-width="2" stroke-linecap="round">
+      <path d="M70 348 H102"/>
+      <path d="M70 356 H96"/>
+      <path d="M70 364 H100"/>
+    </g>
+    <text x="124" y="344" font-size="11" fill="#6b6459">one JSON file</text>
+    <text x="124" y="362" font-size="11" fill="#b0a89c">Python stdlib only</text>
+
+    <!-- 3줄 오른쪽: 뒤에 붙는 저장소들 -->
+    <g fill="#ffffff" stroke="#b9cbdc">
+      <rect x="470" y="322" width="70" height="40" rx="4"/>
+      <ellipse cx="505" cy="322" rx="35" ry="7"/>
+      <rect x="552" y="322" width="70" height="40" rx="4"/>
+      <ellipse cx="587" cy="322" rx="35" ry="7"/>
+      <rect x="634" y="322" width="70" height="40" rx="4"/>
+      <ellipse cx="669" cy="322" rx="35" ry="7"/>
+    </g>
+    <g font-size="9.5" fill="#3f6b8f" text-anchor="middle">
+      <text x="505" y="347">vector</text>
+      <text x="587" y="347">graph</text>
+      <text x="669" y="347">triple</text>
+    </g>
+    <text x="470" y="378" font-size="10" fill="#b0a89c">backing stores, pluggable</text>
+    <text x="716" y="340" font-size="10" fill="#b0a89c">+ LLM</text>
+    <text x="716" y="358" font-size="10" fill="#b0a89c">+ embeddings</text>
+
+    <!-- 4줄 왼쪽: 적힌 문장 그대로와 그 줄번호 -->
+    <rect x="60" y="428" width="230" height="24" rx="3" fill="#ffffff" stroke="#cfc8bd"/>
+    <text x="70" y="444" font-size="10.5" fill="#3c3a35">median 1.19 m, max 99.44 m</text>
+    <rect x="60" y="458" width="150" height="20" rx="3" fill="#eef4f1" stroke="#bcd6cb"/>
+    <text x="70" y="472" font-size="10" fill="#1f6f5c">facts.md : 192</text>
+    <text x="222" y="472" font-size="11" fill="#8d857a">verbatim, with the line</text>
+
+    <!-- 4줄 오른쪽: 미루어 낸 답과 그 출처 사슬 -->
+    <g stroke="#3f6b8f" stroke-width="1.4">
+      <path d="M488 440 H552"/>
+      <path d="M568 440 H632"/>
+    </g>
+    <g fill="#3f6b8f">
+      <circle cx="480" cy="440" r="6"/>
+      <circle cx="560" cy="440" r="6"/>
+      <circle cx="640" cy="440" r="6"/>
+    </g>
+    <rect x="676" y="429" width="76" height="22" rx="11" fill="#eef3f8" stroke="#b9cbdc"/>
+    <text x="714" y="444" font-size="9.5" fill="#3f6b8f" text-anchor="middle">PROV-O</text>
+    <text x="470" y="472" font-size="11" fill="#8d857a">an inference, with its lineage</text>
+
+    <!-- 맨 아래: 각자 자랑하는 지점이 서로 다릅니다 -->
+    <text x="40" y="528" font-size="11" fill="#6b6459">182 documents &#183; 8,524 nodes &#183; rebuilt in 0.11 s</text>
+    <text x="450" y="528" font-size="11" fill="#6b6459">temporal validity &#183; SPARQL &#183; precedent search</text>
+  </svg>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
