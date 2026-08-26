@@ -33,9 +33,9 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "echo '[before compaction - writing the session into the knowledge documents]'",
+            "command": "echo '[context-graph] The map is about to lose this session. Anything worth keeping has to be written into the knowledge documents first - the map only carries what the documents say.'",
             "timeout": 600,
-            "statusMessage": "Writing the session into the knowledge documents..."
+            "statusMessage": "Reminder: write the session into the knowledge documents"
           }
         ]
       }

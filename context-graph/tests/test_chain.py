@@ -1,4 +1,9 @@
 """Walking decision causality: a cycle stops it, and the depth limit holds."""
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
+
 import ask
 
 

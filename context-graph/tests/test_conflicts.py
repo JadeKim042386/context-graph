@@ -1,4 +1,9 @@
 """The conflicts sidecar: what counts as a conflict, and what a suppression does."""
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
+
 import conflicts
 
 
@@ -70,3 +75,17 @@ def test_a_unit_is_not_cut_in_half_by_the_window():
     nodes = [node("Tray width is fixed at 600 mm for every main run.", "a.md")]
     found = conflicts.collect_watched(nodes, ["tray width"])
     assert set(found.get("tray width", {})) == {(0.6, "m")}, found
+
+
+def test_a_value_bound_in_korean_is_still_that_name_value():
+    """The notes are written in Korean, so the words that tie a name to a value are too."""
+    assert conflicts._binds(" 기준 ")
+    assert conflicts._binds(" 최대 ")
+    assert conflicts._binds(" 은 ")
+    assert conflicts._binds(" max ")
+
+
+def test_another_word_between_the_name_and_the_number_breaks_the_tie():
+    """This is what made every one of this pass's reports a false alarm."""
+    assert not conflicts._binds(" measured across the whole rack ")
+    assert not conflicts._binds(" 랙 전체에서 잰 ")

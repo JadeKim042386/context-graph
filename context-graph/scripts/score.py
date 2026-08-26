@@ -4,6 +4,8 @@ import os
 import re
 
 NUMBER_PATTERN = re.compile(r"\d")
+# The map makes these two by itself, so their presence says nothing about what a person wrote.
+AUTOMATIC_RELATIONS = frozenset({"part_of", "mentions"})
 SAMPLE_COUNT = 5
 
 
@@ -54,8 +56,13 @@ def score_map(map_path):
     if document_node_ratio > 0.5:
         hints.append(f"whole-document nodes {document_node_ratio:.0%} — the map is closer"
                      " to a list of documents")
-    if len({link["relation"] for link in links}) <= 2:
-        hints.append("few relation kinds — the `- <word> [[target]]` shape is almost absent")
+    # Counting kinds hides the real shape: the map makes `part_of` and `mentions` by itself, so
+    # those two are always there however few relations a person actually wrote. What matters is
+    # how many hand-written relations there are per document.
+    written = [link for link in links if link["relation"] not in AUTOMATIC_RELATIONS]
+    if documents and len(written) / documents < 1:
+        hints.append(f"few written relations — {len(written)} across {documents} documents; "
+                     "the `- <word> [[target]]` shape is almost absent")
     if components > max(1, len(nodes) // 50):
         hints.append(f"{components} components — documents rarely link to each other,"
                      " so path finding will not get far")

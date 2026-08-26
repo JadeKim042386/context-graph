@@ -1,10 +1,21 @@
+import json
 import os
 import sys
 import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
-from ask import (USAGE, build_graphify_command, condense_answer, stale_documents,
-                 truncation_notice)
+from ask import (LABEL_CAP, MIN_STATEMENTS, USAGE, asked_words, build_graphify_command,
+                 condense_answer, fold_long_label, matching_word_count, stale_documents,
+                 statements_carrying_the_words, truncation_notice)
+
+
+def an_answer_of(statement_count, label_length=200):
+    """Build a query answer the size the real tool returns for a broad question."""
+    lines = ["Start: ['seed'] | depth 2"]
+    for index in range(statement_count):
+        lines.append(f"NODE {'value ' + str(index):.<{label_length}} "
+                     f"[src=C:/vault/note.md loc={index + 2}]")
+    return "\n".join(lines)
 
 
 def test_finds_documents_newer_than_the_map(tmp_path):
@@ -92,3 +103,179 @@ def test_the_document_tail_names_only_a_few():
     raw += "NODE A statement. [src=d0.md loc=4 community=]\n"
     tail = condense_answer(raw).splitlines()[-1]
     assert tail.endswith("and 3 more]")
+
+
+def test_the_answer_stays_inside_the_character_budget():
+    """The point of asking is to spend less than opening the document, so the cap is characters."""
+    raw = an_answer_of(400)
+    assert len(condense_answer(raw)) > 40000            # without a budget it runs to the full size
+    condensed = condense_answer(raw, budget=4000)
+    assert len(condensed) <= 4000
+
+
+def test_what_was_left_out_is_counted():
+    """A narrowed answer must never read as a complete one."""
+    condensed = condense_answer(an_answer_of(400), budget=4000)
+    assert "further statement(s) left out" in condensed
+    assert "narrow the words" in condensed
+
+
+def test_a_small_answer_is_untouched_by_the_budget():
+    raw = an_answer_of(3)
+    assert condense_answer(raw, budget=20000) == condense_answer(raw)
+    assert "left out" not in condense_answer(raw, budget=20000)
+
+
+def test_one_statement_still_comes_back_when_it_alone_fills_the_budget():
+    """Returning nothing would be worse than going over: the first statement always survives."""
+    condensed = condense_answer(an_answer_of(1, label_length=5000), budget=1000)
+    assert "NODE" in condensed
+
+
+def test_a_paragraph_written_as_one_line_is_folded_not_printed_whole():
+    """One physical line becomes one statement, so a whole paragraph can arrive as one label."""
+    label = "opening words " + "x" * 9000
+    folded = fold_long_label(label, "C:/vault/note.md", 147)
+    assert folded.startswith("opening words")
+    assert len(folded) < len(label)
+    assert "C:/vault/note.md:147" in folded
+
+
+def test_a_label_that_fits_is_left_exactly_as_it_is():
+    label = "tray width is 0.66 m"
+    assert fold_long_label(label, "C:/vault/note.md", 4) == label
+    assert fold_long_label("y" * LABEL_CAP, "C:/vault/note.md", 4) == "y" * LABEL_CAP
+
+
+RAW_WITH_A_HEADING_AND_A_VALUE = """Start: ['Bending radius'] | depth 2
+NODE Bending radius [src=C:/vault/cable.md loc=48]
+NODE Sizing workflow and routing coupling [src=C:/vault/cable.md loc=64]
+NODE Voltage drop [src=C:/vault/cable.md loc=36]
+NODE [value] Minimum bend radius is 12 x D for MV power cable [src=C:/vault/cable.md loc=49]
+"""
+
+
+def test_the_statement_carrying_the_asked_words_comes_before_unrelated_headings():
+    """Walk order puts a heading before the line under it, so the value can sit far down."""
+    condensed = condense_answer(RAW_WITH_A_HEADING_AND_A_VALUE, question="bend radius")
+    lines = [line for line in condensed.splitlines() if line.startswith("NODE ")]
+    assert "12 x D" in lines[1]                      # right after the seed heading itself
+    assert "Voltage drop" in lines[-1] or "Sizing workflow" in lines[-1]
+
+
+def test_without_a_question_the_walk_order_is_left_alone():
+    condensed = condense_answer(RAW_WITH_A_HEADING_AND_A_VALUE)
+    lines = [line for line in condensed.splitlines() if line.startswith("NODE ")]
+    assert "Sizing workflow" in lines[1]
+
+
+def test_common_words_are_not_counted_as_a_match():
+    assert asked_words("how many cables are in the WHRP dataset") == {
+        "cables", "whrp", "dataset"}
+    assert asked_words("") == set()
+
+
+def test_the_document_tail_and_the_notice_count_against_the_budget():
+    """The tail has no length limit of its own, so guessing at it lets the cap slip."""
+    long_names = "\n".join(
+        f"NODE {'ADR 00' + str(index) + ' ' + 'a very long decision title ' * 4} "
+        f"[src=C:/vault/adr{index}.md loc=1]" for index in range(6))
+    raw = an_answer_of(300) + "\n" + long_names
+    condensed = condense_answer(raw, budget=20000)
+    assert "also touched" in condensed and "left out" in condensed
+    assert len(condensed) <= 20000
+
+
+def test_a_capital_single_letter_is_part_of_the_question():
+    assert asked_words("role letters S T V E meaning") >= {"s", "t", "v", "e"}
+    assert "a" not in asked_words("a value for the tray")
+
+
+def test_a_korean_word_matches_with_its_particle_taken_off():
+    assert "케이블" in asked_words("케이블은 어디에 있나")
+    assert "트레이" in asked_words("트레이의 폭")
+
+
+def test_a_single_letter_has_to_stand_as_a_word_of_its_own():
+    """Counting `s` inside "statements" would make every English sentence a match."""
+    words = asked_words("role letters S T V E meaning")
+    assert matching_word_count("Voltage drop", words) == 0
+    assert matching_word_count("role S means the plant is split", words) >= 2
+
+
+def test_a_thin_answer_keeps_the_statement_that_carried_the_words():
+    """The walk puts seed labels first, so taking the head can drop the only real answer."""
+    seeds = "Start: [" + ", ".join(f"'heading {index}'" for index in range(9)) + "] | depth 2"
+    lines = [seeds]
+    for index in range(9):
+        lines.append(f"NODE heading {index} [src=C:/vault/a.md loc={index + 2}]")
+    lines.append("NODE the tray width is 0.66 m [src=C:/vault/b.md loc=400]")
+    condensed = condense_answer("\n".join(lines), question="tray width")
+    assert "0.66 m" in condensed
+
+
+def test_the_map_is_read_for_the_words_the_walk_may_have_missed(tmp_path):
+    """A statement can hold the answer and never be visited, so the map is read for it too."""
+    map_path = tmp_path / "graph.json"
+    map_path.write_text(json.dumps({"nodes": [
+        {"id": "t1", "kind": "statement", "label": "the tray width is 0.66 m",
+         "source_file": "C:/vault/a.md", "source_location": 12},
+        {"id": "t2", "kind": "statement", "label": "unrelated line",
+         "source_file": "C:/vault/a.md", "source_location": 13},
+        {"id": "d1", "kind": "document", "label": "a", "source_file": "C:/vault/a.md",
+         "source_location": 1},
+    ]}, ensure_ascii=False), encoding="utf-8")
+    found = statements_carrying_the_words(str(map_path), {"tray", "width"})
+    assert [row[2] for row in found] == ["the tray width is 0.66 m"]
+    assert statements_carrying_the_words(str(tmp_path / "missing.json"), {"tray"}) == []
+
+
+def test_what_the_map_found_is_merged_into_the_answer_without_repeating_it():
+    raw = "Start: ['seed'] | depth 2\nNODE seed line [src=C:/vault/a.md loc=5]"
+    direct = [(-2, 24, "the tray width is 0.66 m", "C:/vault/a.md", 12),
+              (-2, 11, "seed line", "C:/vault/a.md", 5)]
+    condensed = condense_answer(raw, question="tray width", direct=direct)
+    assert "0.66 m" in condensed
+    assert condensed.count("seed line") == 1
+
+
+def test_an_answer_nobody_recognised_is_still_capped():
+    """If the tool ever changes its output shape, this is the path every answer takes."""
+    unrecognised = "some other shape entirely\n" * 4000
+    assert len(unrecognised) > 60000
+    capped = condense_answer(unrecognised, budget=2000)
+    assert len(capped) <= 2000
+    assert "not in the expected shape" in capped
+
+
+def test_a_short_unrecognised_answer_is_shown_as_it_came():
+    assert condense_answer("odd but short", budget=2000) == "odd but short"
+
+
+def test_a_single_korean_syllable_is_a_whole_word():
+    """Hangul has no capitals, so the rule that saves S and T would throw 폭 and 값 away."""
+    words = asked_words("트레이 폭 기준")
+    assert "폭" in words
+    assert matching_word_count("트레이 폭은 0.66 m", {"폭"}) == 1
+
+
+def test_a_korean_word_is_counted_once_however_it_was_written():
+    """Keeping the written form beside the trimmed one scored one statement twice.
+
+    It put a statement holding no value ("트레이 목록과 배치", matching both 트레 and 트레이)
+    above one that did ("폭은 0.66 m"), and filled the direct lookup with the same.
+    """
+    words = asked_words("트레이 폭")
+    assert matching_word_count("트레이 목록과 배치", words) == 1
+    assert matching_word_count("트레이 폭은 0.66 m", words) == 2
+
+
+def test_a_particle_comes_off_even_when_one_syllable_is_left():
+    """One syllable is a whole word in Korean, so 폭은 has to reach the note that says 폭."""
+    assert "폭" in asked_words("폭은 얼마인가")
+
+
+def test_the_cap_holds_even_when_it_is_smaller_than_the_notice():
+    """A budget too small to hold the explanation still caps the answer."""
+    assert len(condense_answer("y" * 5000, budget=100)) <= 100
+    assert len(condense_answer("y" * 5000, budget=20)) <= 20

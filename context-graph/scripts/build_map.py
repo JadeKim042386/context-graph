@@ -1,9 +1,11 @@
 """Joins the pieces into a single map file. The parsers know the formats; this only joins.
 
-The four refresh points (session start, delegated task end, before and after
-compaction) call this file from the command line.
+The three refresh points (session start, delegated task end, after compaction) call this
+file from the command line. Before compaction the hook only prints a reminder - there is
+nothing to rebuild from until the session has been written into the documents.
 """
 import argparse
+import collections
 import json
 import os
 import sys
@@ -104,27 +106,84 @@ def unchanged_since_last_build(source_dirs, map_path):
     return previous == _fingerprint(source_dirs)
 
 
+def _document_ids(paths_and_names):
+    """A node id for every document, none of them shared, none of them tied to scan order.
+
+    The name alone is not enough: two vaults both hold `_CLAUDE.md`, `index.md` and
+    `overview.md`, and one node id shared by two files merges their contents into a single
+    node, so an answer about one vault's rules carries the other vault's rules with it.
+
+    Whoever is scanned first must not get to keep the plain name either. If it did, adding a
+    second `index.md` would rename the first one, and every id that was ever written down
+    beside the map would point at nothing. So a name that appears more than once gives *all*
+    of its documents the folder they sit in, and the folder settles it for good.
+    """
+    seen = collections.Counter(_title_key(name) for _path, name in paths_and_names)
+    ids, taken = {}, set()
+    for path, name in paths_and_names:
+        key = _title_key(name)
+        chosen = "doc_" + key.replace(" ", "_")
+        if seen[key] > 1:
+            folder = _title_key(os.path.basename(os.path.dirname(path))).replace(" ", "_")
+            chosen = f"{chosen}__{folder}" if folder else chosen
+        candidate, suffix = chosen, 2
+        while candidate in taken:                    # same name in two folders of the same name
+            candidate = f"{chosen}_{suffix}"
+            suffix += 1
+        taken.add(candidate)
+        ids[path] = candidate
+    return ids
+
+
+def _section_index_for(statement, section_lines):
+    """Which section a statement sits under, or None if it is above the first heading.
+
+    The parsers carry the position of the heading they were under, which holds however the
+    document is laid out. Falling back to line numbers keeps anything that builds a parsed
+    document by hand working, but that fallback assumes the lines run in order - which a
+    generated HTML report written on one line does not.
+    """
+    index = statement.get("section_index")
+    if index is not None:
+        return index if 0 <= index < len(section_lines) else None
+    if "section_index" in statement:
+        return None                                  # the parser said: above the first heading
+    found = None
+    for position, section_line in enumerate(section_lines):
+        if section_line <= statement["line"]:
+            found = position
+        else:
+            break
+    return found
+
+
 def build_map(source_dirs, map_path):
     """Scan the knowledge documents, build the map, return a summary. Sources are read only."""
     started_at = time.time()
     nodes, links = [], []
     by_key = {}
 
+    files = [(path, os.path.splitext(os.path.basename(path))[0])
+             for path in _document_files(source_dirs)]
+    document_ids = _document_ids(files)
+
     parsed_documents = []
-    for path in _document_files(source_dirs):
+    for path, document_name in files:      # the same list the ids came from, not a second scan
         with open(path, encoding="utf-8-sig", errors="replace") as handle:
             text = handle.read()
         parsed = parse_html(text) if path.endswith(HTML_SUFFIXES) else parse_markdown(text)
-        document_name = os.path.splitext(os.path.basename(path))[0]
-        document_id = "doc_" + _title_key(document_name).replace(" ", "_")
+        document_id = document_ids[path]
         parsed_documents.append((path, document_id, document_name, parsed))
         nodes.append({"id": document_id, "label": document_name, "kind": "document",
                       "source_file": path, "source_location": 1})
         by_key[_title_key(document_name)] = document_id
 
     for path, document_id, _document_name, parsed in parsed_documents:
+        section_ids, section_lines = [], []
         for index, section in enumerate(parsed["sections"]):
             section_id = f"{document_id}_s{index}"
+            section_ids.append(section_id)
+            section_lines.append(section["line"])
             nodes.append({"id": section_id, "label": section["title"], "kind": "section",
                           "source_file": path, "source_location": section["line"]})
             links.append({"source": section_id, "target": document_id, "relation": "part_of"})
@@ -132,7 +191,15 @@ def build_map(source_dirs, map_path):
             statement_id = f"{document_id}_t{index}"
             nodes.append({"id": statement_id, "label": statement["text"], "kind": "statement",
                           "source_file": path, "source_location": statement["line"]})
-            links.append({"source": statement_id, "target": document_id, "relation": "part_of"})
+            # Hang the statement on its own heading, not on the document. Hanging everything on
+            # the document makes one hub whose neighbours are every statement in the file, so a
+            # walk of two steps from any statement reaches the whole document - which is why a
+            # broad question came back with a file dumped into it. Under its heading, the same
+            # walk reaches the section it belongs to. Text above the first heading has no
+            # section to sit under, so it stays on the document.
+            section_index = _section_index_for(statement, section_lines)
+            parent = section_ids[section_index] if section_index is not None else document_id
+            links.append({"source": statement_id, "target": parent, "relation": "part_of"})
         for link in parsed["links"]:
             key = _title_key(link["target"])
             if key not in by_key:
