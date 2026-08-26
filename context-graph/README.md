@@ -62,15 +62,18 @@ Add `watched_names` to the config to have specific value names read first:
 
 ## When it refreshes
 
-Only at four points: session start, when a delegated task ends, right before compaction,
+Only at three points: session start, when a delegated task ends,
 and right after it. Asking does not refresh anything. If the map lags the documents, the
 answer says so.
 
 ## Limits
 
-- **Ask in the language the knowledge documents are written in.** A question in another
-  language matches nothing.
-- **The answer budget is 20,000.** Lower it and statements carrying values come back cut.
+- **Ask in the language the document you want is written in.** A question in another
+  language reaches only the notes written in that language, and most of what comes
+  back is a near-miss.
+- **The answer is capped in characters** (`answer_budget`, 8,000 by default). Whole
+  statements are dropped from the back, never cut in the middle, and the count of what
+  was left out is printed.
 - **Ask narrowly.** A question after a single value ("tray piece length median") comes back
   in a few hundred characters, far cheaper than opening the file. A question that sweeps a
   whole topic ("clustering objective function overall") fills the budget with a **truncated

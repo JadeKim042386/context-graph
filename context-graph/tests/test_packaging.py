@@ -61,8 +61,16 @@ def test_the_build_the_hooks_call_actually_runs(tmp_path):
 def test_the_readme_states_the_three_limits():
     readme = _read_text("context-graph", "README.md")
     assert "written in" in readme                       # one: ask in the language of the documents
-    assert "20,000" in readme or "20000" in readme      # two: the answer budget
+    assert "answer_budget" in readme                    # two: the answer budget, named not quoted
     assert "narrowly" in readme                         # three: a broad question returns a cut list
+
+
+def test_the_packaged_readme_does_not_keep_a_claim_the_code_stopped_making():
+    """This file ships with the plugin, and it kept three sentences the code no longer backs."""
+    readme = _read_text("context-graph", "README.md")
+    assert "matches nothing" not in readme
+    assert "four points" not in readme
+    assert "The answer budget is 20,000" not in readme
 
 
 def test_the_skill_states_the_same_rules():

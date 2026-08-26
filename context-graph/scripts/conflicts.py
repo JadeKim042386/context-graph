@@ -90,7 +90,12 @@ def _binds(between):
     Only punctuation that ties a name to a value, and the few words that read as "is", may
     stand in between. One other word and the number is about something else.
     """
-    cleaned = re.sub(r"[\s:=~\u2248()\[\]\u2014\u2013,;\u00b7|]+", " ", between).strip().lower()
+    # A comma or a semicolon starts the next clause, so what follows is somebody else's value.
+    # Leaving them out of this list is what let "tray width, 300 mm of clearance" be read as
+    # a tray width of 0.3 m.
+    if any(breaker in between for breaker in (",", ";", ".")):
+        return False
+    cleaned = re.sub(r"[\s:=~\u2248()\[\]\u2014\u2013\u00b7|]+", " ", between).strip().lower()
     if not cleaned:
         return True
     return all(word in WATCH_BINDERS for word in cleaned.split())

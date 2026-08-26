@@ -263,7 +263,7 @@ def write_conflict_report(map_path, watched_names=None):
 
 
 def main(argv):
-    """Entry point for the four refresh points. Paths come from the config; the direct
+    """Entry point for the three refresh points. Paths come from the config; the direct
     arguments exist for the tests."""
     parser = argparse.ArgumentParser(
         description="Scan the knowledge documents and build the map.")
