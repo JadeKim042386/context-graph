@@ -385,3 +385,56 @@ def test_the_walk_is_never_narrower_than_what_will_be_printed():
     assert "90000" in wide
     narrow = build_graphify_command("query", ["tray width"], "C:/maps/graph.json", 500)
     assert "500" not in narrow
+
+
+def an_answer_with_a_long_document_tail():
+    """A shape the real tool returns: a few statements and a pile of long document names."""
+    lines = ["Start: ['x'] | depth 2"]
+    lines += [f"NODE tray width statement {index} is 0.66 m [src=C:/v/a{index}.md loc={index + 5}]"
+              for index in range(3)]
+    lines += [f"NODE Document Name Number {index} With A Long Title [src=C:/v/a{index}.md loc=1]"
+              for index in range(5)]
+    return "\n".join(lines)
+
+
+def test_the_document_list_goes_before_the_statements_do():
+    """Joining first and slicing the end took the closing notice, not the tail.
+
+    What survived was a half-written "[also touched:" and no statements - the document list
+    kept at the cost of the answer, which is the opposite of what dropping the tail is for.
+    """
+    cut = condense_answer(an_answer_with_a_long_document_tail(), budget=400, question="tray width")
+    assert len(cut) <= 400
+    assert "left out for room" in cut               # and it says the list went
+    assert "also touched" not in cut                # no half-written fragment survives
+    assert "0.66 m" in cut                          # the statements did
+
+
+def test_a_dropped_document_list_is_never_silent():
+    """A document with no surviving statement is named nowhere else."""
+    cut = condense_answer(an_answer_with_a_long_document_tail(), budget=400, question="tray width")
+    assert "[the list of documents touched was left out for room]" in cut
+
+
+def test_every_budget_holds_whatever_shape_the_answer_takes():
+    raw = an_answer_with_a_long_document_tail()
+    for budget in (20, 100, 250, 400, 900):
+        assert len(condense_answer(raw, budget=budget, question="tray width")) <= budget
+
+
+def test_one_syllable_stem_written_two_ways_is_still_one_word():
+    """폭은 and 폭을 have no two-syllable stem, so they used to key apart and both carry 폭."""
+    words = asked_words("폭은 얼마이고 폭을 알려줘")
+    assert matching_word_count("트레이 폭: 0.66 m", words) == 1
+
+
+def test_a_word_that_only_looks_like_a_particle_keeps_its_syllables():
+    """작은 is not 작 + a particle, and 작 matched 130 statements about 작업 and 시작."""
+    assert every_form(asked_words("작은 청크")) >= {"작은"}
+    assert "작" not in every_form(asked_words("작은 청크"))
+    assert "있" not in every_form(asked_words("있는 값"))
+
+
+def test_without_a_map_to_read_the_line_number_decides():
+    """The fallback was dead: an empty set is not None, so it never ran."""
+    assert document_labels("no-such-map.json") is None

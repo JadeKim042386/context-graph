@@ -401,6 +401,14 @@ WORD_PATTERN = re.compile(r"[\w가-힣]+", re.UNICODE)
 # particle letters also end ordinary nouns - 결과, 추가, 경로, 정도 - and taking one off those
 # leaves a syllable that matches half the vocabulary.
 BARE_SYLLABLE_PARTICLES = frozenset("은는을를")
+# Words that end in one of those letters without the letter being a particle at all. Measured
+# against the vault, taking 작은 down to 작 matched 130 statements about 작업 and 시작 that have
+# nothing to do with anything being small; 있는 matched 52 the same way.
+MODIFIER_FORMS = frozenset({
+    "같은", "있는", "없는", "작은", "많은", "적은", "높은", "낮은", "좋은", "다른", "어떤",
+    "이런", "그런", "저런", "무슨", "새로운", "빠른", "느린", "쓰는", "하는", "되는", "가는",
+    "오는", "보는", "만든", "넣는", "여는", "닫는", "맞는", "받는", "주는", "아는", "모르는",
+})
 
 KOREAN_PARTICLES = ("에서의", "으로는", "에서는", "에게는", "이라는", "라는", "으로", "에서",
                     "에게", "께서", "부터", "까지", "보다", "처럼", "만큼", "이나", "나마",
@@ -485,7 +493,14 @@ def asked_words(question):
         forms.add(lowered)
         # 폭은 has no two-syllable stem to fall back on, so the bare syllable is added here
         # instead. It cannot inflate the score: a set counts once however many forms match.
-        if _is_korean(lowered) and len(lowered) == 2 and lowered[1] in BARE_SYLLABLE_PARTICLES:
+        if (_is_korean(lowered) and len(lowered) == 2
+                and lowered[1] in BARE_SYLLABLE_PARTICLES
+                and lowered not in MODIFIER_FORMS):
+            # The bare syllable becomes the key as well. Keyed on the written form instead,
+            # 폭은 and 폭을 made two sets that both carried 폭, and the word counted twice.
+            forms = by_stem.setdefault(lowered[0], set()) | forms
+            by_stem.pop(stem, None)
+            by_stem[lowered[0]] = forms
             forms.add(lowered[0])
     return {frozenset(forms) for forms in by_stem.values()}
 
@@ -529,13 +544,14 @@ def document_labels(map_path):
     of its statements at line 1, and the guess threw all of them away. The map knows.
     """
     if not os.path.exists(map_path):
-        return set()
+        return None                      # nothing to read: the caller falls back to line numbers
     try:
         with open(map_path, encoding="utf-8") as handle:
             nodes = json.load(handle)["nodes"]
     except (OSError, ValueError, KeyError):
-        return set()
-    return {node.get("label") for node in nodes if node.get("kind") == "document"}
+        return None
+    labels = {node.get("label") for node in nodes if node.get("kind") == "document"}
+    return labels or None                # a map with no document nodes says nothing either
 
 
 def statements_carrying_the_words(map_path, words, limit=DIRECT_LOOKUP_LIMIT):
@@ -717,24 +733,27 @@ def condense_answer(raw_answer, budget=None, question="", direct=(), documents_n
                 break
             kept.append(text)
             used += len(text) + 1
-    condensed = "\n".join(kept) + tail
-    if dropped:
-        condensed += dropped_notice(dropped, budget)
-    if budget and len(condensed) > budget:
-        # The first statement is kept whatever its size and the document tail is not trimmed,
-        # so the running total can still land over. Take the tail off first - it names
-        # documents that are already named in the statements above - and only cut into the
-        # text as a last resort, saying so, because a value usually sits at the end of a line.
-        without_tail = condensed[:len(condensed) - len(tail)] if tail else condensed
-        if len(without_tail) <= budget:
-            condensed = without_tail
-        else:
-            warning = "\n[cut mid-statement at the character budget - raise answer_budget]"
-            room = budget - len(warning)
-            # A budget too small to hold even the warning still has to hold the answer.
-            condensed = (without_tail[:room].rstrip() + warning if room > 0
-                         else without_tail[:budget])
-    return condensed
+    # Held as pieces to the last moment. Joining first and then slicing characters off the
+    # end took the closing notice away instead of the tail, and left a half-written
+    # "[also touched:" behind - the document list surviving at the cost of the statements,
+    # which is what dropping the tail was for.
+    body = "\n".join(kept)
+    notice = dropped_notice(dropped, budget) if dropped else ""
+    if not budget or len(body) + len(tail) + len(notice) <= budget:
+        return body + tail + notice
+
+    # The tail goes first. It names documents, and a name costs more room than it earns
+    # once the statements themselves are at risk - but say that it went, because a document
+    # with no surviving statement is named nowhere else.
+    dropped_tail = "\n[the list of documents touched was left out for room]" if tail else ""
+    if len(body) + len(notice) + len(dropped_tail) <= budget:
+        return body + dropped_tail + notice
+
+    # Last resort: cut into the text itself, and say so. A value usually sits at the end of
+    # a line, so this is the one shape of answer that can lose one without a word.
+    warning = "\n[cut mid-statement at the character budget - raise answer_budget]"
+    room = budget - len(warning)
+    return body[:room].rstrip() + warning if room > 0 else body[:budget]
 
 
 def truncation_notice(answer):

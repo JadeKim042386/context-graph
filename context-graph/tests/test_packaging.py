@@ -15,7 +15,8 @@ BUILD_MAP_SCRIPT = os.path.join(ROOT, "context-graph", "scripts", "build_map.py"
 # The mark has to be something these tests do not themselves check. Using the marketplace
 # manifest meant that losing it - the very regression this file exists to catch - turned nine
 # failures into nine quiet skips.
-IN_THE_REPOSITORY = os.path.isdir(os.path.join(ROOT, ".git"))
+# exists, not isdir: in a worktree checkout .git is a file, and isdir let those skip too.
+IN_THE_REPOSITORY = os.path.exists(os.path.join(ROOT, ".git"))
 pytestmark = pytest.mark.skipif(
     not IN_THE_REPOSITORY,
     reason="packaging is checked against the repository layout; this is an installed copy")
