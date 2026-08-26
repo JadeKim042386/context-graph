@@ -6,7 +6,7 @@
       "name": "context-graph",
       "source": "./context-graph",
       "description": "Builds a map by copying the structure already written in your knowledge documents, answering with values, connections and lineage.",
-      "version": "0.3.2"
+      "version": "0.3.3"
     }
   ]
 }
