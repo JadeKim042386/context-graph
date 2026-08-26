@@ -17,7 +17,8 @@ you open a file.**
 ## Order of work
 
 1. Decide what you are asking about — knowledge we wrote goes here, code goes to the code map.
-2. Ask **in the language the knowledge documents are written in**. Another language matches nothing.
+2. Ask **in the language the document you want is written in**. A question in another language
+   reaches only the notes written in that language, and mostly returns near-misses.
 3. Ask **narrowly**. Follow the three rules below.
 4. The answer carries the statement with its file and line number. That is usually the end of it.
 5. Open the lines around it only when you need to confirm. **Do not open the whole file.**
@@ -25,15 +26,20 @@ you open a file.**
 
 ## Three rules you must follow
 
-- **Ask in the language the knowledge documents are written in.** A question in another
-  language matches nothing.
-- **The answer budget is 20,000.** Lower it and statements carrying values come back cut.
-- **Ask narrowly.** A question after a single value comes back short, far cheaper than
-  opening the file. A question that sweeps a whole topic fills the budget with a
-  **truncated list**, more expensive than reading one note whole. To sweep a topic, hand it
-  to a subagent and take only the conclusion.
+- **Ask in the language the document you want is written in.** Matching is on the words as
+  they are written, so a question in another language reaches only the notes in that
+  language. It is not silent about it - it returns whatever it can find, and most of that is
+  a near-miss. If a value is written in an English note, ask for it in English.
+- **The answer is capped in characters** (`answer_budget`, 8,000 by default). Statements are
+  dropped whole from the back, never cut in the middle, and the count of what was dropped is
+  printed at the end. **A dropped count means you asked too broadly** - it does not mean the
+  documents hold nothing more.
+- **Ask narrowly.** A question after a single value comes back short and costs less than
+  opening the file. A question that sweeps a whole topic fills the cap and reports what it
+  had to leave out, which tells you less than reading one note whole. To sweep a topic, hand
+  it to a subagent and take only the conclusion.
 
 ## Refreshing
 
-Asking does not refresh anything. Refreshes run at session start, when a delegated task
-ends, and before and after compaction. If the map lags, the answer says so.
+Asking does not refresh anything. Refreshes run at session start, when a delegated task ends,
+and after compaction. If the map lags the documents, the answer says so and names what changed.

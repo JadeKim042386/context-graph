@@ -5,7 +5,11 @@ import os
 DEFAULT_CONFIG = {
     "source_dirs": [],            # where the knowledge documents live
     "map_path": "",               # where the map goes (outside the knowledge documents)
-    "answer_budget": 20000,       # answer size limit. Lower it and statements carrying values get cut
+    # A cap on the answer, in characters. Asking here is only worth it when it costs less than
+    # opening the document, so the cap is measured in the same unit a document is. Statements are
+    # dropped whole from the back, never cut in the middle, and the count of what was dropped is
+    # printed. Raise it and a broad question costs more than reading the note it came from.
+    "answer_budget": 8000,
 }
 
 

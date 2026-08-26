@@ -1,7 +1,7 @@
 """Entry point for asking the knowledge map.
 
 This does not rebuild the map. Refreshes only run at session start, when a
-delegated task ends, and right before and after compaction. It does, however,
+delegated task ends, and right after compaction. It does, however,
 report how many documents the map is behind.
 """
 import json
@@ -32,14 +32,17 @@ USAGE = """Ask the knowledge map.
     python ask.py --conflicts              values two documents state differently
     python ask.py --settle "1:2 2:3"       settle them (add --dry-run to only show)
 
-**Ask in the language the knowledge documents are written in.** A question in
-another language matches nothing.
+**Ask in the language the document you want is written in.** Matching is on the
+words as they are written, so a question in another language reaches only the
+notes written in that language. It says nothing about it - it returns whatever it
+can find, and most of that is a near-miss.
 
 **Ask narrowly.** A question after a single value ("tray piece length median")
-comes back in a few hundred characters, far cheaper than opening the file. A
-question that sweeps a whole topic ("clustering objective function overall")
-fills the 20,000 budget with a truncated list, more expensive than reading one
-note whole. To sweep a topic, hand it to a subagent and take only the conclusion.
+comes back with what the documents say about that value and nothing else, which
+costs less than opening the files it drew from. A question that sweeps a whole
+topic ("clustering objective function overall") fills the `answer_budget` and
+says how much it had to leave out - which tells you less than reading one note
+whole. To sweep a topic, hand it to a subagent and take only the conclusion.
 """
 
 
@@ -373,7 +376,168 @@ def matched_labels(raw_answer):
             for single, double in QUOTED_SEED_PATTERN.findall(header.group("seeds"))]
 
 
-def condense_answer(raw_answer):
+# Words too common to tell one statement from another, so they are not counted as a match.
+COMMON_WORDS = frozenset("""a an and are as at be by do does for from has have how in into is it
+its many much not of on or that the their there they this to was were what when where which who
+why will with""".split())
+WORD_PATTERN = re.compile(r"[\w가-힣]+", re.UNICODE)
+# Korean particles ride on the end of a word. Matching is done on the written form, so a question
+# that says "케이블은" has to be trimmed back to "케이블" to reach the note that says it.
+KOREAN_PARTICLES = ("에서의", "으로는", "에서는", "에게는", "이라는", "라는", "으로", "에서",
+                    "에게", "께서", "부터", "까지", "보다", "처럼", "만큼", "이나", "나마",
+                    "은", "는", "이", "가", "을", "를", "의", "에", "와", "과", "도", "로", "만")
+
+
+def _is_korean(word):
+    """Is this written in Hangul?"""
+    return any("가" <= letter <= "힣" for letter in word)
+
+
+def strip_korean_particle(word):
+    """Take a Korean particle off the end of a word. Anything else is returned as it came."""
+    if not _is_korean(word):
+        return word
+    for particle in KOREAN_PARTICLES:
+        # One syllable is a whole word in Korean - 폭, 값, 층 - so trimming down to one is right.
+        # Trimming to nothing is not, and neither is trimming a word that is only a particle.
+        if word.endswith(particle) and len(word) - len(particle) >= 1:
+            return word[:-len(particle)]
+    return word
+LABEL_CAP = 2000
+# Below this many statements an answer is too thin to judge, so the walk's own neighbours are
+# kept even when they carry none of the asked words. Above it, a statement that carries none of
+# them is a neighbour of a neighbour and only costs room.
+MIN_STATEMENTS = 8
+# How many statements the direct lookup may add. It is a second opinion on the walk, not a
+# replacement for it, so it stays small enough that the walk still shapes the answer.
+DIRECT_LOOKUP_LIMIT = 12
+# How far from a statement that matched a neighbour may sit and still be kept. A value
+# often carries none of the asked words itself - the heading says "Bending radius" and
+# the line under it says "12 x D" - so the lines around a match are worth keeping. The
+# rest of the document is not: it is in the answer only because the walk passed through it.
+NEARBY_LINES = 20
+
+
+def fold_long_label(label, source, line_number):
+    """Fold a label longer than a note is worth reading into its opening plus a pointer.
+
+    One physical line of markdown becomes one statement, so a paragraph written without
+    line breaks arrives here as a single label of many thousand characters. Printing it
+    whole costs more than the document it came from. The opening carries the subject and
+    the pointer says where the rest is.
+    """
+    if len(label) <= LABEL_CAP:
+        return label
+    return (label[:LABEL_CAP].rstrip()
+            + f" [+{len(label) - LABEL_CAP} more characters - open {source}:{line_number}]")
+
+
+def asked_words(question):
+    """The words worth matching on, from the question as it was typed.
+
+    A single letter is dropped unless it was written as a capital: `a` in "a value" carries
+    nothing, but the S, T, V and E of "role letters S T V E" are the whole question. A Korean
+    word arrives with its particle attached, so the common endings are taken off - otherwise
+    "케이블은" never matches the note that says "케이블".
+    """
+    words = set()
+    for word in WORD_PATTERN.findall(question):
+        if len(word) == 1:
+            # A single Latin letter is only worth matching when it was written as a capital:
+            # `a` in "a value" says nothing, the S of "role S" is the question. A single Korean
+            # syllable is a whole word - 폭, 값, 층 - and Korean has no capitals to go by.
+            if word.isupper() or _is_korean(word):
+                words.add(word.lower())
+            continue
+        # Only the trimmed form is kept. Matching is on substrings, so the trimmed form reaches
+        # everything the written one does and a little more - and keeping both would count the
+        # same statement twice, which put a statement holding no value above one that did.
+        lowered = strip_korean_particle(word.lower())
+        if lowered not in COMMON_WORDS:
+            words.add(lowered)
+    return words
+
+
+def matching_word_count(label, words):
+    """How many of the asked words this statement carries. Ties are broken by walk order.
+
+    A word of two letters or more counts anywhere in the text, so "cable" reaches "cables".
+    A single letter has to stand as a word of its own: `s` inside "statements" says nothing,
+    and counting it would make every English sentence a match.
+    """
+    if not words:
+        return 0
+    lowered = label.lower()
+    single_latin = {word for word in words if len(word) == 1 and not _is_korean(word)}
+    # A Korean syllable compounds into longer words (폭 inside 트레이폭), so it is matched the
+    # same way a longer word is. A Latin letter is not, and matching it loosely would make
+    # every English sentence a hit.
+    elsewhere = words - single_latin
+    carried = sum(1 for word in elsewhere if word in lowered)
+    if single_latin:
+        tokens = set(WORD_PATTERN.findall(lowered))
+        carried += sum(1 for word in single_latin if word in tokens)
+    return carried
+
+
+def statements_carrying_the_words(map_path, words, limit=DIRECT_LOOKUP_LIMIT):
+    """Statements whose own text carries the asked words, read straight out of the map.
+
+    The walk starts from whatever the query tool picked as a seed and spreads outward, so a
+    statement can hold the answer and never be visited. Reading the map for the words costs
+    one pass over a file that is already on this machine, and it does not care where the walk
+    happened to start. Statements that carry more of the words come first; between two that
+    carry the same number, the shorter one is the denser answer.
+    """
+    if not words or not os.path.exists(map_path):
+        return []
+    try:
+        with open(map_path, encoding="utf-8") as handle:
+            nodes = json.load(handle)["nodes"]
+    except (OSError, ValueError, KeyError):
+        return []                                    # a half-written map must not break the answer
+    found = []
+    for node in nodes:
+        if node.get("kind") != "statement" or not node.get("source_location"):
+            continue
+        label = node.get("label") or ""
+        carried = matching_word_count(label, words)
+        if carried:
+            found.append((-carried, len(label), label,
+                          node.get("source_file") or "", node["source_location"]))
+    found.sort()
+    return found[:limit]
+
+
+def _as_line(value):
+    """A line number as an int. Anything that cannot be placed sits at 0, far from everything."""
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
+def near_a_match(rows):
+    """Build the test for whether a statement sits close to one that carried the asked words."""
+    anchors = {}
+    for row in rows:
+        if row[1] < 0:
+            anchors.setdefault(row[3], []).append(row[4])
+
+    def is_near(row):
+        return any(abs(row[4] - anchor) <= NEARBY_LINES for anchor in anchors.get(row[3], ()))
+
+    return is_near
+
+
+def dropped_notice(count, budget):
+    """The closing line that says the answer was narrowed. Built once so its length can be measured."""
+    return (f"\n[{count} further statement(s) left out to stay inside the {budget}-character "
+            f"answer. The question reached more of the documents than one answer can carry - "
+            f"narrow the words, or hand the topic to a subagent and take only the conclusion]")
+
+
+def condense_answer(raw_answer, budget=None, question="", direct=()):
     """Keep the statements out of a query answer and drop the traversal noise.
 
     The query tool prints its traversal header, every node it walked through and every
@@ -381,8 +545,25 @@ def condense_answer(raw_answer):
     those with their file and line, name the documents they came from once at the end,
     and drop the rest. A node with no location is a name someone linked to and never
     wrote, so it has no value to return.
+
+    `budget` caps what this returns, in **characters**. Asking here is only worth it when it
+    costs less than opening the document, and a document is measured in characters, so the
+    answer has to be too. The query tool's own budget is counted in tokens and cuts at about
+    three times this number, which is why the cap is applied again here. Statements are
+    dropped whole from the back, never cut in the middle, because a value usually sits at the
+    end of its line. What was dropped is counted in a closing line, so a narrowed answer is
+    never mistaken for a complete one.
+
+    `question` puts the statements carrying the asked words first. The walk order alone puts
+    headings before the line under them, so the value a question is after can sit far down a
+    long answer - and once there is a cap, far down means dropped.
+
+    `direct` carries statements found by reading the map for the asked words. They are merged
+    with what the walk returned and ranked the same way, so a statement the walk never reached
+    can still answer the question. A statement found by both routes is kept once.
     """
     seeds = matched_labels(raw_answer)
+    words = asked_words(question)
     statements, documents = [], []
     for line in raw_answer.splitlines():
         found = ANSWER_NODE_PATTERN.match(line)
@@ -398,17 +579,83 @@ def condense_answer(raw_answer):
                 documents.append(label)
             continue
         rank = seeds.index(label) if label in seeds else len(seeds)
-        statements.append((rank, f"NODE {label}\n     [src={source} loc={line_number}]"))
+        carried = matching_word_count(label, words)
+        label = fold_long_label(label, source, line_number)
+        statements.append((rank, -carried, len(statements), source,
+                           _as_line(line_number),
+                           f"NODE {label}\n     [src={source} loc={line_number}]"))
+
+    seen = {text.rsplit("[src=", 1)[-1] for *_head, text in statements}
+    for _negative, _length, label, direct_source, direct_line in direct:
+        marker = f"{direct_source} loc={direct_line}]"
+        if marker in seen:
+            continue
+        seen.add(marker)
+        carried = matching_word_count(label, words)
+        label = fold_long_label(label, direct_source, direct_line)
+        statements.append((len(seeds), -carried, len(statements), direct_source,
+                           _as_line(direct_line),
+                           f"NODE {label}\n     [src={direct_source} loc={direct_line}]"))
 
     if not statements:
-        return raw_answer                            # nothing recognised - show what the tool said
-    ordered = [text for _, text in sorted(statements, key=lambda pair: pair[0])]
-    condensed = "\n".join(ordered)
+        # Nothing was recognised, so show what the tool said - but still inside the cap. The
+        # shape of that output is not ours to rely on; if it ever changes, this is the path
+        # every answer takes, and an uncapped answer here would undo the cap everywhere.
+        if budget and len(raw_answer) > budget:
+            notice = (f"\n[cut at the {budget}-character answer. The answer was not in the "
+                      f"expected shape, so it is shown as it came]")
+            room = budget - len(notice)
+            # A budget too small to hold even the notice still has to hold the answer.
+            return raw_answer[:room].rstrip() + notice if room > 0 else raw_answer[:budget]
+        return raw_answer
+    tail = ""
     if documents:
         # Naming every document turns the tail into a wall of text of its own, so name a few.
         shown = ", ".join(documents[:4])
         rest = f" and {len(documents) - 4} more" if len(documents) > 4 else ""
-        condensed += f"\n\n[also touched: {shown}{rest}]"
+        tail = f"\n\n[also touched: {shown}{rest}]"
+
+    ranked = sorted(statements, key=lambda row: row[:3])
+    if words:
+        # The walk returns a neighbourhood, not an answer. A statement that carries none of the
+        # asked words is only there because it sits next to one that does - it fills the cap and
+        # makes every answer the same size whatever was asked.
+        #
+        # Not all of them, though. A value often carries none of the words itself: the heading
+        # says "Bending radius" and the line under it says "12 x D". Those sit in the same
+        # document as something that did match, so same-document neighbours are kept and only
+        # the ones from elsewhere are trimmed back.
+        is_near = near_a_match(ranked)
+        near = [row for row in ranked if row[1] < 0 or is_near(row)]
+        if len(near) < MIN_STATEMENTS:
+            # Top it up from what the walk returned rather than taking the first few outright:
+            # the walk's own order puts seed labels ahead of everything, so taking the head can
+            # hand back an answer with none of the statements that carried the asked words.
+            chosen = list(near)
+            for row in ranked:
+                if len(chosen) >= MIN_STATEMENTS:
+                    break
+                if row not in near:
+                    chosen.append(row)
+            near = sorted(chosen, key=lambda row: row[:3])
+        ranked = near
+    ordered = [row[-1] for row in ranked]
+    kept, dropped = ordered, 0
+    if budget:
+        # Measure the closing lines instead of guessing at them. The document tail has no length
+        # limit of its own, so a guess can be out by the length of four document names.
+        notice = dropped_notice(len(ordered), budget)
+        room = max(0, budget - len(tail) - len(notice))
+        kept, used = [], 0
+        for position, text in enumerate(ordered):
+            if kept and used + len(text) + 1 > room:
+                dropped = len(ordered) - position
+                break
+            kept.append(text)
+            used += len(text) + 1
+    condensed = "\n".join(kept) + tail
+    if dropped:
+        condensed += dropped_notice(dropped, budget)
     return condensed
 
 
@@ -428,7 +675,11 @@ def run(mode, arguments, source_dirs, map_path, budget):
                                env=dict(os.environ, PYTHONIOENCODING="utf-8"),
                                capture_output=True)
     answer = completed.stdout.decode("utf-8", "replace")
-    sys.stdout.write(condense_answer(answer) + "\n" if mode == "query" else answer)
+    question = " ".join(arguments)
+    direct = (statements_carrying_the_words(map_path, asked_words(question))
+              if mode == "query" else [])
+    sys.stdout.write(condense_answer(answer, budget, question, direct) + "\n"
+                     if mode == "query" else answer)
     notice = truncation_notice(answer)
     if notice:
         print(notice)

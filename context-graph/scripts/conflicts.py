@@ -28,6 +28,18 @@ WATCH_WINDOW = 18        # how far after a watched name the number may start
 UNIT_TAIL = 4
 # A number this far after the name is not its value: "tray width + 0.30 m" adds to the width.
 WATCH_BREAKERS = ("+", "-", "±", "x ", "×", "plus", "over", "than", "gap")
+# What may stand between a watched name and its value without changing whose value it is.
+# Anything else - another word, a comma into the next clause - means the number belongs to
+# something else in the sentence, which is how every one of this pass's reports so far turned
+# out to be a false alarm.
+WATCH_BINDERS = ("is", "of", "at", "was", "stays", "fixed", "set", "to", "the", "a", "an",
+                 # A bound is still that name's value, and the notes say so in words.
+                 "max", "min", "maximum", "minimum", "about", "approximately", "approx",
+                 # Korean particles ride on the end of the name, so the name is read with one
+                 # attached and the particle is what stands between it and the number.
+                 "은", "는", "이", "가", "을", "를", "의", "로", "으로", "까지", "이상", "이하",
+                 # The same bounds, written the way the Korean notes write them.
+                 "최대", "최소", "약", "대략", "기준", "이내", "정도", "고정")
 
 NAMED_VALUE = re.compile(
     r"(?P<key>[A-Za-z가-힣][A-Za-z0-9 _\-/()가-힣]{1,38}?)\s*[:=]\s*"
@@ -72,6 +84,18 @@ def add(found, name, value, source):
         found[name][value].append(source)
 
 
+def _binds(between):
+    """Is the text between a watched name and a number close enough to be that name's value?
+
+    Only punctuation that ties a name to a value, and the few words that read as "is", may
+    stand in between. One other word and the number is about something else.
+    """
+    cleaned = re.sub(r"[\s:=~\u2248()\[\]\u2014\u2013,;\u00b7|]+", " ", between).strip().lower()
+    if not cleaned:
+        return True
+    return all(word in WATCH_BINDERS for word in cleaned.split())
+
+
 def collect_watched(nodes, watched_names):
     """Values written right after a name the config watches."""
     found = {}
@@ -89,7 +113,10 @@ def collect_watched(nodes, watched_names):
                 match = NUMBER_IN_TEXT.search(window)
                 if not match or match.start() >= WATCH_WINDOW:
                     continue
-                if any(breaker in window[:match.start()] for breaker in WATCH_BREAKERS):
+                between = window[:match.start()]
+                if any(breaker in between for breaker in WATCH_BREAKERS):
+                    continue
+                if not _binds(between):
                     continue
                 add(found, normalise_name(name),
                     normalise_value(match.group("number"), match.group("unit")), source_of(node))

@@ -98,7 +98,7 @@ one is cut here to keep the example short.
 
 **You get the statement itself, plus the file and line number it sits on.** That is usually
 the end of it; you open the surrounding lines only when you need to confirm. Reading drops
-from tens of thousands of characters to a few hundred.
+from tens of thousands of characters to a few thousand, capped and told when it was cut.
 
 ---
 
@@ -178,7 +178,7 @@ variable at a file of your own):
 {
   "source_dirs": ["C:/notes", "C:/another/folder"],
   "map_path": "C:/notes-map/graph.json",
-  "answer_budget": 20000
+  "answer_budget": 8000
 }
 ```
 
@@ -284,7 +284,7 @@ no `## Relations` section. When a name does not match, it retries with punctuati
 ### HTML follows the same rules
 
 Title becomes the document name, `h1`-`h3` become headings, `p` and `li` become statements,
-`a href` becomes a link, tables go one row at a time. **Images, styling and scripts are dropped,
+`a href` becomes a link, and each table cell is read on its own. **Images, styling and scripts are dropped,
 but text inside SVG is kept** — the point a diagram makes usually lives in that text.
 
 ### From a question to an answer
@@ -544,8 +544,8 @@ same relation, so lineage still runs across a set of documents written in both l
 
 | Question | Answer | Compared to |
 |---|---|---|
-| `tray piece length median` | statement + line number, a few hundred characters | **far cheaper** than opening the file |
-| `correlation clustering local search move objective` | a truncated list filling the budget, 20k tokens | **more expensive** than reading one note |
+| `tray piece length median` | statement + line number, capped at `answer_budget` characters | **cheaper** than opening the files it draws from |
+| `correlation clustering local search move objective` | a truncated list filling the budget, the answer budget in characters | **more expensive** than reading one note |
 
 To sweep a whole topic, hand it to a subagent and take **the conclusion only**. If an answer is
 truncated, it says so on the spot.

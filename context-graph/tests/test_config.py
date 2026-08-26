@@ -9,7 +9,7 @@ from config import DEFAULT_CONFIG, default_config_path, load_config, save_config
 def test_reading_a_missing_file_gives_the_defaults(tmp_path):
     config = load_config(os.path.join(str(tmp_path), "missing.json"))
     assert config == DEFAULT_CONFIG
-    assert config["answer_budget"] == 20000
+    assert config["answer_budget"] == DEFAULT_CONFIG["answer_budget"]
     assert config["source_dirs"] == []
 
 
@@ -27,7 +27,7 @@ def test_missing_keys_are_filled_with_the_defaults(tmp_path):
         handle.write('{"source_dirs": ["C:/a"]}')
     config = load_config(config_path)
     assert config["source_dirs"] == ["C:/a"]
-    assert config["answer_budget"] == 20000
+    assert config["answer_budget"] == DEFAULT_CONFIG["answer_budget"]
 
 
 def test_an_environment_variable_moves_the_config(monkeypatch, tmp_path):
@@ -36,3 +36,12 @@ def test_an_environment_variable_moves_the_config(monkeypatch, tmp_path):
     assert default_config_path() == moved_path
     monkeypatch.delenv("KNOWLEDGE_MAP_CONFIG")
     assert default_config_path().endswith(os.path.join("context-graph", "config.json"))
+
+
+def test_the_default_answer_is_cheaper_than_opening_a_document():
+    """The whole point is to spend less than reading the note, so the default has to be under one.
+
+    The documents this was built against run about 6,000 characters at the middle of the range.
+    A default above that would make the tool cost more than the thing it replaces.
+    """
+    assert DEFAULT_CONFIG["answer_budget"] <= 10000

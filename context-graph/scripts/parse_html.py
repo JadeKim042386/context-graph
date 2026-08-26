@@ -51,7 +51,12 @@ class _Collector(HTMLParser):
                 self.sections.append({"title": content, "line": self._buffer_line, "body": ""})
             else:
                 self.statements.append({"text": content, "line": self._buffer_line,
-                                        "section": self.current_section})
+                                        "section": self.current_section,
+                                        # A generated report is often one long line, so every
+                                        # element reports line 1. The position of the heading is
+                                        # what actually says where this sits.
+                                        "section_index": (len(self.sections) - 1
+                                                          if self.sections else None)})
                 if self.sections:
                     self.sections[-1]["body"] += content + "\n"
         self._open_tag = None

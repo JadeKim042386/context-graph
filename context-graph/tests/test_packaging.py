@@ -68,5 +68,15 @@ def test_the_readme_states_the_three_limits():
 def test_the_skill_states_the_same_rules():
     skill = _read_text("context-graph", "skills", "context-graph", "SKILL.md")
     assert "written in" in skill
-    assert "20,000" in skill or "20000" in skill
+    assert "answer_budget" in skill                  # the setting is named, not a number in prose
     assert "narrowly" in skill
+
+
+def test_the_skill_quotes_the_default_budget_the_code_actually_uses():
+    """A number written into prose drifts away from the code. This is the check that it has not."""
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
+    from config import DEFAULT_CONFIG
+
+    skill = _read_text("context-graph", "skills", "context-graph", "SKILL.md")
+    default = DEFAULT_CONFIG["answer_budget"]
+    assert f"{default:,}" in skill or str(default) in skill
