@@ -186,8 +186,8 @@ variable at a file of your own):
   documents. They are only ever read
 - **`map_path`** — where the map goes. Keep it **outside** those folders, or the map is picked
   up as a document on the next build. The query tool needs the `.json` suffix
-- **`answer_budget`** — how large an answer may grow before it is cut. Lower it and long
-  statements lose the tail, which is usually where the figure is
+- **`answer_budget`** — the cap on an answer, in characters. Whole statements are dropped
+  from the back, never cut in the middle, and the count of what was left out is printed
 
 Then build it once:
 
@@ -289,7 +289,7 @@ but text inside SVG is kept** — the point a diagram makes usually lives in tha
 
 ### From a question to an answer
 
-<img alt="A question goes to the map, the answer carries the statement and its file and line, and the map is rebuilt at four points" src="assets/flow.png" width="880">
+<img alt="A question goes to the map, the answer carries the statement and its file and line, and the map is rebuilt at three points" src="assets/flow.png" width="880">
 
 ---
 
@@ -454,7 +454,7 @@ python build_map.py --quiet            # no score printed
 
 ## When it refreshes
 
-**Asking does not refresh anything.** It runs at four points only.
+**Asking does not refresh anything.** It runs at three points only.
 
 | When | What |
 |---|---|
@@ -618,8 +618,9 @@ The question was too broad. Narrow the words, or hand the topic to a subagent.
 
 ### The map answers with stale content
 
-Refreshes run only at session start, when a delegated task ends, and before and after
-compaction, and the answer tells you when the map is behind. To bring it up to date right now:
+Refreshes run only at session start, when a delegated task ends, and after compaction -
+before compaction the hook prints a reminder and nothing more - and the answer tells you when
+the map is behind. To bring it up to date right now:
 
 ```bash
 python build_map.py

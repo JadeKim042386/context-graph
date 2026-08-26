@@ -348,7 +348,7 @@ def stale_documents(source_dirs, map_path):
     return changed
 
 
-def build_graphify_command(mode, arguments, map_path, budget=None):
+def build_graphify_command(mode, arguments, map_path, budget=0):
     """Build the command that calls the query tool.
 
     The query tool's own budget is counted in tokens and it cuts by how many neighbours a node
@@ -359,7 +359,9 @@ def build_graphify_command(mode, arguments, map_path, budget=None):
     """
     command = ["graphify", mode, *arguments, "--graph", map_path]
     if mode == "query":
-        command += ["--budget", str(WALK_TOKEN_BUDGET)]
+        # Wide by default, but never narrower than what the caller means to print: raising
+        # answer_budget above this used to buy nothing, because the walk stopped first.
+        command += ["--budget", str(max(WALK_TOKEN_BUDGET, budget or 0))]
     return command
 
 
@@ -395,6 +397,11 @@ why will with""".split())
 WORD_PATTERN = re.compile(r"[\w가-힣]+", re.UNICODE)
 # Korean particles ride on the end of a word. Matching is done on the written form, so a question
 # that says "케이블은" has to be trimmed back to "케이블" to reach the note that says it.
+# Only these four may be taken off a two-syllable word to leave one syllable behind. The other
+# particle letters also end ordinary nouns - 결과, 추가, 경로, 정도 - and taking one off those
+# leaves a syllable that matches half the vocabulary.
+BARE_SYLLABLE_PARTICLES = frozenset("은는을를")
+
 KOREAN_PARTICLES = ("에서의", "으로는", "에서는", "에게는", "이라는", "라는", "으로", "에서",
                     "에게", "께서", "부터", "까지", "보다", "처럼", "만큼", "이나", "나마",
                     "은", "는", "이", "가", "을", "를", "의", "에", "와", "과", "도", "로", "만")
@@ -458,21 +465,29 @@ def asked_words(question):
     forms a statement happens to carry. Keeping them as separate words scored one statement
     twice, which put a statement holding no value above one that did.
     """
-    words = set()
+    by_stem = {}
     for word in WORD_PATTERN.findall(question):
         if len(word) == 1:
             # A single Latin letter is only worth matching when it was written as a capital:
             # `a` in "a value" says nothing, the S of "role S" is the question. A single Korean
             # syllable is a whole word - 폭, 값, 층 - and Korean has no capitals to go by.
             if word.isupper() or _is_korean(word):
-                words.add(frozenset({word.lower()}))
+                by_stem.setdefault(word.lower(), set()).add(word.lower())
             continue
         lowered = word.lower()
         if lowered in COMMON_WORDS:
             continue
-        forms = {lowered, strip_korean_particle(lowered)}
-        words.add(frozenset(forms))
-    return words
+        # The stem is what makes two forms the same word, so it is the key. Asking
+        # "트레이는 ... 트레이의" used to build two sets and count 트레이 twice, which put a
+        # statement holding no value above one that did - the very thing the sets were for.
+        stem = strip_korean_particle(lowered)
+        forms = by_stem.setdefault(stem, {stem})
+        forms.add(lowered)
+        # 폭은 has no two-syllable stem to fall back on, so the bare syllable is added here
+        # instead. It cannot inflate the score: a set counts once however many forms match.
+        if _is_korean(lowered) and len(lowered) == 2 and lowered[1] in BARE_SYLLABLE_PARTICLES:
+            forms.add(lowered[0])
+    return {frozenset(forms) for forms in by_stem.values()}
 
 
 def matching_word_count(label, words):
@@ -706,9 +721,19 @@ def condense_answer(raw_answer, budget=None, question="", direct=(), documents_n
     if dropped:
         condensed += dropped_notice(dropped, budget)
     if budget and len(condensed) > budget:
-        # The first statement is kept whatever its size, and the document tail is not trimmed,
-        # so the running total can still land over. Measure the finished answer and cut it.
-        condensed = condensed[:budget]
+        # The first statement is kept whatever its size and the document tail is not trimmed,
+        # so the running total can still land over. Take the tail off first - it names
+        # documents that are already named in the statements above - and only cut into the
+        # text as a last resort, saying so, because a value usually sits at the end of a line.
+        without_tail = condensed[:len(condensed) - len(tail)] if tail else condensed
+        if len(without_tail) <= budget:
+            condensed = without_tail
+        else:
+            warning = "\n[cut mid-statement at the character budget - raise answer_budget]"
+            room = budget - len(warning)
+            # A budget too small to hold even the warning still has to hold the answer.
+            condensed = (without_tail[:room].rstrip() + warning if room > 0
+                         else without_tail[:budget])
     return condensed
 
 
