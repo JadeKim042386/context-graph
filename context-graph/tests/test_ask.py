@@ -9,6 +9,11 @@ from ask import (LABEL_CAP, MIN_STATEMENTS, USAGE, asked_words, build_graphify_c
                  statements_carrying_the_words, truncation_notice)
 
 
+def every_form(words):
+    """Flatten the word groups so a test can ask whether a form is in there at all."""
+    return {form for forms in words for form in forms}
+
+
 def an_answer_of(statement_count, label_length=200):
     """Build a query answer the size the real tool returns for a broad question."""
     lines = ["Start: ['seed'] | depth 2"]
@@ -170,7 +175,7 @@ def test_without_a_question_the_walk_order_is_left_alone():
 
 
 def test_common_words_are_not_counted_as_a_match():
-    assert asked_words("how many cables are in the WHRP dataset") == {
+    assert every_form(asked_words("how many cables are in the WHRP dataset")) == {
         "cables", "whrp", "dataset"}
     assert asked_words("") == set()
 
@@ -187,13 +192,13 @@ def test_the_document_tail_and_the_notice_count_against_the_budget():
 
 
 def test_a_capital_single_letter_is_part_of_the_question():
-    assert asked_words("role letters S T V E meaning") >= {"s", "t", "v", "e"}
-    assert "a" not in asked_words("a value for the tray")
+    assert every_form(asked_words("role letters S T V E meaning")) >= {"s", "t", "v", "e"}
+    assert "a" not in every_form(asked_words("a value for the tray"))
 
 
 def test_a_korean_word_matches_with_its_particle_taken_off():
-    assert "케이블" in asked_words("케이블은 어디에 있나")
-    assert "트레이" in asked_words("트레이의 폭")
+    assert "케이블" in every_form(asked_words("케이블은 어디에 있나"))
+    assert "트레이" in every_form(asked_words("트레이의 폭"))
 
 
 def test_a_single_letter_has_to_stand_as_a_word_of_its_own():
@@ -225,9 +230,11 @@ def test_the_map_is_read_for_the_words_the_walk_may_have_missed(tmp_path):
         {"id": "d1", "kind": "document", "label": "a", "source_file": "C:/vault/a.md",
          "source_location": 1},
     ]}, ensure_ascii=False), encoding="utf-8")
-    found = statements_carrying_the_words(str(map_path), {"tray", "width"})
+    found = statements_carrying_the_words(str(map_path),
+                                         {frozenset({"tray"}), frozenset({"width"})})
     assert [row[2] for row in found] == ["the tray width is 0.66 m"]
-    assert statements_carrying_the_words(str(tmp_path / "missing.json"), {"tray"}) == []
+    assert statements_carrying_the_words(str(tmp_path / "missing.json"),
+                                        {frozenset({"tray"})}) == []
 
 
 def test_what_the_map_found_is_merged_into_the_answer_without_repeating_it():
@@ -254,25 +261,32 @@ def test_a_short_unrecognised_answer_is_shown_as_it_came():
 
 def test_a_single_korean_syllable_is_a_whole_word():
     """Hangul has no capitals, so the rule that saves S and T would throw 폭 and 값 away."""
-    words = asked_words("트레이 폭 기준")
-    assert "폭" in words
-    assert matching_word_count("트레이 폭은 0.66 m", {"폭"}) == 1
+    assert "폭" in every_form(asked_words("트레이 폭 기준"))
+    assert matching_word_count("트레이 폭은 0.66 m", {frozenset({"폭"})}) == 1
 
 
 def test_a_korean_word_is_counted_once_however_it_was_written():
-    """Keeping the written form beside the trimmed one scored one statement twice.
+    """Both forms of one word live in one group, and a group counts once.
 
-    It put a statement holding no value ("트레이 목록과 배치", matching both 트레 and 트레이)
-    above one that did ("폭은 0.66 m"), and filled the direct lookup with the same.
+    Counting them as separate words put a statement holding no value ("트레이 목록과 배치",
+    which carries both 트레 and 트레이) above one that did ("폭은 0.66 m").
     """
     words = asked_words("트레이 폭")
     assert matching_word_count("트레이 목록과 배치", words) == 1
     assert matching_word_count("트레이 폭은 0.66 m", words) == 2
 
 
-def test_a_particle_comes_off_even_when_one_syllable_is_left():
-    """One syllable is a whole word in Korean, so 폭은 has to reach the note that says 폭."""
-    assert "폭" in asked_words("폭은 얼마인가")
+def test_a_particle_is_only_taken_off_when_two_syllables_are_left():
+    """The letters a particle is written with end plenty of ordinary words too.
+
+    Trimming 결과 to 결 or 경로 to 경 leaves a syllable that matches half the vocabulary -
+    measured against the vault, trimming down to one syllable mangles 1,512 of its 4,085
+    Korean words. Two syllables have to survive for the trim to be safe.
+    """
+    assert every_form(asked_words("결과")) == {"결과"}
+    assert every_form(asked_words("경로")) == {"경로"}
+    assert every_form(asked_words("추가")) == {"추가"}
+    assert "사용자" in every_form(asked_words("사용자가"))
 
 
 def test_the_cap_holds_even_when_it_is_smaller_than_the_notice():

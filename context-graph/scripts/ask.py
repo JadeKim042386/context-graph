@@ -398,9 +398,11 @@ def strip_korean_particle(word):
     if not _is_korean(word):
         return word
     for particle in KOREAN_PARTICLES:
-        # One syllable is a whole word in Korean - 폭, 값, 층 - so trimming down to one is right.
-        # Trimming to nothing is not, and neither is trimming a word that is only a particle.
-        if word.endswith(particle) and len(word) - len(particle) >= 1:
+        # Two syllables have to be left. The letters a particle is written with are also the
+        # last letter of plenty of ordinary words - 결과, 경로, 추가 - and taking one off those
+        # leaves a single syllable that matches half the vocabulary. Measured against this
+        # vault: trimming down to one syllable mangles 1,512 of its 4,085 Korean words.
+        if word.endswith(particle) and len(word) - len(particle) >= 2:
             return word[:-len(particle)]
     return word
 LABEL_CAP = 2000
@@ -433,12 +435,16 @@ def fold_long_label(label, source, line_number):
 
 
 def asked_words(question):
-    """The words worth matching on, from the question as it was typed.
+    """The words worth matching on, each as the set of forms it may be written in.
 
     A single letter is dropped unless it was written as a capital: `a` in "a value" carries
     nothing, but the S, T, V and E of "role letters S T V E" are the whole question. A Korean
-    word arrives with its particle attached, so the common endings are taken off - otherwise
-    "케이블은" never matches the note that says "케이블".
+    word arrives with its particle attached, so the trimmed form is kept beside the written
+    one - otherwise "케이블은" never reaches the note that says "케이블".
+
+    Both forms of one word live in the same set, and a set counts once however many of its
+    forms a statement happens to carry. Keeping them as separate words scored one statement
+    twice, which put a statement holding no value above one that did.
     """
     words = set()
     for word in WORD_PATTERN.findall(question):
@@ -447,14 +453,13 @@ def asked_words(question):
             # `a` in "a value" says nothing, the S of "role S" is the question. A single Korean
             # syllable is a whole word - 폭, 값, 층 - and Korean has no capitals to go by.
             if word.isupper() or _is_korean(word):
-                words.add(word.lower())
+                words.add(frozenset({word.lower()}))
             continue
-        # Only the trimmed form is kept. Matching is on substrings, so the trimmed form reaches
-        # everything the written one does and a little more - and keeping both would count the
-        # same statement twice, which put a statement holding no value above one that did.
-        lowered = strip_korean_particle(word.lower())
-        if lowered not in COMMON_WORDS:
-            words.add(lowered)
+        lowered = word.lower()
+        if lowered in COMMON_WORDS:
+            continue
+        forms = {lowered, strip_korean_particle(lowered)}
+        words.add(frozenset(forms))
     return words
 
 
@@ -468,15 +473,23 @@ def matching_word_count(label, words):
     if not words:
         return 0
     lowered = label.lower()
-    single_latin = {word for word in words if len(word) == 1 and not _is_korean(word)}
-    # A Korean syllable compounds into longer words (폭 inside 트레이폭), so it is matched the
-    # same way a longer word is. A Latin letter is not, and matching it loosely would make
-    # every English sentence a hit.
-    elsewhere = words - single_latin
-    carried = sum(1 for word in elsewhere if word in lowered)
-    if single_latin:
-        tokens = set(WORD_PATTERN.findall(lowered))
-        carried += sum(1 for word in single_latin if word in tokens)
+    tokens = None
+    carried = 0
+    for forms in words:
+        for form in forms:
+            # A single Latin letter has to stand as a word of its own: `s` inside "statements"
+            # says nothing, and counting it would make every English sentence a match. A single
+            # Korean syllable compounds into longer words (폭 inside 트레이폭), so it is matched
+            # the way any other word is.
+            if len(form) == 1 and not _is_korean(form):
+                if tokens is None:
+                    tokens = set(WORD_PATTERN.findall(lowered))
+                hit = form in tokens
+            else:
+                hit = form in lowered
+            if hit:
+                carried += 1                         # one word, counted once, however written
+                break
     return carried
 
 
