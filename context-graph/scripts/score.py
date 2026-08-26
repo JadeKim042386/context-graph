@@ -39,15 +39,27 @@ def score_map(map_path):
             stack.extend(neighbours[current] - seen)
     isolated = sum(1 for node_id in neighbours if not neighbours[node_id])
 
-    # Samples: pick statement nodes that carry a number in a fixed way (sorted), so the
-    # same ones come out every time.
+    # Samples: statement nodes carrying a number, picked in a fixed order so the same ones come
+    # out every time - but one document at a time. Taking the first few by id took whatever the
+    # alphabet put in front, which was four lines of the same file, and a check that only ever
+    # looks at one document is not much of a check.
     candidates = sorted(
         (node for node in nodes
          if node.get("kind") == "statement" and NUMBER_PATTERN.search(node["label"] or "")),
         key=lambda node: node["id"])
+    per_document = {}
+    for node in candidates:
+        per_document.setdefault(node["source_file"], []).append(node)
+    spread = []
+    for round_number in range(max((len(found) for found in per_document.values()), default=0)):
+        for source_file in sorted(per_document):
+            if round_number < len(per_document[source_file]):
+                spread.append(per_document[source_file][round_number])
+        if len(spread) >= SAMPLE_COUNT:
+            break
     samples = [{"label": node["label"], "source_file": node["source_file"],
                 "source_location": node["source_location"], "matched": False}
-               for node in candidates[:SAMPLE_COUNT]]
+               for node in spread[:SAMPLE_COUNT]]
 
     hints = []
     if located_ratio < 0.8:

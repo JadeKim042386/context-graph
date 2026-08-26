@@ -52,3 +52,20 @@ def test_it_formats_a_single_human_readable_line(tmp_path):
     ], [])
     line = format_score(score_map(map_path))
     assert "nodes 1" in line and "located" in line
+
+
+def test_the_samples_are_spread_across_documents(tmp_path):
+    """Taking the first few by id took four lines of whatever the alphabet put in front."""
+    map_path = tmp_path / "graph.json"
+    nodes = [{"id": "a_doc", "kind": "document", "label": "a", "source_file": "C:/v/a.md",
+              "source_location": 1}]
+    for index in range(9):                    # one crowded document
+        nodes.append({"id": f"a_t{index}", "kind": "statement", "label": f"value {index} m",
+                      "source_file": "C:/v/a.md", "source_location": index + 2})
+    for name in ("b", "c", "d", "e"):         # and four quiet ones
+        nodes.append({"id": f"{name}_t0", "kind": "statement", "label": f"value in {name} 3 m",
+                      "source_file": f"C:/v/{name}.md", "source_location": 2})
+    map_path.write_text(json.dumps({"nodes": nodes, "links": []}, ensure_ascii=False),
+                        encoding="utf-8")
+    score = score_map(str(map_path))
+    assert len({sample["source_file"] for sample in score["samples"]}) == 5

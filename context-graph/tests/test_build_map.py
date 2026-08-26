@@ -4,7 +4,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
-from build_map import _nearest, build_map, folder_notes
+from build_map import _document_ids, _nearest, build_map, folder_notes
 from build_map import main as build_map_main
 
 
@@ -154,3 +154,22 @@ def test_vaults_on_two_drives_do_not_stop_the_build():
     candidates = [("C:\\vault_a\\notes", "a"), ("D:\\vault_b\\notes", "b")]
     assert _nearest(candidates, "D:\\vault_b\\deep\\note.md") in {"a", "b"}
     assert _nearest([("C:\\a\\b", "a"), ("relative\\c", "b")], "C:\\x\\y\\n.md") in {"a", "b"}
+
+
+def test_adding_a_document_does_not_rename_the_ones_already_there():
+    """Counting suffixes read the same as folders but left the ids at the scan order's mercy.
+
+    This vault holds _CLAUDE.md, index.md and overview.md twice over, and both copies of each
+    sit in a folder called knowledge - so the folder settles nothing and the counter took over.
+    """
+    before = [("C:\\va\\knowledge\\index.md", "index"),
+              ("C:\\vb\\knowledge\\index.md", "index")]
+    after = [("C:\\aa\\knowledge\\index.md", "index")] + before
+    first, second = _document_ids(before), _document_ids(after)
+    assert all(first[path] == second[path] for path, _name in before)
+    assert len(set(second.values())) == len(second)
+
+
+def test_a_name_that_appears_once_keeps_the_plain_id():
+    ids = _document_ids([("C:\\vault\\note.md", "note"), ("C:\\vault\\other.md", "other")])
+    assert set(ids.values()) == {"doc_note", "doc_other"}
