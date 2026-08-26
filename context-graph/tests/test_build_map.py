@@ -4,7 +4,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
-from build_map import build_map, folder_notes
+from build_map import _nearest, build_map, folder_notes
 from build_map import main as build_map_main
 
 
@@ -147,3 +147,10 @@ def test_a_link_takes_the_nearest_index_above_it_not_the_shallowest(tmp_path):
     reached = [by_id[link["target"]]["source_file"] for link in graph["links"]
                if link["relation"] == "mentions" and by_id[link["source"]]["label"] == "note"]
     assert reached and os.path.join("a", "b", "index.md") in reached[0]
+
+
+def test_vaults_on_two_drives_do_not_stop_the_build():
+    """Asking for a common path across drives raises, and this is the function for two vaults."""
+    candidates = [("C:\\vault_a\\notes", "a"), ("D:\\vault_b\\notes", "b")]
+    assert _nearest(candidates, "D:\\vault_b\\deep\\note.md") in {"a", "b"}
+    assert _nearest([("C:\\a\\b", "a"), ("relative\\c", "b")], "C:\\x\\y\\n.md") in {"a", "b"}

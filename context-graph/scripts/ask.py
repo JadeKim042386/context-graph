@@ -404,10 +404,14 @@ BARE_SYLLABLE_PARTICLES = frozenset("은는을를")
 # Words that end in one of those letters without the letter being a particle at all. Measured
 # against the vault, taking 작은 down to 작 matched 130 statements about 작업 and 시작 that have
 # nothing to do with anything being small; 있는 matched 52 the same way.
+# Only two-syllable words ending in one of those four letters ever reach this, so a word that
+# ends any other way would sit here doing nothing.
 MODIFIER_FORMS = frozenset({
-    "같은", "있는", "없는", "작은", "많은", "적은", "높은", "낮은", "좋은", "다른", "어떤",
-    "이런", "그런", "저런", "무슨", "새로운", "빠른", "느린", "쓰는", "하는", "되는", "가는",
-    "오는", "보는", "만든", "넣는", "여는", "닫는", "맞는", "받는", "주는", "아는", "모르는",
+    # Modifiers: the last letter is part of the verb, not a particle.
+    "같은", "있는", "없는", "작은", "많은", "적은", "높은", "낮은", "좋은", "쓰는", "하는",
+    "되는", "가는", "오는", "보는", "넣는", "여는", "닫는", "맞는", "받는", "주는", "아는",
+    # Nouns whose last letter only looks like one: 마을 is not 마 + 을.
+    "마을", "노을", "가을", "겨울", "서울", "이름", "다음", "처음", "사람",
 })
 
 KOREAN_PARTICLES = ("에서의", "으로는", "에서는", "에게는", "이라는", "라는", "으로", "에서",
@@ -752,8 +756,11 @@ def condense_answer(raw_answer, budget=None, question="", direct=(), documents_n
     # Last resort: cut into the text itself, and say so. A value usually sits at the end of
     # a line, so this is the one shape of answer that can lose one without a word.
     warning = "\n[cut mid-statement at the character budget - raise answer_budget]"
-    room = budget - len(warning)
-    return body[:room].rstrip() + warning if room > 0 else body[:budget]
+    # The count of what was left out still goes in if there is room for it: the
+    # reader has to know the answer was narrowed, whichever way it had to narrow.
+    closing = warning + notice if len(warning) + len(notice) < budget else warning
+    room = budget - len(closing)
+    return body[:room].rstrip() + closing if room > 0 else body[:budget]
 
 
 def truncation_notice(answer):
