@@ -4,7 +4,8 @@ import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
-from build_map import _document_ids, _nearest, build_map, folder_notes
+from build_map import (_document_ids, _fingerprint, _nearest, build_map,
+                       folder_notes)
 from build_map import main as build_map_main
 
 
@@ -173,3 +174,33 @@ def test_adding_a_document_does_not_rename_the_ones_already_there():
 def test_a_name_that_appears_once_keeps_the_plain_id():
     ids = _document_ids([("C:\\vault\\note.md", "note"), ("C:\\vault\\other.md", "other")])
     assert set(ids.values()) == {"doc_note", "doc_other"}
+
+
+def test_two_documents_never_share_an_id():
+    """Whether folders tell documents apart is decided the way the id is written.
+
+    Comparing the raw folders let Knowledge and knowledge, or "a b" and a_b, look different
+    while coming out identical - two files merged into one node, which is what document ids
+    are built the way they are to prevent.
+    """
+    for files in (
+            # Folders that differ only in case, or in a space against an underscore.
+            [("C:\\va\\Knowledge\\index.md", "index"), ("C:\\vb\\knowledge\\index.md", "index")],
+            [("C:\\va\\a b\\index.md", "index"), ("C:\\vb\\a_b\\index.md", "index")],
+            # Folders that read the same all the way up: only the final check separates these.
+            [("C:\\v\\a b\\n.md", "n"), ("C:\\v\\a_b\\n.md", "n")],
+            # A name that happens to read like another name plus its folder. The rule above
+            # cannot see this one at all - the two are not even namesakes.
+            [("C:\\v\\b\\a.md", "a"), ("C:\\v\\c\\a.md", "a"), ("C:\\v\\a__b.md", "a__b")]):
+        ids = _document_ids(files)
+        assert len(set(ids.values())) == len(files)
+
+
+def test_the_map_is_rebuilt_when_the_code_that_builds_it_changes(tmp_path):
+    """Changing how ids are made left the old map in place until somebody edited a document."""
+    source = tmp_path / "docs"
+    source.mkdir()
+    (source / "a.md").write_text("# A\n@\n@a value 3 m\n@", encoding="utf-8")
+    print_of = _fingerprint([str(source)])
+    assert "builder" in print_of
+    assert print_of["builder"] > 0
