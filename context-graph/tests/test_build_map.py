@@ -129,3 +129,21 @@ def test_a_link_goes_to_the_document_beside_the_one_that_wrote_it(tmp_path):
         source_folder = os.path.dirname(by_id[link["source"]]["source_file"])
         target_folder = os.path.dirname(by_id[link["target"]]["source_file"])
         assert source_folder == target_folder      # each note reached its own vault's index
+
+
+def test_a_link_takes_the_nearest_index_above_it_not_the_shallowest(tmp_path):
+    """Taking the first match took the shallowest folder, which is the farthest away."""
+    deep = tmp_path / "vault" / "a" / "b" / "c"
+    deep.mkdir(parents=True)
+    (tmp_path / "vault" / "index.md").write_text("# Index\n\ntop\n", encoding="utf-8")
+    (tmp_path / "vault" / "a" / "b" / "index.md").write_text("# Index\n\nmiddle\n",
+                                                            encoding="utf-8")
+    (deep / "note.md").write_text("# Note\n\nsee [[index]]\n", encoding="utf-8")
+    map_path = tmp_path / "graph.json"
+    build_map([str(tmp_path / "vault")], str(map_path))
+
+    graph = json.loads(map_path.read_text(encoding="utf-8"))
+    by_id = {node["id"]: node for node in graph["nodes"]}
+    reached = [by_id[link["target"]]["source_file"] for link in graph["links"]
+               if link["relation"] == "mentions" and by_id[link["source"]]["label"] == "note"]
+    assert reached and os.path.join("a", "b", "index.md") in reached[0]

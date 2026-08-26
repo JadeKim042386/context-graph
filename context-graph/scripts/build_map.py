@@ -149,8 +149,13 @@ def _nearest(candidates, from_path):
     for folder, node_id in candidates:
         if folder == here:
             return node_id
-    for folder, node_id in candidates:
-        if folder and (here.startswith(folder + os.sep) or folder.startswith(here + os.sep)):
+    # Whoever shares the longest path with the writer is the nearest. Taking the first match
+    # instead took the shallowest one, which is the farthest - the opposite of what was meant.
+    overlapping = [(len(os.path.commonpath([folder, here])), node_id)
+                   for folder, node_id in candidates if folder]
+    if overlapping:
+        depth, node_id = max(overlapping, key=lambda pair: pair[0])
+        if depth > 0:
             return node_id
     return candidates[0][1]
 
