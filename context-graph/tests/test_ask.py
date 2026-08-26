@@ -343,3 +343,45 @@ def test_without_the_map_the_line_number_is_still_used():
     kept = condense_answer(raw, question="tray width")
     assert "0.66 m" in kept
     assert "also touched: report" in kept
+
+
+def test_one_word_written_two_ways_is_still_one_word():
+    """Sets stopped a word counting twice; sets that overlap brought it straight back.
+
+    "트레이는 ... 트레이의" built two sets, both carrying 트레이, so a statement with the noun
+    and no value scored above one with the value - the inversion the sets were built against.
+    """
+    words = asked_words("트레이는 어디에 있고 트레이의 폭은")
+    assert matching_word_count("트레이 목록과 배치", words) == 1
+    assert matching_word_count("폭은 0.66 m", words) == 1
+
+
+def test_a_single_syllable_stem_reaches_the_note_that_drops_the_particle():
+    """폭은 has no two-syllable stem to fall back on, so the bare syllable joins its set."""
+    assert matching_word_count("트레이 폭: 0.66 m", asked_words("폭은 얼마인가")) == 1
+    assert matching_word_count("값이 다르다", asked_words("값을 알려줘")) == 1
+
+
+def test_only_four_particles_may_leave_one_syllable_behind():
+    """The other particle letters end ordinary nouns, and 결 would match half the vocabulary."""
+    for word in ("결과", "경로", "추가", "정도"):
+        assert every_form(asked_words(word)) == {word}
+
+
+def test_a_statement_is_not_cut_in_the_middle_without_saying_so():
+    """A value usually sits at the end of a line, so a silent mid-line cut loses it."""
+    raw = ("Start: ['x'] | depth 2\nNODE the tray width "
+           + "and more words " * 10 + "0.66 m [src=C:/vault/a.md loc=12]")
+    cut = condense_answer(raw, budget=100, question="tray width")
+    assert len(cut) <= 100
+    assert "cut mid-statement" in cut
+    for budget in (20, 40):
+        assert len(condense_answer(raw, budget=budget, question="tray width")) <= budget
+
+
+def test_the_walk_is_never_narrower_than_what_will_be_printed():
+    """Raising answer_budget past the fixed walk budget used to buy nothing."""
+    wide = build_graphify_command("query", ["tray width"], "C:/maps/graph.json", 90000)
+    assert "90000" in wide
+    narrow = build_graphify_command("query", ["tray width"], "C:/maps/graph.json", 500)
+    assert "500" not in narrow

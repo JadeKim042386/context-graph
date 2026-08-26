@@ -62,9 +62,10 @@ Add `watched_names` to the config to have specific value names read first:
 
 ## When it refreshes
 
-Only at three points: session start, when a delegated task ends,
-and right after it. Asking does not refresh anything. If the map lags the documents, the
-answer says so.
+Only at three points: session start, when a delegated task ends, and after compaction.
+Before compaction the hook only prints a reminder - there is nothing to rebuild from until the
+session has been written into the documents. Asking does not refresh anything. If the map lags
+the documents, the answer says so.
 
 ## Limits
 
