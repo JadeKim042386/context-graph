@@ -3,8 +3,19 @@ import os
 import subprocess
 import sys
 
+import pytest
+
 ROOT = os.path.join(os.path.dirname(__file__), "..", "..")
 BUILD_MAP_SCRIPT = os.path.join(ROOT, "context-graph", "scripts", "build_map.py")
+
+# Every test in this file reads the repository around the plugin - the marketplace manifest
+# beside it, the plugin folder it points at. An installed copy has neither: the plugin is
+# unpacked on its own, without the folders that hold it in the repository. Running these there
+# used to fail nine times over something that was never wrong, so they stand down instead.
+IN_THE_REPOSITORY = os.path.isfile(os.path.join(ROOT, ".claude-plugin", "marketplace.json"))
+pytestmark = pytest.mark.skipif(
+    not IN_THE_REPOSITORY,
+    reason="packaging is checked against the repository layout; this is an installed copy")
 
 
 def _read_json(*parts):
