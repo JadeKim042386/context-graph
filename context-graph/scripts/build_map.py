@@ -76,15 +76,36 @@ def _drop_mentions_that_repeat_a_named_relation(links):
 
 
 def _fingerprint(source_dirs):
-    """Summarise the documents: how many there are and the newest change time.
+    """Summarise what the map is built from: the documents, and the code that reads them.
 
-    The count is part of it because a deleted document leaves the newest time untouched.
+    The count is part of it because a deleted document leaves the newest time untouched, and
+    the code is part of it because changing how the map is shaped changes the map.
     """
     count, newest = 0, 0.0
     for path in _document_files(source_dirs):
         count += 1
         newest = max(newest, os.path.getmtime(path))
-    return {"documents": count, "newest": round(newest, 3)}
+    # The code that builds the map is part of what the map looks like. Without this, changing
+    # how ids are made left the old map in place until somebody happened to edit a document,
+    # so when the change landed was anyone's guess.
+    return {"documents": count, "newest": round(newest, 3), "builder": _builder_stamp()}
+
+
+def _builder_stamp():
+    """When the files that decide the map's shape were last changed.
+
+    `conflicts.py` is in here because the report it writes beside the map is written by this
+    build too: without it, changing what counts as a conflict left the old report standing
+    until somebody happened to edit a document.
+    """
+    here = os.path.dirname(os.path.abspath(__file__))
+    stamps = []
+    for name in ("build_map.py", "parse_markdown.py", "parse_html.py", "conflicts.py"):
+        try:
+            stamps.append(round(os.path.getmtime(os.path.join(here, name)), 3))
+        except OSError:
+            pass
+    return max(stamps, default=0.0)
 
 
 def _fingerprint_path(map_path):
@@ -134,7 +155,25 @@ def _document_ids(paths_and_names):
                      if _title_key(other_name) == key]
             chosen += "__" + _distinguishing_path(path, twins)
         ids[path] = chosen
+    # Nothing above may hand two documents the same id: one id shared is two files merged into
+    # one node, which is the whole reason these are built the way they are. The check is cheap
+    # and it does not depend on the rules above being right.
+    taken = set()
+    for path in sorted(ids):
+        chosen = ids[path]
+        if chosen in taken:
+            chosen += "__" + _whole_path(path)
+            while chosen in taken:
+                chosen += "_"
+        taken.add(chosen)
+        ids[path] = chosen
     return ids
+
+
+def _whole_path(path):
+    """Every folder above a document, as one piece of an id."""
+    return "_".join(_title_key(part).replace(" ", "_")
+                    for part in os.path.dirname(path).split(os.sep) if part)
 
 
 def _distinguishing_path(path, twins):
@@ -144,16 +183,23 @@ def _distinguishing_path(path, twins):
     scanned keeps the plain name, the next gets a 2 - reads the same but is not the same
     thing: the number depends on what else the scan found, so adding a document renames one
     that was already there.
+
+    Two folders count as telling a document apart only if they still differ once they are
+    written the way an id is written. Comparing the raw folders instead let `Knowledge` and
+    `knowledge`, or `a b` and `a_b`, look different here and come out identical.
     """
+    def suffix_at(other, depth):
+        parts = os.path.dirname(other).split(os.sep)[-depth:]
+        return "_".join(_title_key(part).replace(" ", "_") for part in parts if part)
+
     folders = os.path.dirname(path).split(os.sep)
     for depth in range(1, len(folders) + 1):
-        mine = folders[-depth:]
-        if not any(other != path and os.path.dirname(other).split(os.sep)[-depth:] == mine
-                   for other in twins):
-            return "_".join(_title_key(part).replace(" ", "_") for part in mine if part)
-    # Two documents with the same name under paths that match all the way up cannot happen
-    # on one filesystem, but the whole path is the honest answer if it ever did.
-    return "_".join(_title_key(part).replace(" ", "_") for part in folders if part)
+        mine = suffix_at(path, depth)
+        if not any(other != path and suffix_at(other, depth) == mine for other in twins):
+            return mine
+    # Same name, and folders that read the same all the way up. The whole path is the honest
+    # answer, and the caller has a final check for what even that cannot separate.
+    return _whole_path(path)
 
 
 def _shared_path_length(one, other):

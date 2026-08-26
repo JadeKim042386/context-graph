@@ -69,3 +69,20 @@ def test_the_samples_are_spread_across_documents(tmp_path):
                         encoding="utf-8")
     score = score_map(str(map_path))
     assert len({sample["source_file"] for sample in score["samples"]}) == 5
+
+
+def test_the_samples_are_spread_across_folders_too(tmp_path):
+    """Going document by document alone let all five come from whichever folder sorts first."""
+    map_path = tmp_path / "graph.json"
+    nodes = []
+    for folder, count in (("aaa", 9), ("bbb", 3), ("ccc", 3)):
+        for index in range(count):
+            nodes.append({"id": f"{folder}_{index}", "kind": "statement",
+                          "label": f"value {index} m",
+                          "source_file": f"C:/v/{folder}/note{index}.md",
+                          "source_location": 2})
+    map_path.write_text(json.dumps({"nodes": nodes, "links": []}, ensure_ascii=False),
+                        encoding="utf-8")
+    score = score_map(str(map_path))
+    folders = {os.path.dirname(sample["source_file"]) for sample in score["samples"]}
+    assert len(folders) == 3

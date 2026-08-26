@@ -47,16 +47,29 @@ def score_map(map_path):
         (node for node in nodes
          if node.get("kind") == "statement" and NUMBER_PATTERN.search(node["label"] or "")),
         key=lambda node: node["id"])
-    per_document = {}
+    # Grouped by folder first, then by document. Going document by document alone let the five
+    # come from whichever folder sorts first - the same "took what the alphabet put in front"
+    # the per-document grouping was meant to fix, one level up.
+    per_folder = {}
     for node in candidates:
-        per_document.setdefault(node["source_file"], []).append(node)
-    spread = []
-    for round_number in range(max((len(found) for found in per_document.values()), default=0)):
-        for source_file in sorted(per_document):
-            if round_number < len(per_document[source_file]):
-                spread.append(per_document[source_file][round_number])
-        if len(spread) >= SAMPLE_COUNT:
-            break
+        folder = os.path.dirname(node["source_file"])
+        per_folder.setdefault(folder, {}).setdefault(node["source_file"], []).append(node)
+    queues = {folder: [found for _name, found in sorted(in_folder.items())]
+              for folder, in_folder in per_folder.items()}
+    spread, exhausted = [], False
+    while len(spread) < SAMPLE_COUNT and not exhausted:
+        exhausted = True
+        for folder in sorted(queues):
+            waiting = queues[folder]
+            while waiting and not waiting[0]:
+                waiting.pop(0)                       # this document has none left to give
+            if not waiting:
+                continue
+            spread.append(waiting[0].pop(0))
+            waiting.append(waiting.pop(0))           # and the next turn goes to the next document
+            exhausted = False
+            if len(spread) >= SAMPLE_COUNT:
+                break
     samples = [{"label": node["label"], "source_file": node["source_file"],
                 "source_location": node["source_location"], "matched": False}
                for node in spread[:SAMPLE_COUNT]]
