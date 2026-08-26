@@ -505,6 +505,24 @@ def matching_word_count(label, words):
     return carried
 
 
+def document_labels(map_path):
+    """The labels of the nodes that stand for a whole document, read from the map.
+
+    The query tool prints a label, a file and a line, but not what kind of node it was, so
+    whether a line is a document used to be guessed from its line number being 1. A document
+    written on one line - which is how a generated HTML report usually arrives - has every one
+    of its statements at line 1, and the guess threw all of them away. The map knows.
+    """
+    if not os.path.exists(map_path):
+        return set()
+    try:
+        with open(map_path, encoding="utf-8") as handle:
+            nodes = json.load(handle)["nodes"]
+    except (OSError, ValueError, KeyError):
+        return set()
+    return {node.get("label") for node in nodes if node.get("kind") == "document"}
+
+
 def statements_carrying_the_words(map_path, words, limit=DIRECT_LOOKUP_LIMIT):
     """Statements whose own text carries the asked words, read straight out of the map.
 
@@ -562,7 +580,7 @@ def dropped_notice(count, budget):
             f"narrow the words, or hand the topic to a subagent and take only the conclusion]")
 
 
-def condense_answer(raw_answer, budget=None, question="", direct=()):
+def condense_answer(raw_answer, budget=None, question="", direct=(), documents_named=None):
     """Keep the statements out of a query answer and drop the traversal noise.
 
     The query tool prints its traversal header, every node it walked through and every
@@ -601,7 +619,11 @@ def condense_answer(raw_answer, budget=None, question="", direct=()):
                                       found.group("line"))
         if not source or line_number == "None":
             continue
-        if line_number == "1":                       # the node standing for the whole document
+        # A node standing for a whole document. The map says which labels those are; without
+        # it, fall back to the line number, which is where a document node sits.
+        is_document = (label in documents_named if documents_named is not None
+                       else line_number == "1")
+        if is_document:
             if label not in documents:
                 documents.append(label)
             continue
@@ -709,7 +731,8 @@ def run(mode, arguments, source_dirs, map_path, budget):
     question = " ".join(arguments)
     direct = (statements_carrying_the_words(map_path, asked_words(question))
               if mode == "query" else [])
-    sys.stdout.write(condense_answer(answer, budget, question, direct) + "\n"
+    named = document_labels(map_path) if mode == "query" else None
+    sys.stdout.write(condense_answer(answer, budget, question, direct, named) + "\n"
                      if mode == "query" else answer)
     notice = truncation_notice(answer)
     if notice:

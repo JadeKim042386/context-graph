@@ -135,6 +135,26 @@ def _document_ids(paths_and_names):
     return ids
 
 
+def _nearest(candidates, from_path):
+    """Which document a title points at, when more than one document carries that title.
+
+    Two vaults both hold `index.md`, and whoever was scanned last used to win every link to
+    `[[index]]` - including the links written in the other vault. A writer means the document
+    beside them, so the one in the same folder is taken first, then the nearest folder above,
+    and only then the first by scan order.
+    """
+    if len(candidates) == 1:
+        return candidates[0][1]
+    here = os.path.dirname(from_path)
+    for folder, node_id in candidates:
+        if folder == here:
+            return node_id
+    for folder, node_id in candidates:
+        if folder and (here.startswith(folder + os.sep) or folder.startswith(here + os.sep)):
+            return node_id
+    return candidates[0][1]
+
+
 def _section_index_for(statement, section_lines):
     """Which section a statement sits under, or None if it is above the first heading.
 
@@ -161,7 +181,7 @@ def build_map(source_dirs, map_path):
     """Scan the knowledge documents, build the map, return a summary. Sources are read only."""
     started_at = time.time()
     nodes, links = [], []
-    by_key = {}
+    by_key = {}                      # title -> [(folder, id), ...], in scan order
 
     files = [(path, os.path.splitext(os.path.basename(path))[0])
              for path in _document_files(source_dirs)]
@@ -176,7 +196,8 @@ def build_map(source_dirs, map_path):
         parsed_documents.append((path, document_id, document_name, parsed))
         nodes.append({"id": document_id, "label": document_name, "kind": "document",
                       "source_file": path, "source_location": 1})
-        by_key[_title_key(document_name)] = document_id
+        by_key.setdefault(_title_key(document_name), []).append(
+            (os.path.dirname(path), document_id))
 
     for path, document_id, _document_name, parsed in parsed_documents:
         section_ids, section_lines = [], []
@@ -204,10 +225,10 @@ def build_map(source_dirs, map_path):
             key = _title_key(link["target"])
             if key not in by_key:
                 name_only_id = "name_" + key.replace(" ", "_")
-                by_key[key] = name_only_id
+                by_key[key] = [("", name_only_id)]
                 nodes.append({"id": name_only_id, "label": link["target"], "kind": "name_only",
                               "source_file": "", "source_location": None})
-            links.append({"source": document_id, "target": by_key[key],
+            links.append({"source": document_id, "target": _nearest(by_key[key], path),
                           "relation": link["relation"] or "mentions"})
 
     links = _drop_mentions_that_repeat_a_named_relation(links)

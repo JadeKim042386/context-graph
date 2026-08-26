@@ -108,3 +108,24 @@ def test_the_build_reports_the_sampled_check(tmp_path, capsys):
     (source / "facts.md").write_text("# Facts\n\n- The median is 1.19 m.\n", encoding="utf-8")
     build_map_main(["--source", str(source), "--out", str(tmp_path / "graph.json")])
     assert "samples 1/1 verbatim" in capsys.readouterr().out
+
+
+def test_a_link_goes_to_the_document_beside_the_one_that_wrote_it(tmp_path):
+    """Two vaults both hold index.md, and whoever was scanned last used to win every link."""
+    first, second = tmp_path / "vault_a", tmp_path / "vault_b"
+    for folder in (first, second):
+        folder.mkdir()
+        (folder / "index.md").write_text("# Index\n\na listing\n", encoding="utf-8")
+    (first / "note.md").write_text("# Note\n\nsee [[index]]\n", encoding="utf-8")
+    (second / "other.md").write_text("# Other\n\nsee [[index]]\n", encoding="utf-8")
+    map_path = tmp_path / "graph.json"
+    build_map([str(first), str(second)], str(map_path))
+
+    graph = json.loads(map_path.read_text(encoding="utf-8"))
+    by_id = {node["id"]: node for node in graph["nodes"]}
+    for link in graph["links"]:
+        if link["relation"] != "mentions":
+            continue
+        source_folder = os.path.dirname(by_id[link["source"]]["source_file"])
+        target_folder = os.path.dirname(by_id[link["target"]]["source_file"])
+        assert source_folder == target_folder      # each note reached its own vault's index

@@ -5,6 +5,7 @@ import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 from ask import (LABEL_CAP, MIN_STATEMENTS, USAGE, asked_words, build_graphify_command,
+                 document_labels,
                  condense_answer, fold_long_label, matching_word_count, stale_documents,
                  statements_carrying_the_words, truncation_notice)
 
@@ -312,3 +313,33 @@ def test_the_walk_budget_does_not_follow_the_answer_budget():
     command = build_graphify_command("query", ["tray width"], "C:/maps/graph.json", 500)
     assert "500" not in command
     assert "--budget" in command
+
+
+def test_the_map_says_which_labels_are_documents(tmp_path):
+    """A document written on one line has every statement at line 1, and the guess threw
+    all of them away."""
+    map_path = tmp_path / "graph.json"
+    map_path.write_text(json.dumps({"nodes": [
+        {"id": "d1", "kind": "document", "label": "report",
+         "source_file": "C:/vault/report.html", "source_location": 1},
+        {"id": "t1", "kind": "statement", "label": "the tray width is 0.66 m",
+         "source_file": "C:/vault/report.html", "source_location": 1},
+    ]}, ensure_ascii=False), encoding="utf-8")
+    named = document_labels(str(map_path))
+    assert named == {"report"}
+
+    raw = ("Start: ['x'] | depth 2\n"
+           "NODE report [src=C:/vault/report.html loc=1]\n"
+           "NODE the tray width is 0.66 m [src=C:/vault/report.html loc=1]")
+    kept = condense_answer(raw, question="tray width", documents_named=named)
+    assert "0.66 m" in kept                        # the statement survives its line number
+    assert "also touched: report" in kept          # and the document is still named as one
+
+
+def test_without_the_map_the_line_number_is_still_used():
+    raw = ("Start: ['x'] | depth 2\n"
+           "NODE report [src=C:/vault/report.md loc=1]\n"
+           "NODE the tray width is 0.66 m [src=C:/vault/report.md loc=8]")
+    kept = condense_answer(raw, question="tray width")
+    assert "0.66 m" in kept
+    assert "also touched: report" in kept
