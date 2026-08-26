@@ -293,3 +293,22 @@ def test_the_cap_holds_even_when_it_is_smaller_than_the_notice():
     """A budget too small to hold the explanation still caps the answer."""
     assert len(condense_answer("y" * 5000, budget=100)) <= 100
     assert len(condense_answer("y" * 5000, budget=20)) <= 20
+
+
+def test_the_cap_holds_when_the_tail_and_the_first_statement_would_burst_it():
+    """The first statement is kept whatever its size and the document tail is not trimmed."""
+    lines = ["Start: ['a'] | depth 2"]
+    lines += [f"NODE statement {index} carrying the word tray [src=C:/vault/note{index}.md "
+              f"loc={index + 2}]" for index in range(5)]
+    lines += [f"NODE a rather long document name number {index} [src=C:/vault/note{index}.md "
+              f"loc=1]" for index in range(5)]
+    raw = "\n".join(lines)
+    for budget in (20, 300, 900):
+        assert len(condense_answer(raw, budget=budget, question="tray")) <= budget
+
+
+def test_the_walk_budget_does_not_follow_the_answer_budget():
+    """Tying them together cut statements upstream before the ranking here could see them."""
+    command = build_graphify_command("query", ["tray width"], "C:/maps/graph.json", 500)
+    assert "500" not in command
+    assert "--budget" in command

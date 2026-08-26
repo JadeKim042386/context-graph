@@ -348,11 +348,18 @@ def stale_documents(source_dirs, map_path):
     return changed
 
 
-def build_graphify_command(mode, arguments, map_path, budget):
-    """Build the command that calls the query tool. The budget is a measured value, pinned here."""
+def build_graphify_command(mode, arguments, map_path, budget=None):
+    """Build the command that calls the query tool.
+
+    The query tool's own budget is counted in tokens and it cuts by how many neighbours a node
+    has, not by what was asked. Tying it to `answer_budget` meant that lowering the answer also
+    narrowed what the tool was allowed to return, so statements were cut upstream before the
+    ranking here ever saw them - and the count of what was left out came out short. It is
+    pinned wide instead, and `answer_budget` does its own job further down, in characters.
+    """
     command = ["graphify", mode, *arguments, "--graph", map_path]
     if mode == "query":
-        command += ["--budget", str(budget)]
+        command += ["--budget", str(WALK_TOKEN_BUDGET)]
     return command
 
 
@@ -375,6 +382,11 @@ def matched_labels(raw_answer):
     return [(single or double).replace("\\'", "'").replace('\\"', '"')
             for single, double in QUOTED_SEED_PATTERN.findall(header.group("seeds"))]
 
+
+# How much the query tool may walk before it cuts, counted in tokens (it allows about three
+# characters per token). Wide enough that the ranking below decides what survives, rather than
+# a cut made upstream by how many neighbours a node happened to have.
+WALK_TOKEN_BUDGET = 20000
 
 # Words too common to tell one statement from another, so they are not counted as a match.
 COMMON_WORDS = frozenset("""a an and are as at be by do does for from has have how in into is it
@@ -559,7 +571,9 @@ def condense_answer(raw_answer, budget=None, question="", direct=()):
     and drop the rest. A node with no location is a name someone linked to and never
     wrote, so it has no value to return.
 
-    `budget` caps what this returns, in **characters**. Asking here is only worth it when it
+    `budget` caps what this returns, in **characters**. Two short notices can follow it on the
+    way out - that the question was broad, that the map lags the documents - and those are how
+    the caller learns the answer was narrowed, so they are printed outside the cap. Asking here is only worth it when it
     costs less than opening the document, and a document is measured in characters, so the
     answer has to be too. The query tool's own budget is counted in tokens and cuts at about
     three times this number, which is why the cap is applied again here. Statements are
@@ -669,6 +683,10 @@ def condense_answer(raw_answer, budget=None, question="", direct=()):
     condensed = "\n".join(kept) + tail
     if dropped:
         condensed += dropped_notice(dropped, budget)
+    if budget and len(condensed) > budget:
+        # The first statement is kept whatever its size, and the document tail is not trimmed,
+        # so the running total can still land over. Measure the finished answer and cut it.
+        condensed = condensed[:budget]
     return condensed
 
 

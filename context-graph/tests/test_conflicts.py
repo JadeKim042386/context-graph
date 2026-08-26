@@ -89,3 +89,10 @@ def test_another_word_between_the_name_and_the_number_breaks_the_tie():
     """This is what made every one of this pass's reports a false alarm."""
     assert not conflicts._binds(" measured across the whole rack ")
     assert not conflicts._binds(" 랙 전체에서 잰 ")
+
+
+def test_a_comma_starts_the_next_clause():
+    """Without this, "tray width, 300 mm of clearance" was read as a tray width of 0.3 m."""
+    assert not conflicts._binds(", ")
+    assert not conflicts._binds(" ; ")
+    assert conflicts._binds(" : ")
