@@ -135,6 +135,20 @@ def _document_ids(paths_and_names):
     return ids
 
 
+def _shared_path_length(one, other):
+    """How much of a path two folders have in common. Nothing in common counts as zero.
+
+    Two folders on different drives - which is exactly the shape this is here to sort out,
+    since vaults get kept on separate drives - have no common path at all, and asking for one
+    raises. So does a mix of absolute and relative. Neither is an error worth stopping a build
+    for: they simply share nothing.
+    """
+    try:
+        return len(os.path.commonpath([one, other]))
+    except ValueError:
+        return 0
+
+
 def _nearest(candidates, from_path):
     """Which document a title points at, when more than one document carries that title.
 
@@ -151,7 +165,7 @@ def _nearest(candidates, from_path):
             return node_id
     # Whoever shares the longest path with the writer is the nearest. Taking the first match
     # instead took the shallowest one, which is the farthest - the opposite of what was meant.
-    overlapping = [(len(os.path.commonpath([folder, here])), node_id)
+    overlapping = [(_shared_path_length(folder, here), node_id)
                    for folder, node_id in candidates if folder]
     if overlapping:
         depth, node_id = max(overlapping, key=lambda pair: pair[0])

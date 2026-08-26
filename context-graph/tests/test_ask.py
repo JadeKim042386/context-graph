@@ -438,3 +438,19 @@ def test_a_word_that_only_looks_like_a_particle_keeps_its_syllables():
 def test_without_a_map_to_read_the_line_number_decides():
     """The fallback was dead: an empty set is not None, so it never ran."""
     assert document_labels("no-such-map.json") is None
+
+
+def test_a_noun_that_ends_in_a_particle_letter_keeps_its_syllables():
+    """마을 is not 마 plus a particle, and 마 would match anything."""
+    assert every_form(asked_words("마을 이름")) == {"마을", "이름"}
+
+
+def test_the_count_of_what_was_left_out_survives_a_mid_statement_cut():
+    """However the answer had to narrow, the reader has to know that it did."""
+    lines = ["Start: ['x'] | depth 2"]
+    lines += [f"NODE tray width statement {i} " + "x" * 300 + f" [src=C:/v/a{i}.md loc={i + 5}]"
+              for i in range(4)]
+    cut = condense_answer(chr(10).join(lines), budget=500, question="tray width")
+    assert len(cut) <= 500
+    assert "cut mid-statement" in cut
+    assert "left out" in cut
