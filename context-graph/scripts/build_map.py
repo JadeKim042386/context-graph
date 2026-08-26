@@ -116,23 +116,44 @@ def _document_ids(paths_and_names):
     Whoever is scanned first must not get to keep the plain name either. If it did, adding a
     second `index.md` would rename the first one, and every id that was ever written down
     beside the map would point at nothing. So a name that appears more than once gives *all*
-    of its documents the folder they sit in, and the folder settles it for good.
+    of its documents the folder they sit in.
+
+    One folder is often not enough. This vault holds `_CLAUDE.md`, `index.md` and
+    `overview.md` twice over, and both copies of each sit in a folder called `knowledge` -
+    so the folder settles nothing and a counted suffix took over, which put the ids back at
+    the mercy of the scan order. Enough of the path is taken to tell them apart, and then
+    what any one document is called no longer depends on what else was scanned.
     """
     seen = collections.Counter(_title_key(name) for _path, name in paths_and_names)
-    ids, taken = {}, set()
+    ids = {}
     for path, name in paths_and_names:
         key = _title_key(name)
         chosen = "doc_" + key.replace(" ", "_")
         if seen[key] > 1:
-            folder = _title_key(os.path.basename(os.path.dirname(path))).replace(" ", "_")
-            chosen = f"{chosen}__{folder}" if folder else chosen
-        candidate, suffix = chosen, 2
-        while candidate in taken:                    # same name in two folders of the same name
-            candidate = f"{chosen}_{suffix}"
-            suffix += 1
-        taken.add(candidate)
-        ids[path] = candidate
+            twins = [other for other, other_name in paths_and_names
+                     if _title_key(other_name) == key]
+            chosen += "__" + _distinguishing_path(path, twins)
+        ids[path] = chosen
     return ids
+
+
+def _distinguishing_path(path, twins):
+    """As much of the folders above a document as it takes to tell it from its namesakes.
+
+    One folder name is taken first, then two, and so on. Counting instead - the first one
+    scanned keeps the plain name, the next gets a 2 - reads the same but is not the same
+    thing: the number depends on what else the scan found, so adding a document renames one
+    that was already there.
+    """
+    folders = os.path.dirname(path).split(os.sep)
+    for depth in range(1, len(folders) + 1):
+        mine = folders[-depth:]
+        if not any(other != path and os.path.dirname(other).split(os.sep)[-depth:] == mine
+                   for other in twins):
+            return "_".join(_title_key(part).replace(" ", "_") for part in mine if part)
+    # Two documents with the same name under paths that match all the way up cannot happen
+    # on one filesystem, but the whole path is the honest answer if it ever did.
+    return "_".join(_title_key(part).replace(" ", "_") for part in folders if part)
 
 
 def _shared_path_length(one, other):
