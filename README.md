@@ -6,7 +6,7 @@
 
 **A Claude Code plugin · Copies the structure you already wrote · No language model · 100% local**
 
-[![Tests](https://img.shields.io/badge/tests-70%20passing-brightgreen.svg)](#tests)
+[![Tests](https://img.shields.io/badge/tests-130%20passing-brightgreen.svg)](#tests)
 [![No LLM](https://img.shields.io/badge/build-no%20LLM%20calls-brightgreen.svg)](#why-it-copies-instead-of-inferring)
 [![Deterministic](https://img.shields.io/badge/output-byte--identical-brightgreen.svg)](#same-input-same-output)
 [![Python](https://img.shields.io/badge/python-3.9%2B%20stdlib%20only-blue.svg)](#requirements)
@@ -15,28 +15,25 @@
 [![macOS](https://img.shields.io/badge/macOS-supported-blue.svg)](#requirements)
 [![Linux](https://img.shields.io/badge/Linux-supported-blue.svg)](#requirements)
 
-**182 documents · 8,524 nodes · rebuilt in 0.11 s**
+**182 documents · 8,524 statements linked · rebuilt in 0.11 s**
 
 </div>
 
 ---
 
 <div align="center">
-<img alt="A Claude Code session on the left and the map on the right: you ask in your own words, the skill runs the lookup, the statement that matches lights up together with the nodes around it, a path walks the supersedes chain between decisions, and at compaction the session is written back into the notes and the map is rebuilt" src="assets/demo.gif" width="900">
+<img alt="A Claude Code session on the left, the map on the right. You ask in your own words. The matching statement lights up with the sentences near it. A path traces the chain of relations between two decisions. At compaction, the session is written back into the notes and the map rebuilds." src="assets/demo.gif" width="900">
 </div>
 
-**What it is** — your notes already say what links to what. This copies that structure into one
-map, then answers a question with **the statement itself, its file and its line number**, instead
-of making you open the file. Nothing is guessed: a statement in the map is the statement in the
-document, word for word. Building 182 documents takes about a tenth of a second and calls no model.
+**What it is** — your notes already say what links to what: a decision that supersedes another, a
+fact that backs up a claim, written as a plain link like `- supersedes [[ADR 0064]]`. Reading that
+trail today means opening file after file. This plugin copies that structure into one map instead
+of inferring it, so a question is answered in under a second with **the exact sentence, its file
+and its line number** — not a summary, not a guess, not a stack of files to open.
 
-The animation above is the whole loop, from the side you use and the side you do not see. You ask
-Claude Code in your own words; the skill turns that into a lookup on the map (the `ask.py` line);
-the statement that matches lights up **together with the nodes around it**, which is what comes
-back with the answer; a second question walks the relation words themselves; and when the
-conversation is compacted the session is written back into your notes and the map is rebuilt, so
-the next question already finds it. Every statement in your notes is a node, and every
-`- supersedes [[...]]` you wrote is an edge.
+The animation above shows the loop in motion: the matching sentence lights up **with its
+neighbours**, which is what comes back as the answer. Every statement becomes a node in the map
+this way, and every link like the one above becomes an edge between two of them.
 
 | Ask this | Get this |
 |---|---|
@@ -45,7 +42,7 @@ the next question already finds it. Every statement in your notes is a node, and
 | `ask.py --explain "<node>"` | one node and its neighbours |
 | `ask.py --chain "<decision>"` | what a decision came from and what it led to |
 | `ask.py --conflicts` | values two documents state differently |
-| `ask.py --settle "1:2"` | correct the document holding the value you did not pick |
+| `ask.py --settle "<conflict:pick>"` | correct the document holding the value you did not pick |
 
 ---
 
@@ -53,9 +50,9 @@ the next question already finds it. Every statement in your notes is a node, and
 
 - [The problem](#the-problem)
 - [Install](#install)
-- [Point it at your notes](#point-it-at-your-notes)
 - [Why it copies instead of inferring](#why-it-copies-instead-of-inferring)
 - [How it works](#how-it-works)
+- [Point it at your notes](#point-it-at-your-notes)
 - [Next to Semantica](#next-to-semantica)
 - [Command reference](#command-reference)
 - [When it refreshes](#when-it-refreshes)
@@ -168,52 +165,6 @@ does not change a single character of them.
 
 ---
 
-## Point it at your notes
-
-No path is baked into the code, so the one thing you have to do is say where your documents are.
-Write `~/.claude/context-graph/config.json` (or point the `KNOWLEDGE_MAP_CONFIG` environment
-variable at a file of your own):
-
-```json
-{
-  "source_dirs": ["C:/notes", "C:/another/folder"],
-  "map_path": "C:/notes-map/graph.json",
-  "answer_budget": 8000
-}
-```
-
-- **`source_dirs`** — one or more folders holding your `.md`, `.markdown`, `.html` or `.htm`
-  documents. They are only ever read
-- **`map_path`** — where the map goes. Keep it **outside** those folders, or the map is picked
-  up as a document on the next build. The query tool needs the `.json` suffix
-- **`answer_budget`** — the cap on an answer, in characters. Whole statements are dropped
-  from the back, never cut in the middle, and the count of what was left out is printed
-
-Then build it once:
-
-```bash
-python build_map.py
-```
-
-```
-nodes 8524 · links 9749 · located 99.8% · relations 28 kinds · components 3 · samples 5/5 verbatim · 0.11s
-```
-
-**That line is where you find out whether it is any use on your set of documents** — what it
-means is under [Quality check](#quality-check). If the folder is missing or holds no documents, the
-build says so instead of quietly producing an empty map.
-
-### The two tools it leans on
-
-| | Without it |
-|---|---|
-| [graphify](https://github.com/safishamsi/graphify) — runs the queries | building and scoring still work; asking does not |
-| [obsidian-second-brain](https://github.com/eugeniughelbur/obsidian-second-brain) — writes a session into your notes | everything works except the write-back at compaction |
-
-Neither is installed for you.
-
----
-
 ## Why it copies instead of inferring
 
 The relations between documents are **already written down**, by hand, by the person who wrote
@@ -231,16 +182,17 @@ the notes.
 Asking a model to infer that relation would be paying to guess at something already stated.
 Copying it across instead is what makes the map
 
-- **fast** — 0.11 s for 182 documents
+- **fast** — well under a second to rebuild
 - **free** — zero model calls
 - **not wrong** — a statement in the map is the statement in the document, verbatim
 - **repeatable** — build twice, get byte-identical output
 
 ### Same input, same output
 
-Every file walk and every set iteration is sorted and pinned. A test builds the map twice and
-compares it byte for byte. That test has to pass before any of the others mean anything —
-**if the output changes every run, no fix can be shown to have improved anything.**
+Every file walk and every set iteration is sorted and pinned, so a test can build the map twice
+and compare it byte for byte. **If the output changed between runs, no fix could ever be shown
+to have improved anything** — so this is the one test that has to pass before any other result
+here can be trusted.
 
 ---
 
@@ -293,20 +245,65 @@ but text inside SVG is kept** — the point a diagram makes usually lives in tha
 
 ---
 
+## Point it at your notes
+
+No path is baked into the code, so the one thing you have to do is say where your documents are.
+Write `~/.claude/context-graph/config.json` (or point the `KNOWLEDGE_MAP_CONFIG` environment
+variable at a file of your own):
+
+```json
+{
+  "source_dirs": ["C:/notes", "C:/another/folder"],
+  "map_path": "C:/notes-map/graph.json",
+  "answer_budget": 8000
+}
+```
+
+- **`source_dirs`** — one or more folders holding your `.md`, `.markdown`, `.html` or `.htm`
+  documents. They are only ever read
+- **`map_path`** — where the map goes. Keep it **outside** those folders, or the map is picked
+  up as a document on the next build. The query tool needs the `.json` suffix
+- **`answer_budget`** — the cap on an answer, in characters. Whole statements are dropped
+  from the back, never cut in the middle, and the count of what was left out is printed
+
+Then build it once:
+
+```bash
+python build_map.py
+```
+
+```
+nodes 8524 · links 9749 · located 99.8% · relations 28 kinds · components 3 · samples 5/5 verbatim · 0.11s
+```
+
+**That line is where you find out whether it is any use on your set of documents** — what it
+means is under [Quality check](#quality-check). If the folder is missing or holds no documents, the
+build says so instead of quietly producing an empty map.
+
+### The two tools it leans on
+
+| | Without it |
+|---|---|
+| [graphify](https://github.com/safishamsi/graphify) — runs the queries | building and scoring still work; asking does not |
+| [obsidian-second-brain](https://github.com/eugeniughelbur/obsidian-second-brain) — writes a session into your notes | everything works except the write-back at compaction |
+
+Neither is installed for you.
+
+---
+
 ## Next to Semantica
 
-<img alt="Two columns side by side. What goes in: your own markdown and HTML notes, against PDF, DOCX, XLSX, SQL, web and email plus crawlers, repositories and MCP servers. How the graph is made: the relation line you wrote is copied straight across with no model call, against a source passing through an LLM and embeddings that infer the nodes. What it runs on: one JSON file and the Python standard library, against pluggable vector, graph and triple stores plus an LLM and embeddings. What comes back: the statement word for word with its file and line, against an inference carrying its PROV-O lineage" src="assets/compare.png" width="880">
+<img alt="Two columns side by side. What goes in: your own markdown and HTML notes, against PDF, DOCX, XLSX, SQL, web and email plus crawlers, repositories and MCP servers. How the graph is made: the relation line you wrote is copied straight across with no model call, against a source passing through an LLM and embeddings that infer the nodes. What it runs on: one JSON file and the Python standard library, against pluggable vector, graph and triple stores plus an LLM and embeddings. What comes back: the statement word for word with its file and line, against an inference carrying its own audit trail (the PROV-O provenance standard)" src="assets/compare.png" width="880">
 
 [Semantica](https://github.com/semantica-agi/semantica) &middot; [docs](https://docs.getsemantica.ai/)
 
 ### What this does better
 
-- **Nothing is generated.** The answer is the line as it stands in the document, and every build
-  re-checks a sample against the file. There is no step where a figure could be paraphrased.
+- **Nothing is generated.** The answer is the line as it stands in the document; every build
+  re-checks a sample against the file, so a figure can never drift from its source by being
+  paraphrased.
 - **No model, no key, no service.** The build calls nothing and reaches no network. Semantica
   infers its graph with an LLM and embeddings, which is a cost and a dependency per document.
-- **The same input gives byte-identical output.** A test builds twice and compares. A pass driven
-  by a model does not offer that.
 - **One JSON file is the whole store.** Nothing to keep running between sessions.
 - **It refreshes itself.** As a plugin it rebuilds at session start, when a subagent ends, and
   around compaction. Semantica is a library you build an application around.
@@ -585,7 +582,7 @@ Nothing in the build or the query reaches the network.
 python -m pytest context-graph/tests -v
 ```
 
-**All 70 pass.** Three of them matter most.
+**All 130 pass.** Three of them matter most.
 
 - **Same input, same output** — build twice, compare byte for byte
 - **Sampled value lookup** — compare a statement in the map against that line in the source file
