@@ -7,6 +7,23 @@ description: Use when collecting, analyzing, proposing, reviewing, modifying, or
 
 Manage project knowledge as **originals → canonical records → review and approval → search and answers**. Keep originals separate from generated results; do not guess when evidence cannot be reproduced.
 
+## Cross-runtime project instructions
+
+This skill is shared by Codex and Claude Code, but host instruction files are
+platform-specific. Read the instruction file that exists in the host project:
+
+- Codex commonly uses `AGENTS.md`.
+- Claude Code commonly uses `CLAUDE.md`; it does not automatically load `AGENTS.md`.
+
+Do not require either file merely because the other platform uses it. Update the
+host's instruction file only when the shared project rules actually changed;
+otherwise keep durable state in `knowledge-base/_ops/memory/index.json`.
+
+Run the quick commands from the project root. In a Claude Code plugin checkout,
+use the plugin-root paths shown by the plugin README; in a Codex Skill upload,
+use paths relative to the project being worked on. Never assume that a
+platform-specific environment variable exists in the other runtime.
+
 ## Scope
 
 - Collect and normalize material; create Claim, Evidence, Source, and Media records

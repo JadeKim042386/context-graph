@@ -20,7 +20,7 @@ The project Skill is `context-graph/skills/knowledge-engineering/SKILL.md`. It c
 
 ### Codex or ChatGPT Skills
 
-Download `knowledge-engineering-skill-v0.3.4.zip` from the [v0.3.4 release](https://github.com/JadeKim042386/context-graph/releases/tag/v0.3.4), then open **Skills → Create → Upload** and select the ZIP file. Enable the uploaded Skill for the workspace or project where it should run.
+Download `knowledge-engineering-skill-v0.3.5.zip` from the [v0.3.5 release](https://github.com/JadeKim042386/context-graph/releases/tag/v0.3.5), then open **Skills → Create → Upload** and select the ZIP file. Enable the uploaded Skill for the workspace or project where it should run.
 
 ### Claude Code
 
@@ -38,12 +38,25 @@ The plugin can also be submitted to Anthropic's [official Claude Code plugin dir
 For either runtime, clone the tagged release and use the included Skill directory:
 
 ```bash
-git clone --branch v0.3.4 https://github.com/JadeKim042386/context-graph.git
+git clone --branch v0.3.5 https://github.com/JadeKim042386/context-graph.git
 ```
 
 Codex-compatible Skill path: `context-graph/skills/knowledge-engineering/`
 
 Claude Code plugin root: `context-graph/`
+
+### Runtime compatibility
+
+The skill content is shared by Codex and Claude Code, while each runtime keeps
+its own project instructions. Codex projects may use `AGENTS.md`; Claude Code
+projects should use `CLAUDE.md`. Claude Code does not automatically load
+`AGENTS.md`. The skill does not require either file unless the host project
+already uses it for shared rules.
+
+Script paths are also runtime-specific: Claude Code resolves plugin scripts
+through `${CLAUDE_PLUGIN_ROOT}`, while Codex and repository checkouts use paths
+relative to the project root. This avoids requiring a Claude-only environment
+variable in Codex.
 
 ## Skill scope
 

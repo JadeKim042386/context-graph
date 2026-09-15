@@ -12,8 +12,15 @@ def test_project_skill_has_a_triggering_description_and_workflow_contract():
     text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
     assert text.startswith("---\nname: knowledge-engineering\n")
     assert "description: Use when" in text
-    for required in ("analysis", "proposal", "modification", "Review", "AGENTS.md", "memory/index.json", "Archify"):
+    for required in ("analysis", "proposal", "modification", "Review", "AGENTS.md", "CLAUDE.md", "memory/index.json", "Archify"):
         assert required in text
+
+
+def test_skill_explains_cross_runtime_instruction_and_script_paths():
+    text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+    assert "Codex" in text and "Claude Code" in text
+    assert "CLAUDE_PLUGIN_ROOT" not in text
+    assert "platform-specific" in text
 
 
 def test_skill_references_the_project_contracts():
@@ -49,3 +56,5 @@ def test_readme_describes_the_knowledge_engineering_skill():
     assert "proposal" in readme
     assert "review, and modification" in readme
     assert "A Claude Code plugin" not in readme
+    assert "Codex" in readme and "Claude Code" in readme
+    assert "CLAUDE.md" in readme
