@@ -42,6 +42,7 @@ def test_the_plugin_manifest_has_a_name_and_a_version():
     plugin = _read_json("context-graph", ".claude-plugin", "plugin.json")
     assert plugin["name"] == "context-graph"
     assert plugin["version"]
+    assert plugin["author"]["name"] == "KimJooYoung"
 
 
 def test_the_plugin_packages_a_knowledge_engineer_agent():
