@@ -8,11 +8,26 @@ description: Use when looking for a value, a decision or a connection in the kno
 When you need a value or a decision written in the knowledge documents, **ask here before
 you open a file.**
 
+## Runtime-specific script path
+
+This skill is usable from Codex and Claude Code. Resolve the script path from
+the host runtime instead of copying one platform's path into the other:
+
+- Claude Code plugin: `python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" "<question>"`
+- Codex or repository checkout: `python context-graph/scripts/ask.py "<question>"`
+
+The same rule applies to `build_map.py`. If the host project exposes neither
+path, locate the checked-out `scripts/` directory before running a command.
+
 ## How to use it
 
+    # Claude Code plugin
     python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" "<question>"
-    python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" --path "<a>" "<b>"
-    python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" --explain "<node>"
+    # Codex or repository checkout
+    python context-graph/scripts/ask.py "<question>"
+
+Use the same runtime-specific prefix for `--path`, `--explain`, `--chain`,
+and `--conflicts`.
 
 ## Order of work
 
