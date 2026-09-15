@@ -1,6 +1,10 @@
 {
   "name": "context-graph",
   "description": "A knowledge map over your markdown and HTML documents that answers with the value and the line number it came from",
-  "version": "0.3.5",
+  "version": "0.3.6",
+  "author": {
+    "name": "KimJooYoung",
+    "url": "https://github.com/JadeKim042386"
+  },
   "keywords": ["knowledge", "graph", "markdown", "obsidian"]
 }
