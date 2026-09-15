@@ -8,6 +8,7 @@ import argparse
 import collections
 import json
 import os
+import re
 import sys
 import time
 
@@ -173,7 +174,12 @@ def _document_ids(paths_and_names):
 def _whole_path(path):
     """Every folder above a document, as one piece of an id."""
     return "_".join(_title_key(part).replace(" ", "_")
-                    for part in os.path.dirname(path).split(os.sep) if part)
+                    for part in _path_parts(path)[:-1] if part)
+
+
+def _path_parts(path):
+    """Split either POSIX or Windows paths, regardless of the host OS."""
+    return [part for part in re.split(r"[\\/]", path) if part]
 
 
 def _distinguishing_path(path, twins):
@@ -189,10 +195,10 @@ def _distinguishing_path(path, twins):
     `knowledge`, or `a b` and `a_b`, look different here and come out identical.
     """
     def suffix_at(other, depth):
-        parts = os.path.dirname(other).split(os.sep)[-depth:]
+        parts = _path_parts(other)[:-1][-depth:]
         return "_".join(_title_key(part).replace(" ", "_") for part in parts if part)
 
-    folders = os.path.dirname(path).split(os.sep)
+    folders = _path_parts(path)[:-1]
     for depth in range(1, len(folders) + 1):
         mine = suffix_at(path, depth)
         if not any(other != path and suffix_at(other, depth) == mine for other in twins):

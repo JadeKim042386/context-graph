@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "context-graph project structure",
+    "output": "project-structure.architecture.html",
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "canonical", "label": "Canonical knowledge data", "focus": ["knowledge-base", "concepts", "claims", "sources", "evidence", "reviews", "decisions"], "note": "Records reviewed and modified by people." },
+      { "id": "generated", "label": "Generated results", "focus": ["knowledge-base", "views", "graphify-out"], "note": "Search, relationship, and HTML results rebuilt from canonical records." },
+      { "id": "operations", "label": "Operations and validation", "focus": ["ops", "memory", "design", "agents"], "note": "Connects rules, memory pointers, design experiments, and checks." }
+    ]
+  },
+  "components": [
+    { "id": "agents", "type": "security", "label": "AGENTS.md", "sublabel": "Shared work rules", "pos": [40, 95], "size": [150, 64] },
+    { "id": "knowledge", "type": "external", "label": "knowledge/", "sublabel": "Readable HTML", "pos": [250, 95], "size": [150, 64] },
+    { "id": "knowledge-base", "type": "backend", "label": "knowledge-base/", "sublabel": "Canonical knowledge store", "pos": [470, 250], "size": [180, 72] },
+    { "id": "concepts", "type": "database", "label": "10-concepts/", "sublabel": "Terms and concepts", "pos": [40, 250], "size": [150, 64] },
+    { "id": "claims", "type": "database", "label": "20-claims/", "sublabel": "Reviewable claims", "pos": [40, 355], "size": [150, 64] },
+    { "id": "sources", "type": "external", "label": "30-sources/", "sublabel": "Original identity", "pos": [250, 355], "size": [150, 64] },
+    { "id": "evidence", "type": "database", "label": "35-evidence/", "sublabel": "Locations and evidence", "pos": [470, 390], "size": [180, 64] },
+    { "id": "reviews", "type": "security", "label": "60-reviews/", "sublabel": "Review findings", "pos": [720, 355], "size": [150, 64] },
+    { "id": "decisions", "type": "security", "label": "40-decisions/", "sublabel": "Approval decisions", "pos": [930, 355], "size": [150, 64] },
+    { "id": "views", "type": "cloud", "label": "80-views/ + _index/", "sublabel": "HTML, search, relationships", "pos": [720, 95], "size": [180, 64] },
+    { "id": "ops", "type": "backend", "label": "_ops/", "sublabel": "Rules, rebuilds, logs", "pos": [930, 95], "size": [150, 64] },
+    { "id": "memory", "type": "database", "label": "_ops/memory/", "sublabel": "Short state pointers", "pos": [930, 210], "size": [150, 64] },
+    { "id": "design", "type": "external", "label": "design/", "sublabel": "Design and experiments", "pos": [720, 210], "size": [150, 64] },
+    { "id": "graphify-out", "type": "cloud", "label": "graphify-out/", "sublabel": "External generated results", "pos": [930, 500], "size": [150, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Human-reviewed canonical area", "wraps": ["knowledge-base", "concepts", "claims", "sources", "evidence", "reviews", "decisions"] },
+    { "kind": "region", "label": "Automatically generated projections", "wraps": ["views", "graphify-out"] },
+    { "kind": "security-group", "label": "Rules, validation, and state management", "wraps": ["agents", "ops", "memory", "design"] }
+  ],
+  "connections": [
+    { "id": "concepts-to-base", "from": "concepts", "to": "knowledge-base", "label": "references" },
+    { "id": "claims-to-base", "from": "claims", "to": "knowledge-base", "label": "canonical record" },
+    { "id": "sources-to-base", "from": "sources", "to": "knowledge-base", "label": "preserve original" },
+    { "id": "evidence-to-base", "from": "evidence", "to": "knowledge-base", "label": "connect locator" },
+    { "id": "reviews-to-decisions", "from": "reviews", "to": "decisions", "label": "accept / hold", "variant": "security", "labelDy": 56 },
+    { "id": "base-to-views", "from": "knowledge-base", "to": "views", "label": "rebuild from approved snapshot", "variant": "emphasis" },
+    { "id": "ops-to-memory", "from": "ops", "to": "memory", "label": "record state pointer", "labelDy": 24 },
+    { "id": "knowledge-to-views", "from": "knowledge", "to": "views", "label": "readable view reference", "variant": "dashed" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Canonical data", "items": ["JSON in folders 10–70 is reviewed source data", "Source and Evidence explain where conclusions come from"] },
+    { "dot": "emerald", "title": "Generated results", "items": ["80-views and _index are rebuilt from canonical data", "Do not edit HTML, search indexes, or relationships directly"] },
+    { "dot": "rose", "title": "Operations record", "items": ["AGENTS.md contains shared rules", "_ops/memory contains short pointers and unresolved state"] }
+  ]
+}

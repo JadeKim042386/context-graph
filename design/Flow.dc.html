@@ -18,7 +18,7 @@
   <svg width="880" height="420" viewBox="0 0 880 420" fill="none" xmlns="http://www.w3.org/2000/svg"
        font-family="'IBM Plex Mono', ui-monospace, monospace">
 
-    <!-- 왼쪽: 지금. 답 하나를 얻으려 페이지 전체를 읽습니다 -->
+    <!-- Left: current state; the whole page is read to obtain one answer. -->
     <rect x="56" y="56" width="150" height="200" rx="4" fill="#ffffff" stroke="#cfc8bd"/>
     <g stroke="#17211d" stroke-width="3.4" stroke-linecap="round" opacity="0.82">
       <path d="M72 78 H180"/><path d="M72 92 H166"/><path d="M72 106 H186"/>
@@ -29,7 +29,7 @@
     <text x="56" y="282" font-size="11" fill="#8d857a" letter-spacing="0.8">TODAY</text>
     <text x="56" y="300" font-size="11" fill="#b0a89c">every line read, one line wanted</text>
 
-    <!-- 가운데: 물음이 지도를 지나갑니다 -->
+    <!-- Center: the question travels through the map. -->
     <circle cx="262" cy="156" r="9" fill="#c2703a"/>
     <path d="M276 156 C320 156 340 140 372 132" stroke="#c2703a" stroke-width="1.6"/>
     <text x="248" y="132" font-size="11" fill="#c2703a">?</text>
@@ -49,15 +49,15 @@
       <circle cx="624" cy="150" r="5"/><circle cx="556" cy="214" r="5"/>
     </g>
 
-    <!-- 하나만 켜집니다 -->
+    <!-- Only one node is activated. -->
     <circle cx="488" cy="176" r="19" fill="#1f6f5c" opacity="0.12"/>
     <circle cx="488" cy="176" r="12" fill="#1f6f5c" opacity="0.22"/>
     <circle cx="488" cy="176" r="7" fill="#1f6f5c"/>
 
-    <!-- 켜진 점이 자기 줄로 실을 내립니다 -->
+    <!-- The active node draws a thread to its source line. -->
     <path d="M495 182 C560 236 620 250 690 202" stroke="#1f6f5c" stroke-width="1.6"/>
 
-    <!-- 오른쪽: 그 줄 하나만 열립니다 -->
+    <!-- Right: only that one line is opened. -->
     <rect x="690" y="56" width="150" height="200" rx="4" fill="#ffffff" stroke="#cfc8bd"/>
     <g stroke="#e2dcd2" stroke-width="3.4" stroke-linecap="round">
       <path d="M706 78 H814"/><path d="M706 92 H800"/><path d="M706 106 H820"/>
@@ -70,7 +70,7 @@
     <text x="690" y="282" font-size="11" fill="#1f6f5c" letter-spacing="0.8">AFTER</text>
     <text x="690" y="300" font-size="11" fill="#b0a89c">one line, with its source</text>
 
-    <!-- 아래: 지도가 다시 만들어지는 자리 넷 -->
+    <!-- Bottom: four places where the map is rebuilt. -->
     <path d="M56 366 H824" stroke="#e2dcd2" stroke-width="1.4"/>
     <g>
       <circle cx="140" cy="366" r="16" fill="#1f6f5c" opacity="0.10"/>

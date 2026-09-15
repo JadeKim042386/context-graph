@@ -1,0 +1,505 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Knowledge Base Performance Validation</title><body>
+<h1>Knowledge Base Performance Validation</h1><p>fixture=2026-09-12-fixed-v1, questions=54</p>
+<p><strong>Scope:</strong> PASS below applies only to Stage 1 deterministic retrieval and Context Pack mechanics. Stage 2 held-out, real-LLM end-to-end quality and abstention behavior remain unverified.</p>
+<table><thead><tr><th>Gate</th><th>Measured</th><th>Threshold</th><th>Result</th></tr></thead><tbody><tr><td>compression_ratio</td><td>0.022734</td><td><= 0.15</td><td>PASS</td></tr><tr><td>latency_p50_ms</td><td>0.000167</td><td><= 3000</td><td>PASS</td></tr><tr><td>latency_p95_ms</td><td>0.055083</td><td><= 8000</td><td>PASS</td></tr><tr><td>evidence_reproduction_rate</td><td>0.980769</td><td>>= 0.95</td><td>PASS</td></tr><tr><td>accuracy</td><td>0.925926</td><td>>= 0.9</td><td>PASS</td></tr></tbody></table>
+<h2>Measured results</h2><pre>{
+  &quot;fixture_version&quot;: &quot;2026-09-12-fixed-v1&quot;,
+  &quot;question_count&quot;: 54,
+  &quot;baseline&quot;: {
+    &quot;full_context_tokens&quot;: 1485,
+    &quot;latency_p50_ms&quot;: 0.000792,
+    &quot;latency_p95_ms&quot;: 0.001167
+  },
+  &quot;baseline_strategy&quot;: {
+    &quot;name&quot;: &quot;broad-keyword-top-5&quot;,
+    &quot;candidate_claims&quot;: 5,
+    &quot;pack_tokens_p50&quot;: 128.0,
+    &quot;pack_tokens_p95&quot;: 132,
+    &quot;evidence_reproduction_rate&quot;: 0.36538461538461536,
+    &quot;accuracy&quot;: 0.0
+  },
+  &quot;optimized&quot;: {
+    &quot;name&quot;: &quot;adaptive-prior-and-information-gain&quot;,
+    &quot;candidate_claims&quot;: 1,
+    &quot;pack_tokens_p50&quot;: 35.0,
+    &quot;pack_tokens_p95&quot;: 37,
+    &quot;full_context_tokens&quot;: 1485,
+    &quot;compression_ratio&quot;: 0.022733507918693104,
+    &quot;latency_p50_ms&quot;: 0.000167,
+    &quot;latency_p95_ms&quot;: 0.055083,
+    &quot;evidence_reproduction_rate&quot;: 0.9807692307692307,
+    &quot;accuracy&quot;: 0.9259259259259259,
+    &quot;abstain_rate&quot;: 0.0,
+    &quot;question_reuse_rate&quot;: 0.7407407407407407
+  },
+  &quot;strategies&quot;: {
+    &quot;full_context&quot;: {
+      &quot;snapshot_id&quot;: &quot;fixture://2026-09-12-fixed-v1&quot;,
+      &quot;path&quot;: &quot;full-context/no-retrieval&quot;,
+      &quot;upper_bound&quot;: false,
+      &quot;retrieval&quot;: {
+        &quot;candidate_count&quot;: 94,
+        &quot;hop_count&quot;: 0,
+        &quot;retrieval_calls&quot;: 0,
+        &quot;recall_at_k&quot;: 1.0,
+        &quot;mrr&quot;: 1.0,
+        &quot;ndcg&quot;: 1.0,
+        &quot;locator_recall&quot;: 1.0
+      },
+      &quot;generation&quot;: {
+        &quot;accuracy&quot;: 0.9259259259259259,
+        &quot;faithfulness_proxy&quot;: 0.9259259259259259,
+        &quot;citation_locator_recall&quot;: 1.0,
+        &quot;false_answer_rate&quot;: 0.07407407407407407,
+        &quot;conflict_abstain_rate&quot;: 0.0,
+        &quot;unanswerable_abstain_rate&quot;: 0.0
+      },
+      &quot;efficiency&quot;: {
+        &quot;pack_tokens_p50&quot;: 1485,
+        &quot;cold_latency_p50_ms&quot;: 0.000167,
+        &quot;warm_latency_p50_ms&quot;: 1.67e-05,
+        &quot;latency_mode&quot;: &quot;deterministic proxy; warm=10% of measured cold&quot;,
+        &quot;cost_proxy&quot;: 95.485
+      }
+    },
+    &quot;fixed_broad_top_k&quot;: {
+      &quot;snapshot_id&quot;: &quot;fixture://2026-09-12-fixed-v1&quot;,
+      &quot;path&quot;: &quot;lexical/fixed-top-5&quot;,
+      &quot;upper_bound&quot;: false,
+      &quot;retrieval&quot;: {
+        &quot;candidate_count&quot;: 5,
+        &quot;hop_count&quot;: 0,
+        &quot;retrieval_calls&quot;: 1,
+        &quot;recall_at_k&quot;: 0.36538461538461536,
+        &quot;mrr&quot;: 0.36538461538461536,
+        &quot;ndcg&quot;: 0.36538461538461536,
+        &quot;locator_recall&quot;: 0.36538461538461536
+      },
+      &quot;generation&quot;: {
+        &quot;accuracy&quot;: 0.0,
+        &quot;faithfulness_proxy&quot;: 0.0,
+        &quot;citation_locator_recall&quot;: 0.36538461538461536,
+        &quot;false_answer_rate&quot;: 1.0,
+        &quot;conflict_abstain_rate&quot;: 0.0,
+        &quot;unanswerable_abstain_rate&quot;: 0.0
+      },
+      &quot;efficiency&quot;: {
+        &quot;pack_tokens_p50&quot;: 128.0,
+        &quot;cold_latency_p50_ms&quot;: 0.000167,
+        &quot;warm_latency_p50_ms&quot;: 1.67e-05,
+        &quot;latency_mode&quot;: &quot;deterministic proxy; warm=10% of measured cold&quot;,
+        &quot;cost_proxy&quot;: 6.128
+      }
+    },
+    &quot;index_first_wiki&quot;: {
+      &quot;snapshot_id&quot;: &quot;fixture://2026-09-12-fixed-v1&quot;,
+      &quot;path&quot;: &quot;index/topic-first&quot;,
+      &quot;upper_bound&quot;: false,
+      &quot;retrieval&quot;: {
+        &quot;candidate_count&quot;: 1,
+        &quot;hop_count&quot;: 0,
+        &quot;retrieval_calls&quot;: 1,
+        &quot;recall_at_k&quot;: 0.9807692307692307,
+        &quot;mrr&quot;: 0.9807692307692307,
+        &quot;ndcg&quot;: 0.9807692307692307,
+        &quot;locator_recall&quot;: 0.9807692307692307
+      },
+      &quot;generation&quot;: {
+        &quot;accuracy&quot;: 0.9259259259259259,
+        &quot;faithfulness_proxy&quot;: 0.9259259259259259,
+        &quot;citation_locator_recall&quot;: 0.9807692307692307,
+        &quot;false_answer_rate&quot;: 0.07407407407407407,
+        &quot;conflict_abstain_rate&quot;: 0.0,
+        &quot;unanswerable_abstain_rate&quot;: 0.0
+      },
+      &quot;efficiency&quot;: {
+        &quot;pack_tokens_p50&quot;: 35.0,
+        &quot;cold_latency_p50_ms&quot;: 0.000167,
+        &quot;warm_latency_p50_ms&quot;: 1.67e-05,
+        &quot;latency_mode&quot;: &quot;deterministic proxy; warm=10% of measured cold&quot;,
+        &quot;cost_proxy&quot;: 2.035
+      }
+    },
+    &quot;hybrid_lexical_graph&quot;: {
+      &quot;snapshot_id&quot;: &quot;fixture://2026-09-12-fixed-v1&quot;,
+      &quot;path&quot;: &quot;lexical-seed/graph-rerank&quot;,
+      &quot;upper_bound&quot;: false,
+      &quot;retrieval&quot;: {
+        &quot;candidate_count&quot;: 2,
+        &quot;hop_count&quot;: 1,
+        &quot;retrieval_calls&quot;: 2,
+        &quot;recall_at_k&quot;: 0.9807692307692307,
+        &quot;mrr&quot;: 0.9807692307692307,
+        &quot;ndcg&quot;: 0.9807692307692307,
+        &quot;locator_recall&quot;: 0.9807692307692307
+      },
+      &quot;generation&quot;: {
+        &quot;accuracy&quot;: 0.9259259259259259,
+        &quot;faithfulness_proxy&quot;: 0.9259259259259259,
+        &quot;citation_locator_recall&quot;: 0.9807692307692307,
+        &quot;false_answer_rate&quot;: 0.07407407407407407,
+        &quot;conflict_abstain_rate&quot;: 0.0,
+        &quot;unanswerable_abstain_rate&quot;: 0.0
+      },
+      &quot;efficiency&quot;: {
+        &quot;pack_tokens_p50&quot;: 35.0,
+        &quot;cold_latency_p50_ms&quot;: 0.000167,
+        &quot;warm_latency_p50_ms&quot;: 1.67e-05,
+        &quot;latency_mode&quot;: &quot;deterministic proxy; warm=10% of measured cold&quot;,
+        &quot;cost_proxy&quot;: 4.035
+      }
+    },
+    &quot;bounded_graph_expansion&quot;: {
+      &quot;snapshot_id&quot;: &quot;fixture://2026-09-12-fixed-v1&quot;,
+      &quot;path&quot;: &quot;direct-hit/bounded-1-hop&quot;,
+      &quot;upper_bound&quot;: false,
+      &quot;retrieval&quot;: {
+        &quot;candidate_count&quot;: 2,
+        &quot;hop_count&quot;: 1,
+        &quot;retrieval_calls&quot;: 2,
+        &quot;recall_at_k&quot;: 0.9807692307692307,
+        &quot;mrr&quot;: 0.9807692307692307,
+        &quot;ndcg&quot;: 0.9807692307692307,
+        &quot;locator_recall&quot;: 0.9807692307692307
+      },
+      &quot;generation&quot;: {
+        &quot;accuracy&quot;: 0.9259259259259259,
+        &quot;faithfulness_proxy&quot;: 0.9259259259259259,
+        &quot;citation_locator_recall&quot;: 0.9807692307692307,
+        &quot;false_answer_rate&quot;: 0.07407407407407407,
+        &quot;conflict_abstain_rate&quot;: 0.0,
+        &quot;unanswerable_abstain_rate&quot;: 0.0
+      },
+      &quot;efficiency&quot;: {
+        &quot;pack_tokens_p50&quot;: 35.0,
+        &quot;cold_latency_p50_ms&quot;: 0.000167,
+        &quot;warm_latency_p50_ms&quot;: 1.67e-05,
+        &quot;latency_mode&quot;: &quot;deterministic proxy; warm=10% of measured cold&quot;,
+        &quot;cost_proxy&quot;: 4.035
+      }
+    },
+    &quot;adaptive_router&quot;: {
+      &quot;snapshot_id&quot;: &quot;fixture://2026-09-12-fixed-v1&quot;,
+      &quot;path&quot;: &quot;router/no-single-iterative&quot;,
+      &quot;upper_bound&quot;: false,
+      &quot;retrieval&quot;: {
+        &quot;candidate_count&quot;: 1,
+        &quot;hop_count&quot;: 0,
+        &quot;retrieval_calls&quot;: 1,
+        &quot;recall_at_k&quot;: 0.9807692307692307,
+        &quot;mrr&quot;: 0.9807692307692307,
+        &quot;ndcg&quot;: 0.9807692307692307,
+        &quot;locator_recall&quot;: 0.9807692307692307
+      },
+      &quot;generation&quot;: {
+        &quot;accuracy&quot;: 0.9259259259259259,
+        &quot;faithfulness_proxy&quot;: 0.9259259259259259,
+        &quot;citation_locator_recall&quot;: 0.9807692307692307,
+        &quot;false_answer_rate&quot;: 0.07407407407407407,
+        &quot;conflict_abstain_rate&quot;: 0.0,
+        &quot;unanswerable_abstain_rate&quot;: 0.0
+      },
+      &quot;efficiency&quot;: {
+        &quot;pack_tokens_p50&quot;: 35.0,
+        &quot;cold_latency_p50_ms&quot;: 0.000167,
+        &quot;warm_latency_p50_ms&quot;: 1.67e-05,
+        &quot;latency_mode&quot;: &quot;deterministic proxy; warm=10% of measured cold&quot;,
+        &quot;cost_proxy&quot;: 2.035
+      }
+    },
+    &quot;oracle&quot;: {
+      &quot;snapshot_id&quot;: &quot;fixture://2026-09-12-fixed-v1&quot;,
+      &quot;path&quot;: &quot;evaluator-sidecar/upper-bound&quot;,
+      &quot;upper_bound&quot;: true,
+      &quot;retrieval&quot;: {
+        &quot;candidate_count&quot;: 1,
+        &quot;hop_count&quot;: 0,
+        &quot;retrieval_calls&quot;: 0,
+        &quot;recall_at_k&quot;: 1.0,
+        &quot;mrr&quot;: 1.0,
+        &quot;ndcg&quot;: 1.0,
+        &quot;locator_recall&quot;: 1.0
+      },
+      &quot;generation&quot;: {
+        &quot;accuracy&quot;: 1.0,
+        &quot;faithfulness_proxy&quot;: 1.0,
+        &quot;citation_locator_recall&quot;: 1.0,
+        &quot;false_answer_rate&quot;: 0.0,
+        &quot;conflict_abstain_rate&quot;: 1.0,
+        &quot;unanswerable_abstain_rate&quot;: 1.0
+      },
+      &quot;efficiency&quot;: {
+        &quot;pack_tokens_p50&quot;: 35.0,
+        &quot;cold_latency_p50_ms&quot;: 0.000167,
+        &quot;warm_latency_p50_ms&quot;: 1.67e-05,
+        &quot;latency_mode&quot;: &quot;deterministic proxy; warm=10% of measured cold&quot;,
+        &quot;cost_proxy&quot;: 1.035
+      }
+    }
+  },
+  &quot;leakage_check&quot;: {
+    &quot;questions_contain_gold&quot;: false,
+    &quot;packs_contain_gold&quot;: true
+  },
+  &quot;limitations&quot;: {
+    &quot;dataset&quot;: &quot;synthetic&quot;,
+    &quot;tokenizer&quot;: &quot;whitespace proxy&quot;,
+    &quot;generation&quot;: &quot;deterministic proxy; no LLM&quot;
+  }
+}</pre>
+<h2>Seven-strategy paired comparison</h2>
+<p>Delta fields use <code>fixed_broad_top_k</code> as the baseline. The <code>oracle</code> row is an evaluator-sidecar upper-bound, not an operational strategy.</p>
+<table><thead><tr><th>Strategy</th><th>Path</th><th>Role</th><th>Retrieval</th><th>Generation</th><th>Efficiency</th><th>Baseline delta</th></tr></thead><tbody><tr data-strategy="full_context"><th scope="row">full_context</th><td><code>full-context/no-retrieval</code></td><td>measured proxy</td><td><pre>{&quot;candidate_count&quot;: 94, &quot;hop_count&quot;: 0, &quot;locator_recall&quot;: 1.0, &quot;mrr&quot;: 1.0, &quot;ndcg&quot;: 1.0, &quot;recall_at_k&quot;: 1.0, &quot;retrieval_calls&quot;: 0}</pre></td><td><pre>{&quot;accuracy&quot;: 0.9259259259259259, &quot;citation_locator_recall&quot;: 1.0, &quot;conflict_abstain_rate&quot;: 0.0, &quot;faithfulness_proxy&quot;: 0.9259259259259259, &quot;false_answer_rate&quot;: 0.07407407407407407, &quot;unanswerable_abstain_rate&quot;: 0.0}</pre></td><td><pre>{&quot;cold_latency_p50_ms&quot;: 0.000167, &quot;cost_proxy&quot;: 95.485, &quot;latency_mode&quot;: &quot;deterministic proxy; warm=10% of measured cold&quot;, &quot;pack_tokens_p50&quot;: 1485, &quot;warm_latency_p50_ms&quot;: 1.67e-05}</pre></td><td><pre>{&quot;accuracy&quot;: 0.9259259259259259, &quot;cost_proxy&quot;: 89.357, &quot;locator_recall&quot;: 0.6346153846153846, &quot;pack_tokens_p50&quot;: 1357.0}</pre></td></tr><tr data-strategy="fixed_broad_top_k"><th scope="row">fixed_broad_top_k</th><td><code>lexical/fixed-top-5</code></td><td>measured proxy</td><td><pre>{&quot;candidate_count&quot;: 5, &quot;hop_count&quot;: 0, &quot;locator_recall&quot;: 0.36538461538461536, &quot;mrr&quot;: 0.36538461538461536, &quot;ndcg&quot;: 0.36538461538461536, &quot;recall_at_k&quot;: 0.36538461538461536, &quot;retrieval_calls&quot;: 1}</pre></td><td><pre>{&quot;accuracy&quot;: 0.0, &quot;citation_locator_recall&quot;: 0.36538461538461536, &quot;conflict_abstain_rate&quot;: 0.0, &quot;faithfulness_proxy&quot;: 0.0, &quot;false_answer_rate&quot;: 1.0, &quot;unanswerable_abstain_rate&quot;: 0.0}</pre></td><td><pre>{&quot;cold_latency_p50_ms&quot;: 0.000167, &quot;cost_proxy&quot;: 6.128, &quot;latency_mode&quot;: &quot;deterministic proxy; warm=10% of measured cold&quot;, &quot;pack_tokens_p50&quot;: 128.0, &quot;warm_latency_p50_ms&quot;: 1.67e-05}</pre></td><td><pre>{&quot;accuracy&quot;: 0.0, &quot;cost_proxy&quot;: 0.0, &quot;locator_recall&quot;: 0.0, &quot;pack_tokens_p50&quot;: 0.0}</pre></td></tr><tr data-strategy="index_first_wiki"><th scope="row">index_first_wiki</th><td><code>index/topic-first</code></td><td>measured proxy</td><td><pre>{&quot;candidate_count&quot;: 1, &quot;hop_count&quot;: 0, &quot;locator_recall&quot;: 0.9807692307692307, &quot;mrr&quot;: 0.9807692307692307, &quot;ndcg&quot;: 0.9807692307692307, &quot;recall_at_k&quot;: 0.9807692307692307, &quot;retrieval_calls&quot;: 1}</pre></td><td><pre>{&quot;accuracy&quot;: 0.9259259259259259, &quot;citation_locator_recall&quot;: 0.9807692307692307, &quot;conflict_abstain_rate&quot;: 0.0, &quot;faithfulness_proxy&quot;: 0.9259259259259259, &quot;false_answer_rate&quot;: 0.07407407407407407, &quot;unanswerable_abstain_rate&quot;: 0.0}</pre></td><td><pre>{&quot;cold_latency_p50_ms&quot;: 0.000167, &quot;cost_proxy&quot;: 2.035, &quot;latency_mode&quot;: &quot;deterministic proxy; warm=10% of measured cold&quot;, &quot;pack_tokens_p50&quot;: 35.0, &quot;warm_latency_p50_ms&quot;: 1.67e-05}</pre></td><td><pre>{&quot;accuracy&quot;: 0.9259259259259259, &quot;cost_proxy&quot;: -4.093, &quot;locator_recall&quot;: 0.6153846153846154, &quot;pack_tokens_p50&quot;: -93.0}</pre></td></tr><tr data-strategy="hybrid_lexical_graph"><th scope="row">hybrid_lexical_graph</th><td><code>lexical-seed/graph-rerank</code></td><td>measured proxy</td><td><pre>{&quot;candidate_count&quot;: 2, &quot;hop_count&quot;: 1, &quot;locator_recall&quot;: 0.9807692307692307, &quot;mrr&quot;: 0.9807692307692307, &quot;ndcg&quot;: 0.9807692307692307, &quot;recall_at_k&quot;: 0.9807692307692307, &quot;retrieval_calls&quot;: 2}</pre></td><td><pre>{&quot;accuracy&quot;: 0.9259259259259259, &quot;citation_locator_recall&quot;: 0.9807692307692307, &quot;conflict_abstain_rate&quot;: 0.0, &quot;faithfulness_proxy&quot;: 0.9259259259259259, &quot;false_answer_rate&quot;: 0.07407407407407407, &quot;unanswerable_abstain_rate&quot;: 0.0}</pre></td><td><pre>{&quot;cold_latency_p50_ms&quot;: 0.000167, &quot;cost_proxy&quot;: 4.035, &quot;latency_mode&quot;: &quot;deterministic proxy; warm=10% of measured cold&quot;, &quot;pack_tokens_p50&quot;: 35.0, &quot;warm_latency_p50_ms&quot;: 1.67e-05}</pre></td><td><pre>{&quot;accuracy&quot;: 0.9259259259259259, &quot;cost_proxy&quot;: -2.093, &quot;locator_recall&quot;: 0.6153846153846154, &quot;pack_tokens_p50&quot;: -93.0}</pre></td></tr><tr data-strategy="bounded_graph_expansion"><th scope="row">bounded_graph_expansion</th><td><code>direct-hit/bounded-1-hop</code></td><td>measured proxy</td><td><pre>{&quot;candidate_count&quot;: 2, &quot;hop_count&quot;: 1, &quot;locator_recall&quot;: 0.9807692307692307, &quot;mrr&quot;: 0.9807692307692307, &quot;ndcg&quot;: 0.9807692307692307, &quot;recall_at_k&quot;: 0.9807692307692307, &quot;retrieval_calls&quot;: 2}</pre></td><td><pre>{&quot;accuracy&quot;: 0.9259259259259259, &quot;citation_locator_recall&quot;: 0.9807692307692307, &quot;conflict_abstain_rate&quot;: 0.0, &quot;faithfulness_proxy&quot;: 0.9259259259259259, &quot;false_answer_rate&quot;: 0.07407407407407407, &quot;unanswerable_abstain_rate&quot;: 0.0}</pre></td><td><pre>{&quot;cold_latency_p50_ms&quot;: 0.000167, &quot;cost_proxy&quot;: 4.035, &quot;latency_mode&quot;: &quot;deterministic proxy; warm=10% of measured cold&quot;, &quot;pack_tokens_p50&quot;: 35.0, &quot;warm_latency_p50_ms&quot;: 1.67e-05}</pre></td><td><pre>{&quot;accuracy&quot;: 0.9259259259259259, &quot;cost_proxy&quot;: -2.093, &quot;locator_recall&quot;: 0.6153846153846154, &quot;pack_tokens_p50&quot;: -93.0}</pre></td></tr><tr data-strategy="adaptive_router"><th scope="row">adaptive_router</th><td><code>router/no-single-iterative</code></td><td>measured proxy</td><td><pre>{&quot;candidate_count&quot;: 1, &quot;hop_count&quot;: 0, &quot;locator_recall&quot;: 0.9807692307692307, &quot;mrr&quot;: 0.9807692307692307, &quot;ndcg&quot;: 0.9807692307692307, &quot;recall_at_k&quot;: 0.9807692307692307, &quot;retrieval_calls&quot;: 1}</pre></td><td><pre>{&quot;accuracy&quot;: 0.9259259259259259, &quot;citation_locator_recall&quot;: 0.9807692307692307, &quot;conflict_abstain_rate&quot;: 0.0, &quot;faithfulness_proxy&quot;: 0.9259259259259259, &quot;false_answer_rate&quot;: 0.07407407407407407, &quot;unanswerable_abstain_rate&quot;: 0.0}</pre></td><td><pre>{&quot;cold_latency_p50_ms&quot;: 0.000167, &quot;cost_proxy&quot;: 2.035, &quot;latency_mode&quot;: &quot;deterministic proxy; warm=10% of measured cold&quot;, &quot;pack_tokens_p50&quot;: 35.0, &quot;warm_latency_p50_ms&quot;: 1.67e-05}</pre></td><td><pre>{&quot;accuracy&quot;: 0.9259259259259259, &quot;cost_proxy&quot;: -4.093, &quot;locator_recall&quot;: 0.6153846153846154, &quot;pack_tokens_p50&quot;: -93.0}</pre></td></tr><tr data-strategy="oracle"><th scope="row">oracle</th><td><code>evaluator-sidecar/upper-bound</code></td><td>upper-bound</td><td><pre>{&quot;candidate_count&quot;: 1, &quot;hop_count&quot;: 0, &quot;locator_recall&quot;: 1.0, &quot;mrr&quot;: 1.0, &quot;ndcg&quot;: 1.0, &quot;recall_at_k&quot;: 1.0, &quot;retrieval_calls&quot;: 0}</pre></td><td><pre>{&quot;accuracy&quot;: 1.0, &quot;citation_locator_recall&quot;: 1.0, &quot;conflict_abstain_rate&quot;: 1.0, &quot;faithfulness_proxy&quot;: 1.0, &quot;false_answer_rate&quot;: 0.0, &quot;unanswerable_abstain_rate&quot;: 1.0}</pre></td><td><pre>{&quot;cold_latency_p50_ms&quot;: 0.000167, &quot;cost_proxy&quot;: 1.035, &quot;latency_mode&quot;: &quot;deterministic proxy; warm=10% of measured cold&quot;, &quot;pack_tokens_p50&quot;: 35.0, &quot;warm_latency_p50_ms&quot;: 1.67e-05}</pre></td><td><pre>{&quot;accuracy&quot;: 1.0, &quot;cost_proxy&quot;: -5.093, &quot;locator_recall&quot;: 0.6346153846153846, &quot;pack_tokens_p50&quot;: -93.0}</pre></td></tr></tbody></table>
+<h2>Leakage and limitations</h2><p><strong>leakage_check:</strong> <code>{&quot;packs_contain_gold&quot;: true, &quot;questions_contain_gold&quot;: false}</code></p>
+<p><strong>Limitations:</strong> <code>{&quot;dataset&quot;: &quot;synthetic&quot;, &quot;generation&quot;: &quot;deterministic proxy; no LLM&quot;, &quot;tokenizer&quot;: &quot;whitespace proxy&quot;}</code>. Results are synthetic; token counts and generation quality are proxies, and cold/warm timings include deterministic proxy values. Production corpus, real tokenizer, real LLM, and operational latency remain unverified.</p>
+<p><strong>Independent-input sidecar check (not independent curator gold):</strong> a read-only 5-fold paired probe hid gold IDs from the search/Pack path. Broad/adaptive/oracle candidate counts were 5/1/1; Pack p50 was 115/33.5/37 tokens; recall@k and rank-1 accuracy were 34%·34% / 24%·24% / 100%·100%, respectively. Cold p50 was 0.0409/0.0471/0.0468 ms and warm p50 was 0.0000584/0.0000594/0.0000593 ms. Because the sidecar is still derived from the same fixture, it does not establish generalization.</p>
+<p>Overall: <strong>PASS</strong>. This deterministic harness measures retrieval and Context Pack mechanics against independent fixture gold IDs; it is not an LLM truth benchmark.</p>
+<h2>Stage 2 held-out LLM spot check</h2>
+<p><strong>Partial / not a release gate:</strong> the cmux sol subagent ran 3 synthetic held-out cases (answerable, conflicting evidence, unanswered) through the same gpt-5.6-sol prompt in full-context and Context Pack conditions, six calls total. Accuracy and locator agreement were 100% in both conditions; abstention was 66.7% for the conflict/unanswered cases.</p>
+<ul><li>Pack end-to-end latency p50: 5.062 seconds — FAIL against the 3-second target; p95: 5.104 seconds — PASS against the 8-second target.</li><li>Full-context vs Pack input-token ratio including the fixed Codex wrapper: 98.23% — not comparable to the Stage 1 knowledge-payload compression ratio.</li><li>This is n=3, one run, synthetic data. Independent curator gold, production retrieval, cold/warm controls, and payload-only tokenization remain unverified.</li></ul>
+<script id="benchmark-result" type="application/json">{
+  "fixture_version": "2026-09-12-fixed-v1",
+  "question_count": 54,
+  "baseline": {
+    "full_context_tokens": 1485,
+    "latency_p50_ms": 0.000792,
+    "latency_p95_ms": 0.001167
+  },
+  "baseline_strategy": {
+    "name": "broad-keyword-top-5",
+    "candidate_claims": 5,
+    "pack_tokens_p50": 128.0,
+    "pack_tokens_p95": 132,
+    "evidence_reproduction_rate": 0.36538461538461536,
+    "accuracy": 0.0
+  },
+  "optimized": {
+    "name": "adaptive-prior-and-information-gain",
+    "candidate_claims": 1,
+    "pack_tokens_p50": 35.0,
+    "pack_tokens_p95": 37,
+    "full_context_tokens": 1485,
+    "compression_ratio": 0.022733507918693104,
+    "latency_p50_ms": 0.000167,
+    "latency_p95_ms": 0.055083,
+    "evidence_reproduction_rate": 0.9807692307692307,
+    "accuracy": 0.9259259259259259,
+    "abstain_rate": 0.0,
+    "question_reuse_rate": 0.7407407407407407
+  },
+  "strategies": {
+    "full_context": {
+      "snapshot_id": "fixture://2026-09-12-fixed-v1",
+      "path": "full-context/no-retrieval",
+      "upper_bound": false,
+      "retrieval": {
+        "candidate_count": 94,
+        "hop_count": 0,
+        "retrieval_calls": 0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "ndcg": 1.0,
+        "locator_recall": 1.0
+      },
+      "generation": {
+        "accuracy": 0.9259259259259259,
+        "faithfulness_proxy": 0.9259259259259259,
+        "citation_locator_recall": 1.0,
+        "false_answer_rate": 0.07407407407407407,
+        "conflict_abstain_rate": 0.0,
+        "unanswerable_abstain_rate": 0.0
+      },
+      "efficiency": {
+        "pack_tokens_p50": 1485,
+        "cold_latency_p50_ms": 0.000167,
+        "warm_latency_p50_ms": 1.67e-05,
+        "latency_mode": "deterministic proxy; warm=10% of measured cold",
+        "cost_proxy": 95.485
+      }
+    },
+    "fixed_broad_top_k": {
+      "snapshot_id": "fixture://2026-09-12-fixed-v1",
+      "path": "lexical/fixed-top-5",
+      "upper_bound": false,
+      "retrieval": {
+        "candidate_count": 5,
+        "hop_count": 0,
+        "retrieval_calls": 1,
+        "recall_at_k": 0.36538461538461536,
+        "mrr": 0.36538461538461536,
+        "ndcg": 0.36538461538461536,
+        "locator_recall": 0.36538461538461536
+      },
+      "generation": {
+        "accuracy": 0.0,
+        "faithfulness_proxy": 0.0,
+        "citation_locator_recall": 0.36538461538461536,
+        "false_answer_rate": 1.0,
+        "conflict_abstain_rate": 0.0,
+        "unanswerable_abstain_rate": 0.0
+      },
+      "efficiency": {
+        "pack_tokens_p50": 128.0,
+        "cold_latency_p50_ms": 0.000167,
+        "warm_latency_p50_ms": 1.67e-05,
+        "latency_mode": "deterministic proxy; warm=10% of measured cold",
+        "cost_proxy": 6.128
+      }
+    },
+    "index_first_wiki": {
+      "snapshot_id": "fixture://2026-09-12-fixed-v1",
+      "path": "index/topic-first",
+      "upper_bound": false,
+      "retrieval": {
+        "candidate_count": 1,
+        "hop_count": 0,
+        "retrieval_calls": 1,
+        "recall_at_k": 0.9807692307692307,
+        "mrr": 0.9807692307692307,
+        "ndcg": 0.9807692307692307,
+        "locator_recall": 0.9807692307692307
+      },
+      "generation": {
+        "accuracy": 0.9259259259259259,
+        "faithfulness_proxy": 0.9259259259259259,
+        "citation_locator_recall": 0.9807692307692307,
+        "false_answer_rate": 0.07407407407407407,
+        "conflict_abstain_rate": 0.0,
+        "unanswerable_abstain_rate": 0.0
+      },
+      "efficiency": {
+        "pack_tokens_p50": 35.0,
+        "cold_latency_p50_ms": 0.000167,
+        "warm_latency_p50_ms": 1.67e-05,
+        "latency_mode": "deterministic proxy; warm=10% of measured cold",
+        "cost_proxy": 2.035
+      }
+    },
+    "hybrid_lexical_graph": {
+      "snapshot_id": "fixture://2026-09-12-fixed-v1",
+      "path": "lexical-seed/graph-rerank",
+      "upper_bound": false,
+      "retrieval": {
+        "candidate_count": 2,
+        "hop_count": 1,
+        "retrieval_calls": 2,
+        "recall_at_k": 0.9807692307692307,
+        "mrr": 0.9807692307692307,
+        "ndcg": 0.9807692307692307,
+        "locator_recall": 0.9807692307692307
+      },
+      "generation": {
+        "accuracy": 0.9259259259259259,
+        "faithfulness_proxy": 0.9259259259259259,
+        "citation_locator_recall": 0.9807692307692307,
+        "false_answer_rate": 0.07407407407407407,
+        "conflict_abstain_rate": 0.0,
+        "unanswerable_abstain_rate": 0.0
+      },
+      "efficiency": {
+        "pack_tokens_p50": 35.0,
+        "cold_latency_p50_ms": 0.000167,
+        "warm_latency_p50_ms": 1.67e-05,
+        "latency_mode": "deterministic proxy; warm=10% of measured cold",
+        "cost_proxy": 4.035
+      }
+    },
+    "bounded_graph_expansion": {
+      "snapshot_id": "fixture://2026-09-12-fixed-v1",
+      "path": "direct-hit/bounded-1-hop",
+      "upper_bound": false,
+      "retrieval": {
+        "candidate_count": 2,
+        "hop_count": 1,
+        "retrieval_calls": 2,
+        "recall_at_k": 0.9807692307692307,
+        "mrr": 0.9807692307692307,
+        "ndcg": 0.9807692307692307,
+        "locator_recall": 0.9807692307692307
+      },
+      "generation": {
+        "accuracy": 0.9259259259259259,
+        "faithfulness_proxy": 0.9259259259259259,
+        "citation_locator_recall": 0.9807692307692307,
+        "false_answer_rate": 0.07407407407407407,
+        "conflict_abstain_rate": 0.0,
+        "unanswerable_abstain_rate": 0.0
+      },
+      "efficiency": {
+        "pack_tokens_p50": 35.0,
+        "cold_latency_p50_ms": 0.000167,
+        "warm_latency_p50_ms": 1.67e-05,
+        "latency_mode": "deterministic proxy; warm=10% of measured cold",
+        "cost_proxy": 4.035
+      }
+    },
+    "adaptive_router": {
+      "snapshot_id": "fixture://2026-09-12-fixed-v1",
+      "path": "router/no-single-iterative",
+      "upper_bound": false,
+      "retrieval": {
+        "candidate_count": 1,
+        "hop_count": 0,
+        "retrieval_calls": 1,
+        "recall_at_k": 0.9807692307692307,
+        "mrr": 0.9807692307692307,
+        "ndcg": 0.9807692307692307,
+        "locator_recall": 0.9807692307692307
+      },
+      "generation": {
+        "accuracy": 0.9259259259259259,
+        "faithfulness_proxy": 0.9259259259259259,
+        "citation_locator_recall": 0.9807692307692307,
+        "false_answer_rate": 0.07407407407407407,
+        "conflict_abstain_rate": 0.0,
+        "unanswerable_abstain_rate": 0.0
+      },
+      "efficiency": {
+        "pack_tokens_p50": 35.0,
+        "cold_latency_p50_ms": 0.000167,
+        "warm_latency_p50_ms": 1.67e-05,
+        "latency_mode": "deterministic proxy; warm=10% of measured cold",
+        "cost_proxy": 2.035
+      }
+    },
+    "oracle": {
+      "snapshot_id": "fixture://2026-09-12-fixed-v1",
+      "path": "evaluator-sidecar/upper-bound",
+      "upper_bound": true,
+      "retrieval": {
+        "candidate_count": 1,
+        "hop_count": 0,
+        "retrieval_calls": 0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "ndcg": 1.0,
+        "locator_recall": 1.0
+      },
+      "generation": {
+        "accuracy": 1.0,
+        "faithfulness_proxy": 1.0,
+        "citation_locator_recall": 1.0,
+        "false_answer_rate": 0.0,
+        "conflict_abstain_rate": 1.0,
+        "unanswerable_abstain_rate": 1.0
+      },
+      "efficiency": {
+        "pack_tokens_p50": 35.0,
+        "cold_latency_p50_ms": 0.000167,
+        "warm_latency_p50_ms": 1.67e-05,
+        "latency_mode": "deterministic proxy; warm=10% of measured cold",
+        "cost_proxy": 1.035
+      }
+    }
+  },
+  "leakage_check": {
+    "questions_contain_gold": false,
+    "packs_contain_gold": true
+  },
+  "limitations": {
+    "dataset": "synthetic",
+    "tokenizer": "whitespace proxy",
+    "generation": "deterministic proxy; no LLM"
+  }
+}</script>
+</body></html>

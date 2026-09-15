@@ -1,0 +1,720 @@
+{
+  "schema_version": 1,
+  "manifest_id": "MAN-KE-REBUILD-20260914-SOURCES",
+  "inventory_id": "INV-KE-REBUILD-20260914-001",
+  "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af",
+  "record_count": 22,
+  "records": [
+    {
+      "stable_id": "SRC-FC5A4B65AFD0E921",
+      "path": "design/Compare.dc.html",
+      "sha256": "5bf70e332e78c7361a8b1d04277ef1977243e2e61b6f5eef83d5bb50222874d0",
+      "current_sha256": "53751f6e3624afeb5cfcd62e136edc52e1dfc5d31a21ff2c18ca9935a3232594",
+      "size_bytes": 8223,
+      "mime": "text/html",
+      "layer_candidate": "L5-projection",
+      "canonical_status": "not-canonical-projection",
+      "is_projection": true,
+      "locator": {
+        "type": "text-position",
+        "path": "design/Compare.dc.html",
+        "line_start": 1,
+        "line_end": 179,
+        "source_sha256": "5bf70e332e78c7361a8b1d04277ef1977243e2e61b6f5eef83d5bb50222874d0"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-682D9DD2C2037ECE",
+      "path": "design/Flow.dc.html",
+      "sha256": "c8d1f9907b2a3f946a80a31ebefced3c9b1eedb765f9c55662e9b3ad50c8a820",
+      "current_sha256": "2b0d5b0486ce2e2bd86a7be15d7e9874849228b9382ccdd5e51c303388b6f486",
+      "size_bytes": 4992,
+      "mime": "text/html",
+      "layer_candidate": "L5-projection",
+      "canonical_status": "not-canonical-projection",
+      "is_projection": true,
+      "locator": {
+        "type": "text-position",
+        "path": "design/Flow.dc.html",
+        "line_start": 1,
+        "line_end": 102,
+        "source_sha256": "c8d1f9907b2a3f946a80a31ebefced3c9b1eedb765f9c55662e9b3ad50c8a820"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-F09907FFD68AB698",
+      "path": "design/Main.dc.html",
+      "sha256": "4563c18ec0069dcf80e87351983d81183930ef1efa11ab95eed704b7620797f1",
+      "current_sha256": "d4d2d2d82c47900644b75fe900a7c7f4e167ed8b4ba22f6f3c200abbfaedbd83",
+      "size_bytes": 4764,
+      "mime": "text/html",
+      "layer_candidate": "L5-projection",
+      "canonical_status": "not-canonical-projection",
+      "is_projection": true,
+      "locator": {
+        "type": "text-position",
+        "path": "design/Main.dc.html",
+        "line_start": 1,
+        "line_end": 117,
+        "source_sha256": "4563c18ec0069dcf80e87351983d81183930ef1efa11ab95eed704b7620797f1"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-4E4744D410BED4A8",
+      "path": "design/__pycache__/knowledge_base_performance.cpython-310.pyc",
+      "sha256": "c5bb3d90d705ed89ad2775d33d02b2e8cfc25cda52787523104403efda57a175",
+      "size_bytes": 14178,
+      "mime": "application/octet-stream",
+      "layer_candidate": "L5-derived-cache",
+      "canonical_status": "not-canonical-projection",
+      "is_projection": true,
+      "locator": {
+        "type": "byte-range",
+        "path": "design/__pycache__/knowledge_base_performance.cpython-310.pyc",
+        "byte_start": 0,
+        "byte_end": 14178,
+        "source_sha256": "c5bb3d90d705ed89ad2775d33d02b2e8cfc25cda52787523104403efda57a175"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "skipped-generated-binary",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-7B1BE9B0778F6F5A",
+      "path": "design/__pycache__/test_knowledge_base_performance.cpython-310-pytest-8.3.4.pyc",
+      "sha256": "74fa9ff30afcf0ec3de83dc3e5309bcec4b3cbbdbd9c772b4b898a2df07c0b5e",
+      "size_bytes": 10638,
+      "mime": "application/octet-stream",
+      "layer_candidate": "L5-derived-cache",
+      "canonical_status": "not-canonical-projection",
+      "is_projection": true,
+      "locator": {
+        "type": "byte-range",
+        "path": "design/__pycache__/test_knowledge_base_performance.cpython-310-pytest-8.3.4.pyc",
+        "byte_start": 0,
+        "byte_end": 10638,
+        "source_sha256": "74fa9ff30afcf0ec3de83dc3e5309bcec4b3cbbdbd9c772b4b898a2df07c0b5e"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "skipped-generated-binary",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-04176639FB221D05",
+      "path": "design/__pycache__/test_knowledge_base_performance.cpython-310.pyc",
+      "sha256": "9065de1450a10bb019dfd4c5799f7b21311b1f51c6921c6765f5ecf3c6da7ed7",
+      "size_bytes": 5779,
+      "mime": "application/octet-stream",
+      "layer_candidate": "L5-derived-cache",
+      "canonical_status": "not-canonical-projection",
+      "is_projection": true,
+      "locator": {
+        "type": "byte-range",
+        "path": "design/__pycache__/test_knowledge_base_performance.cpython-310.pyc",
+        "byte_start": 0,
+        "byte_end": 5779,
+        "source_sha256": "9065de1450a10bb019dfd4c5799f7b21311b1f51c6921c6765f5ecf3c6da7ed7"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "skipped-generated-binary",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-42FE4B8C6C764B25",
+      "path": "design/canvas.json",
+      "sha256": "3697f6cde067ef95089255b90d0fcf4153eeccc1d15923f22d915c8abf5b8ffc",
+      "size_bytes": 369,
+      "mime": "application/json",
+      "layer_candidate": "L0-raw-candidate",
+      "canonical_status": "canonical-candidate-unverified",
+      "is_projection": false,
+      "locator": {
+        "type": "json-pointer",
+        "path": "design/canvas.json",
+        "pointer": "",
+        "source_sha256": "3697f6cde067ef95089255b90d0fcf4153eeccc1d15923f22d915c8abf5b8ffc"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-4F01007A737AAFA8",
+      "path": "design/knowledge-base-context-efficiency-design.html",
+      "sha256": "c275bf4f708192f32ca2effa52591c58ae9502b5a88aefcf1bf8dcc800f15698",
+      "current_sha256": "415f65e06058fe556db1babda22fc3db97a8ce7cbd3cb82e9ae0062bc1c702be",
+      "size_bytes": 43156,
+      "mime": "text/html",
+      "layer_candidate": "L5-projection",
+      "canonical_status": "not-canonical-projection",
+      "is_projection": true,
+      "locator": {
+        "type": "text-position",
+        "path": "design/knowledge-base-context-efficiency-design.html",
+        "line_start": 1,
+        "line_end": 332,
+        "source_sha256": "c275bf4f708192f32ca2effa52591c58ae9502b5a88aefcf1bf8dcc800f15698"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-97D32C8972422312",
+      "path": "design/knowledge-base-performance-validation.html",
+      "sha256": "c5b8ed3374800ecd47a7b5734b3af57bd1ee69616421fe406e97075c1ae476aa",
+      "current_sha256": "b319a066939e20e42da9439223c57e4dbf36a20ed5f5d2fc28276c133ac8a16c",
+      "size_bytes": 30018,
+      "mime": "text/html",
+      "layer_candidate": "L5-projection",
+      "canonical_status": "not-canonical-projection",
+      "is_projection": true,
+      "locator": {
+        "type": "text-position",
+        "path": "design/knowledge-base-performance-validation.html",
+        "line_start": 1,
+        "line_end": 505,
+        "source_sha256": "c5b8ed3374800ecd47a7b5734b3af57bd1ee69616421fe406e97075c1ae476aa"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-60621EF09CAA64CA",
+      "path": "design/knowledge_base_performance.py",
+      "sha256": "d72afb77f42f9c595463b435cec894d18d07039634a71317c47b8dabc3adbb80",
+      "current_sha256": "b703b3f14c1395ecc1c36a3f1674dac68f8db7f65a9019a7eb0472e43541fc7b",
+      "size_bytes": 16825,
+      "mime": "text/plain",
+      "layer_candidate": "L0-raw-candidate",
+      "canonical_status": "canonical-candidate-unverified",
+      "is_projection": false,
+      "locator": {
+        "type": "text-position",
+        "path": "design/knowledge_base_performance.py",
+        "line_start": 1,
+        "line_end": 277,
+        "source_sha256": "d72afb77f42f9c595463b435cec894d18d07039634a71317c47b8dabc3adbb80"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-4B35B84D44DA6530",
+      "path": "design/make_demo_gif.py",
+      "sha256": "fb2462e33bc5d995549dbccf8793c8bb9bc150dd96fcd6b5b1a91ebfa705e229",
+      "size_bytes": 16756,
+      "mime": "text/plain",
+      "layer_candidate": "L0-raw-candidate",
+      "canonical_status": "canonical-candidate-unverified",
+      "is_projection": false,
+      "locator": {
+        "type": "text-position",
+        "path": "design/make_demo_gif.py",
+        "line_start": 1,
+        "line_end": 307,
+        "source_sha256": "fb2462e33bc5d995549dbccf8793c8bb9bc150dd96fcd6b5b1a91ebfa705e229"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-0581F571F2EACEF4",
+      "path": "design/performance-fixture.json",
+      "sha256": "0dfb5d47fe9ce466dcf137b7daa843d169ae757edab592a89383f950f7bf6bec",
+      "size_bytes": 6091,
+      "mime": "application/json",
+      "layer_candidate": "L0-raw-candidate",
+      "canonical_status": "canonical-candidate-unverified",
+      "is_projection": false,
+      "locator": {
+        "type": "json-pointer",
+        "path": "design/performance-fixture.json",
+        "pointer": "",
+        "source_sha256": "0dfb5d47fe9ce466dcf137b7daa843d169ae757edab592a89383f950f7bf6bec"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-562DD7C860BAEA4F",
+      "path": "design/test_knowledge_base_performance.py",
+      "sha256": "088ba16a10413eca263c99715cc3a45f9e5b08a65dd6eac53c52fb0d692c501b",
+      "size_bytes": 4502,
+      "mime": "text/x-script.python",
+      "layer_candidate": "L0-raw-candidate",
+      "canonical_status": "canonical-candidate-unverified",
+      "is_projection": false,
+      "locator": {
+        "type": "text-position",
+        "path": "design/test_knowledge_base_performance.py",
+        "line_start": 1,
+        "line_end": 116,
+        "source_sha256": "088ba16a10413eca263c99715cc3a45f9e5b08a65dd6eac53c52fb0d692c501b"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-C5666ACCA1BBC1AC",
+      "path": "graphify-out/.context-graph.json.fingerprint",
+      "sha256": "8f37f6bc2277b4bc59874c9dcefdcbd23d65032fbc1a778c2db8bc745f4ca9d9",
+      "size_bytes": 69,
+      "mime": "application/json",
+      "layer_candidate": "L5-projection",
+      "canonical_status": "not-canonical-projection",
+      "is_projection": true,
+      "locator": {
+        "type": "json-pointer",
+        "path": "graphify-out/.context-graph.json.fingerprint",
+        "pointer": "",
+        "source_sha256": "8f37f6bc2277b4bc59874c9dcefdcbd23d65032fbc1a778c2db8bc745f4ca9d9"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-242118F263E5F5A9",
+      "path": "graphify-out/cache/last_query_stamp",
+      "sha256": "70ff881f5b5b0fb7f385c7260524db8cd539553f0ca272c3e39daa8f5a63a484",
+      "size_bytes": 17,
+      "mime": "text/plain",
+      "layer_candidate": "L5-projection",
+      "canonical_status": "not-canonical-projection",
+      "is_projection": true,
+      "locator": {
+        "type": "text-position",
+        "path": "graphify-out/cache/last_query_stamp",
+        "line_start": 1,
+        "line_end": 1,
+        "source_sha256": "70ff881f5b5b0fb7f385c7260524db8cd539553f0ca272c3e39daa8f5a63a484"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-90BEA7BAF73F6B6D",
+      "path": "graphify-out/context-graph.conflicts.txt",
+      "sha256": "96b494367ffc27c3f42355d3d64f565154ad916d044d6563891b300fde502fd3",
+      "size_bytes": 725,
+      "mime": "text/plain",
+      "layer_candidate": "L5-projection",
+      "canonical_status": "not-canonical-projection",
+      "is_projection": true,
+      "locator": {
+        "type": "text-position",
+        "path": "graphify-out/context-graph.conflicts.txt",
+        "line_start": 1,
+        "line_end": 19,
+        "source_sha256": "96b494367ffc27c3f42355d3d64f565154ad916d044d6563891b300fde502fd3"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-6CEC27816BFCD8EE",
+      "path": "graphify-out/context-graph.json",
+      "sha256": "05988ece6e3bc86c61c9d7dd4e687464c0511a8ee42d1006bb21eeecd6e883c1",
+      "size_bytes": 3075502,
+      "mime": "text/plain",
+      "layer_candidate": "L5-projection",
+      "canonical_status": "not-canonical-projection",
+      "is_projection": true,
+      "locator": {
+        "type": "text-position",
+        "path": "graphify-out/context-graph.json",
+        "line_start": 1,
+        "line_end": 91348,
+        "source_sha256": "05988ece6e3bc86c61c9d7dd4e687464c0511a8ee42d1006bb21eeecd6e883c1"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-667037E800445645",
+      "path": "knowledge-base/_ops/memory/index.json",
+      "sha256": "7326e28eb2eb1c1eb29c7a463728e35ffccd28f57dd6237c0bca56a2ee08dc9c",
+      "current_sha256": "517ebb503efc4fe4e580a5a9eff193af3704c14dde83694d87f8deec2abfd5bc",
+      "size_bytes": 235,
+      "mime": "application/json",
+      "layer_candidate": "ops-metadata",
+      "canonical_status": "canonical-candidate-unverified",
+      "is_projection": false,
+      "locator": {
+        "type": "json-pointer",
+        "path": "knowledge-base/_ops/memory/index.json",
+        "pointer": "",
+        "source_sha256": "7326e28eb2eb1c1eb29c7a463728e35ffccd28f57dd6237c0bca56a2ee08dc9c"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-3BAA254AE6B353B5",
+      "path": "knowledge/animal-target-tracking-and-inference.html",
+      "sha256": "6be97814a2226e0da1463c32a11c4c8d94e6e78da903dc2895c2f0e8a2235fe0",
+      "current_sha256": "6b628924bc89e31bd0d1a52addf08ec98ad3c6fea6e60ed50f7b123a08ace89b",
+      "size_bytes": 17717,
+      "mime": "text/html",
+      "layer_candidate": "L5-projection",
+      "canonical_status": "not-canonical-projection",
+      "is_projection": true,
+      "locator": {
+        "type": "text-position",
+        "path": "knowledge/animal-target-tracking-and-inference.html",
+        "line_start": 1,
+        "line_end": 90,
+        "source_sha256": "6be97814a2226e0da1463c32a11c4c8d94e6e78da903dc2895c2f0e8a2235fe0"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-C04E8BB5CF924667",
+      "path": "knowledge/knowledge-base-architecture-design.html",
+      "sha256": "aba2f629fdc65f1248495ffcde853244039493a7087688b00d102b966eaa77ca",
+      "current_sha256": "980cc4af23f3312438e4b446a495ae32e4e5e4b312fee730afd26b5b8d979a3e",
+      "size_bytes": 20031,
+      "mime": "text/html",
+      "layer_candidate": "L5-projection",
+      "canonical_status": "not-canonical-projection",
+      "is_projection": true,
+      "locator": {
+        "type": "text-position",
+        "path": "knowledge/knowledge-base-architecture-design.html",
+        "line_start": 1,
+        "line_end": 82,
+        "source_sha256": "aba2f629fdc65f1248495ffcde853244039493a7087688b00d102b966eaa77ca"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-41B539CE79A6A913",
+      "path": "knowledge/knowledge-engineering-comparative-review.html",
+      "sha256": "070c7c2fdf6a445df5f4a1028b1847938e77c48364239631f545ad2f1adc98f7",
+      "current_sha256": "8f9ba0117af71a9282de98bb55cf9e600a5d32e0861ef1546a1da860f187d79c",
+      "size_bytes": 9316,
+      "mime": "text/html",
+      "layer_candidate": "L5-projection",
+      "canonical_status": "not-canonical-projection",
+      "is_projection": true,
+      "locator": {
+        "type": "text-position",
+        "path": "knowledge/knowledge-engineering-comparative-review.html",
+        "line_start": 1,
+        "line_end": 59,
+        "source_sha256": "070c7c2fdf6a445df5f4a1028b1847938e77c48364239631f545ad2f1adc98f7"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    },
+    {
+      "stable_id": "SRC-73214D517BC6E5D4",
+      "path": "knowledge/knowledge-engineering.html",
+      "sha256": "1d22dee8552e76b1cc90619f004848dfd102e212a2d679cd77f4f27030105ac6",
+      "current_sha256": "cffd4816dbf07ffac2b2fb50c7b899a09ad313c78c61f56f6a4b28ab66267a4a",
+      "size_bytes": 712837,
+      "mime": "text/html",
+      "layer_candidate": "L5-projection",
+      "canonical_status": "not-canonical-projection",
+      "is_projection": true,
+      "locator": {
+        "type": "text-position",
+        "path": "knowledge/knowledge-engineering.html",
+        "line_start": 1,
+        "line_end": 2785,
+        "source_sha256": "1d22dee8552e76b1cc90619f004848dfd102e212a2d679cd77f4f27030105ac6"
+      },
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-INVENTORY",
+        "agent": "knowledge-engineer",
+        "method": "rg --files -uu + file --mime-type + sha256",
+        "observed_at": "2026-09-14T05:16:15.437181+00:00",
+        "inventory_id": "INV-KE-REBUILD-20260914-001",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      },
+      "media_status": {
+        "is_binary_media": false,
+        "preservation_status": "preserved-in-place",
+        "extraction_status": "not-applicable",
+        "rights_status": "unverified",
+        "canonical_url": null
+      }
+    }
+  ]
+}

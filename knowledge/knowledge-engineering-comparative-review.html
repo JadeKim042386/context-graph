@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A comparative review of the project's knowledge-engineering design against standards and research.">
+  <title>Knowledge Engineering Comparative Review</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.55; }
+    body { max-width: 1120px; margin: 0 auto; padding: 2rem; color: #1f2937; background: #fff; }
+    h1, h2 { color: #111827; }
+    h1 { margin-bottom: .25rem; }
+    .meta { color: #6b7280; }
+    .callout { padding: 1rem 1.2rem; border-left: 4px solid #2563eb; background: #eff6ff; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0 2rem; font-size: .95rem; }
+    th, td { border: 1px solid #d1d5db; padding: .65rem; vertical-align: top; text-align: left; }
+    th { background: #f3f4f6; }
+    code { background: #f3f4f6; padding: .1rem .25rem; border-radius: .2rem; }
+    li { margin: .45rem 0; }
+  </style>
+</head>
+<body>
+  <h1>Knowledge Engineering Comparative Review</h1>
+  <p class="meta">Reviewed on 2026-09-12 · Standards, research, and the current project were compared using the same evidence-oriented criteria.</p>
+
+  <p class="callout">Summary: the project is directionally aligned with evidence graphs, provenance, and retrieval-augmented generation evaluation. The main gaps are independent gold data, media-aware locators, automatic validation, and an operational graphify/performance runner.</p>
+
+  <h2>Review criteria</h2>
+  <ul>
+    <li>Can each claim be connected to a precise source span or media locator?</li>
+    <li>Is provenance recorded in a way that supports auditing and reproducibility?</li>
+    <li>Can graph structure and constraints be validated automatically?</li>
+    <li>Are retrieval quality and answer-generation quality evaluated separately?</li>
+    <li>Do the records support text, images, video, and audio rather than text alone?</li>
+  </ul>
+
+  <h2>Comparable material and implementation implications</h2>
+  <table>
+    <thead><tr><th>Material</th><th>What it contributes</th><th>Current project implication</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><a href="https://www.w3.org/TR/annotation-model/">W3C Web Annotation Data Model</a></td><td>Separates a target resource from a body and supports selectors for exact fragments.</td><td>Use a common evidence record with a source URI, media type, and locator.</td><td>Needs additional implementation</td></tr>
+      <tr><td><a href="https://www.w3.org/TR/prov-o/">PROV-O</a></td><td>Models entities, activities, and agents so that derivation and responsibility are explicit.</td><td>Record collection, transformation, review, and publication activities.</td><td>Partially reflected</td></tr>
+      <tr><td><a href="https://www.w3.org/TR/rdf11-concepts/">RDF 1.1 Concepts</a></td><td>Provides a graph model for subject–predicate–object statements and named graphs.</td><td>Keep claim identity and graph membership stable across rebuilds.</td><td>Partially reflected</td></tr>
+      <tr><td><a href="https://www.w3.org/TR/sparql11-query/">SPARQL 1.1 Query</a></td><td>Defines graph querying and joins across related statements.</td><td>Make relationship and provenance queries reproducible instead of relying only on ad hoc search.</td><td>Not implemented</td></tr>
+      <tr><td><a href="https://www.w3.org/TR/shacl/">SHACL</a></td><td>Describes machine-checkable constraints for graph shape and required fields.</td><td>Convert record-schema requirements into executable validation rules.</td><td>Needs additional implementation</td></tr>
+      <tr><td><a href="https://www.w3.org/TR/vocab-dcat-3/">DCAT 3</a></td><td>Describes datasets, distributions, catalogs, and their access locations.</td><td>Represent source collections and generated distributions as discoverable assets.</td><td>Partially reflected</td></tr>
+      <tr><td><a href="https://www.w3.org/TR/vocab-dqv/">Data Quality Vocabulary</a></td><td>Provides a vocabulary for measurable quality dimensions and observations.</td><td>Store validation results with metric names, values, thresholds, and timestamps.</td><td>Needs additional implementation</td></tr>
+      <tr><td><a href="https://www.w3.org/TR/rdf-canon/">RDF Dataset Canonicalization 1.0</a></td><td>Supports deterministic normalization and hashing of RDF datasets.</td><td>Use canonical serialization when comparing graph snapshots.</td><td>Not implemented</td></tr>
+      <tr><td><a href="https://www.w3.org/TR/json-ld11/">JSON-LD 1.1</a></td><td>Combines JSON usability with linked-data semantics and context definitions.</td><td>Use explicit contexts when exporting records for other tools.</td><td>Partially reflected</td></tr>
+      <tr><td><a href="https://www.nist.gov/itl/ai-risk-management-framework/ai-rmf-generative-ai-profile">NIST AI RMF: Generative AI Profile</a></td><td>Frames risk management around governance, measurement, and ongoing monitoring.</td><td>Attach risk, review status, and limitations to knowledge outputs.</td><td>Needs additional implementation</td></tr>
+      <tr><td><a href="https://docs.ragas.io/en/stable/">Ragas</a></td><td>Separates retrieval and response dimensions such as context precision, context recall, and faithfulness.</td><td>Report retrieval metrics independently from answer metrics.</td><td>Partially reflected</td></tr>
+      <tr><td><a href="https://arxiv.org/abs/2311.09476">ARES</a></td><td>Uses synthetic or human-labeled evaluators for context relevance, answer faithfulness, and answer relevance.</td><td>Maintain an independent evaluation set and disclose how labels were produced.</td><td>Needs additional implementation</td></tr>
+      <tr><td><a href="https://arxiv.org/abs/2303.04971">Adaptive-RAG</a></td><td>Chooses a retrieval strategy based on question complexity.</td><td>Measure routing decisions and compare simple, multi-step, and no-retrieval paths.</td><td>Needs additional implementation</td></tr>
+      <tr><td><a href="https://arxiv.org/abs/2004.05150">Lost in the Middle</a></td><td>Shows that relevant information placed in the middle of a long context can be used less effectively.</td><td>Test evidence ordering and context length instead of assuming that more context is always better.</td><td>Needs additional implementation</td></tr>
+      <tr><td><a href="https://www.pnas.org/doi/10.1073/pnas.1216073110">Infotaxis</a></td><td>Models search as sequential information gathering under uncertainty.</td><td>Treat biological search inspiration as a hypothesis that requires an operational benchmark.</td><td>Hypothesis only</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Problems found in the current project</h2>
+  <ol>
+    <li>Operational evidence and synthetic fixtures are mixed, so benchmark improvements do not yet prove production improvement.</li>
+    <li>Locators are mostly text-centric and do not yet provide a consistent frame, timestamp, page, or region model for media.</li>
+    <li>Structural validation is still partly manual; schema checks should become executable gates.</li>
+    <li>The search strategy makes stronger claims than the current measurements support.</li>
+    <li>The graphify and performance runners are not yet connected to one repeatable operational evaluation path.</li>
+  </ol>
+
+  <h2>Iteration plan</h2>
+  <ol>
+    <li>Extend the evidence schema with source URI, media type, locator, capture time, extraction method, and confidence.</li>
+    <li>Create an independent gold set that is not used to tune retrieval or answer prompts.</li>
+    <li>Run paired operational measurements for the baseline and the proposed strategy on the same cases.</li>
+    <li>Publish retrieval, generation, latency, cost, and failure metrics as separate dimensions.</li>
+    <li>Keep source links and implementation status next to each design decision so later reviews can distinguish implemented, partial, and hypothetical behavior.</li>
+  </ol>
+
+  <h2>Judgment</h2>
+  <p>The design direction is consistent with the cited standards and RAG evaluation research. It should not yet be described as fully validated. Independent gold data, media locators, automatic graph validation, and an operational graphify runner are required before performance claims become reliable. The biological-search component remains a research hypothesis until it is tested with paired production measurements.</p>
+</body>
+</html>

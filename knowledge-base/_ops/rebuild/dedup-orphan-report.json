@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "report_id": "RPT-KE-REBUILD-20260914-DEDUP-ORPHAN",
+  "inventory_id": "INV-KE-REBUILD-20260914-001",
+  "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af",
+  "file_count": 22,
+  "sha256_duplicate_groups": [],
+  "duplicate_file_count": 0,
+  "local_references": {
+    "occurrences": 26,
+    "broken_count": 3,
+    "broken": [
+      {
+        "source_path": "design/Compare.dc.html",
+        "tag": "script",
+        "attribute": "src",
+        "value": "./support.js",
+        "target_path": "design/support.js",
+        "fragment": null,
+        "reason": "missing-target"
+      },
+      {
+        "source_path": "design/Flow.dc.html",
+        "tag": "script",
+        "attribute": "src",
+        "value": "./support.js",
+        "target_path": "design/support.js",
+        "fragment": null,
+        "reason": "missing-target"
+      },
+      {
+        "source_path": "design/Main.dc.html",
+        "tag": "script",
+        "attribute": "src",
+        "value": "./support.js",
+        "target_path": "design/support.js",
+        "fragment": null,
+        "reason": "missing-target"
+      }
+    ]
+  },
+  "external_urls": {
+    "occurrences": 2440,
+    "unique": 1203,
+    "duplicate_values": 799
+  },
+  "external_media": {
+    "occurrences": 17,
+    "unique_urls": 17,
+    "by_kind": {
+      "embedded-video-or-document": 9,
+      "image": 8
+    },
+    "rights_status": "unverified",
+    "local_binary_media_files": 0
+  },
+  "orphan_definition": "A local HTML href/src is broken when its target file or explicit HTML fragment is absent from the fixed inventory filesystem snapshot."
+}

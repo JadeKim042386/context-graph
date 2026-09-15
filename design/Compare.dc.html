@@ -26,13 +26,13 @@
       </marker>
     </defs>
 
-    <!-- 두 기둥의 이름. 왼쪽은 이 플러그인, 오른쪽은 비교 대상 -->
+    <!-- Names of the two columns: this plugin on the left and the comparator on the right. -->
     <text x="40" y="32" font-size="14" font-weight="600" letter-spacing="1.2" fill="#1f6f5c">CONTEXT GRAPH</text>
     <text x="40" y="50" font-size="11" fill="#b0a89c">a Claude Code plugin</text>
     <text x="450" y="32" font-size="14" font-weight="600" letter-spacing="1.2" fill="#3f6b8f">SEMANTICA</text>
     <text x="450" y="50" font-size="11" fill="#b0a89c">a framework you build on</text>
 
-    <!-- 칸을 나누는 가로 실선 -->
+    <!-- Horizontal rules divide the rows. -->
     <g stroke="#e8e2d8" stroke-width="1">
       <path d="M40 68 H840"/>
       <path d="M40 174 H840"/>
@@ -41,7 +41,7 @@
       <path d="M40 506 H840"/>
     </g>
 
-    <!-- 두 기둥 사이 세로선. 줄 이름이 놓인 자리는 비워 둡니다 -->
+    <!-- Vertical line between the columns; the row-label space remains empty. -->
     <g stroke="#e8e2d8" stroke-width="1">
       <path d="M440 104 V172"/>
       <path d="M440 210 V278"/>
@@ -49,7 +49,7 @@
       <path d="M440 422 V490"/>
     </g>
 
-    <!-- 줄 이름 -->
+    <!-- Row labels. -->
     <g font-size="10" letter-spacing="1.4" fill="#a49c90" text-anchor="middle">
       <text x="440" y="92">WHAT GOES IN</text>
       <text x="440" y="198">HOW THE GRAPH IS MADE</text>
@@ -57,7 +57,7 @@
       <text x="440" y="410">WHAT COMES BACK</text>
     </g>
 
-    <!-- 1줄 왼쪽: 직접 쓴 노트 두 장 -->
+    <!-- Row 1 left: two directly written notes. -->
     <rect x="60" y="110" width="70" height="56" rx="3" fill="#ffffff" stroke="#d8d2c8" transform="rotate(-4 95 138)"/>
     <rect x="72" y="106" width="70" height="56" rx="3" fill="#ffffff" stroke="#cfc8bd"/>
     <g stroke-width="2.5" stroke-linecap="round">
@@ -70,7 +70,7 @@
     <text x="160" y="126" font-size="11" fill="#6b6459">your own notes</text>
     <text x="160" y="144" font-size="11" fill="#b0a89c">.md &#183; .markdown &#183; .html</text>
 
-    <!-- 1줄 오른쪽: 온갖 출처 -->
+    <!-- Row 1 right: assorted sources. -->
     <g fill="#ffffff" stroke="#cfd8e2">
       <rect x="470" y="106" width="58" height="24" rx="3"/>
       <rect x="536" y="106" width="58" height="24" rx="3"/>
@@ -90,14 +90,14 @@
     <text x="676" y="126" font-size="11" fill="#6b6459">any source</text>
     <text x="676" y="144" font-size="10" fill="#b0a89c">+ crawlers, repos, MCP</text>
 
-    <!-- 2줄 왼쪽: 사람이 적어 둔 관계 줄이 그대로 건너갑니다 -->
+    <!-- Row 2 left: human-written relation lines pass through unchanged. -->
     <rect x="60" y="222" width="190" height="26" rx="4" fill="#ffffff" stroke="#d8d2c8"/>
     <text x="70" y="239" font-size="11" fill="#1f6f5c">- supersedes [[X]]</text>
     <path d="M258 235 H298" stroke="#1f6f5c" stroke-width="1.6" marker-end="url(#tipGreen)"/>
     <circle cx="312" cy="235" r="7" fill="#1f6f5c"/>
     <text x="60" y="268" font-size="11" fill="#1f6f5c">copied &#183; 0 model calls</text>
 
-    <!-- 2줄 오른쪽: 모델이 뽑아내는 단계가 사이에 들어갑니다 -->
+    <!-- Row 2 right: a model extraction step is inserted between them. -->
     <rect x="470" y="222" width="28" height="26" rx="3" fill="#ffffff" stroke="#cfd8e2"/>
     <g stroke="#cfd8e2" stroke-width="1.6" stroke-linecap="round">
       <path d="M476 230 H492"/>
@@ -111,7 +111,7 @@
     <circle cx="702" cy="235" r="7" fill="#3f6b8f"/>
     <text x="470" y="268" font-size="11" fill="#3f6b8f">inferred, then scored</text>
 
-    <!-- 3줄 왼쪽: 결과물은 파일 하나 -->
+    <!-- Row 3 left: one output file. -->
     <path d="M60 322 H98 L112 336 V378 H60 Z" fill="#ffffff" stroke="#cfc8bd"/>
     <path d="M98 322 V336 H112" fill="none" stroke="#cfc8bd"/>
     <g stroke="#ddd6cb" stroke-width="2" stroke-linecap="round">
@@ -122,7 +122,7 @@
     <text x="124" y="344" font-size="11" fill="#6b6459">one JSON file</text>
     <text x="124" y="362" font-size="11" fill="#b0a89c">Python stdlib only</text>
 
-    <!-- 3줄 오른쪽: 뒤에 붙는 저장소들 -->
+    <!-- Row 3 right: storage systems attached behind it. -->
     <g fill="#ffffff" stroke="#b9cbdc">
       <rect x="470" y="322" width="70" height="40" rx="4"/>
       <ellipse cx="505" cy="322" rx="35" ry="7"/>
@@ -140,14 +140,14 @@
     <text x="716" y="340" font-size="10" fill="#b0a89c">+ LLM</text>
     <text x="716" y="358" font-size="10" fill="#b0a89c">+ embeddings</text>
 
-    <!-- 4줄 왼쪽: 적힌 문장 그대로와 그 줄번호 -->
+    <!-- Row 4 left: the exact written statement and its line number. -->
     <rect x="60" y="428" width="230" height="24" rx="3" fill="#ffffff" stroke="#cfc8bd"/>
     <text x="70" y="444" font-size="10.5" fill="#3c3a35">median 1.19 m, max 99.44 m</text>
     <rect x="60" y="458" width="150" height="20" rx="3" fill="#eef4f1" stroke="#bcd6cb"/>
     <text x="70" y="472" font-size="10" fill="#1f6f5c">facts.md : 192</text>
     <text x="222" y="472" font-size="11" fill="#8d857a">verbatim, with the line</text>
 
-    <!-- 4줄 오른쪽: 미루어 낸 답과 그 출처 사슬 -->
+    <!-- Row 4 right: inferred answer and its source chain. -->
     <g stroke="#3f6b8f" stroke-width="1.4">
       <path d="M488 440 H552"/>
       <path d="M568 440 H632"/>
@@ -161,7 +161,7 @@
     <text x="714" y="444" font-size="9.5" fill="#3f6b8f" text-anchor="middle">PROV-O</text>
     <text x="470" y="472" font-size="11" fill="#8d857a">an inference, with its lineage</text>
 
-    <!-- 맨 아래: 각자 자랑하는 지점이 서로 다릅니다 -->
+    <!-- Bottom: each side highlights a different strength. -->
     <text x="40" y="528" font-size="11" fill="#6b6459">182 documents &#183; 8,524 nodes &#183; rebuilt in 0.11 s</text>
     <text x="450" y="528" font-size="11" fill="#6b6459">temporal validity &#183; SPARQL &#183; precedent search</text>
   </svg>

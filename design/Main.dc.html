@@ -18,14 +18,14 @@
   <svg width="880" height="380" viewBox="0 0 880 380" fill="none" xmlns="http://www.w3.org/2000/svg"
        font-family="'IBM Plex Mono', ui-monospace, monospace">
 
-    <!-- 쌓인 문서. 뒤의 두 장은 기울여 두께를 보입니다 -->
+    <!-- Stacked documents; the two behind are tilted to show thickness. -->
     <g opacity="0.35">
       <rect x="54" y="86" width="150" height="196" rx="4" fill="#ffffff" stroke="#d8d2c8" transform="rotate(-7 129 184)"/>
       <rect x="62" y="80" width="150" height="196" rx="4" fill="#ffffff" stroke="#d8d2c8" transform="rotate(-3.5 137 178)"/>
     </g>
     <rect x="70" y="74" width="150" height="196" rx="4" fill="#ffffff" stroke="#cfc8bd"/>
 
-    <!-- 문서 안의 글줄. 대부분은 그냥 회색 -->
+    <!-- Text lines inside a document; most are neutral gray. -->
     <g stroke="#d3ccc1" stroke-width="3" stroke-linecap="round">
       <path d="M86 96 H176"/>
       <path d="M86 108 H196"/>
@@ -37,7 +37,7 @@
       <path d="M86 252 H196"/>
     </g>
 
-    <!-- 값이 든 줄과 관계를 적은 줄만 색이 있습니다 -->
+    <!-- Only lines with values or relations are colored. -->
     <g stroke-width="4" stroke-linecap="round">
       <path d="M86 120 H184" stroke="#1f6f5c"/>
       <path d="M86 144 H172" stroke="#1f6f5c"/>
@@ -45,7 +45,7 @@
       <path d="M86 204 H166" stroke="#1f6f5c"/>
     </g>
 
-    <!-- 그 줄들이 그대로 건너가 점과 이음이 됩니다 -->
+    <!-- Those lines continue into nodes and edges. -->
     <g fill="none" stroke-width="1.6" opacity="0.85">
       <path d="M188 120 C300 116 380 92 470 96" stroke="#1f6f5c"/>
       <path d="M176 144 C300 148 400 168 512 158" stroke="#1f6f5c"/>
@@ -53,7 +53,7 @@
       <path d="M182 228 C300 244 392 286 476 292" stroke="#c2703a"/>
     </g>
 
-    <!-- 지도. 점은 문장이고 선은 적어 둔 관계입니다 -->
+    <!-- The map: nodes are statements and edges are recorded relations. -->
     <g stroke="#b9b2a7" stroke-width="1.2">
       <path d="M478 96 L556 60"/>
       <path d="M478 96 L520 158"/>
@@ -91,7 +91,7 @@
       <circle cx="604" cy="140" r="8.5" fill="#1f6f5c"/>
     </g>
 
-    <!-- 어느 점이든 자기가 나온 줄로 되짚어 갑니다 -->
+    <!-- Every node traces back to the line it came from. -->
     <path d="M604 148 C600 236 420 262 232 216" stroke="#1f6f5c" stroke-width="1.2"
           stroke-dasharray="3 4" opacity="0.75"/>
     <circle cx="228" cy="214" r="3" fill="#1f6f5c"/>

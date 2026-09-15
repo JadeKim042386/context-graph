@@ -4,16 +4,16 @@ import re
 HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.*\S)\s*$")
 WIKILINK_PATTERN = re.compile(r"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]")
 # Relation line: only the shape "- <word> [[target]]" counts as a relation. Section names are not relied on.
-# The word may be written in any script, so a Korean note keeps its relations instead of losing them
+# The word may be written in any script, so a multilingual note keeps its relations instead of losing them
 # to an unnamed mention. Digits and underscores cannot open the word, which keeps list items such as
 # "- 3 [[target]]" out.
 RELATION_PATTERN = re.compile(r"^\s*[-*]\s+([^\W\d_]\w*)\s+\[\[([^\]|]+)(?:\|[^\]]*)?\]\]\s*$",
                               re.UNICODE)
 
-# Korean relation words, mapped onto the English names the rest of the map already uses, so that
-# "- 대체함 [[X]]" and "- supersedes [[X]]" end up as the same relation and a path can run through
-# both. This is a fixed table, not a translation service - nothing here calls a model. A word that
-# is not in the table is kept exactly as it was written.
+# Korean relation words are mapped onto the English names used by the rest of the map, so
+# a Korean equivalent of a relation and "- supersedes [[X]]" become the same relation and paths can cross both.
+# This is a fixed table, not a translation service; no model is called. A word not in the table
+# is preserved exactly as written.
 KOREAN_RELATION_NAMES = {
     "대체함": "supersedes",
     "대체": "supersedes",
@@ -38,7 +38,7 @@ KOREAN_RELATION_NAMES = {
 
 
 def relation_name(written_word):
-    """The relation name to store. A Korean word becomes its English name; anything else is kept as written."""
+    """Return the stored relation name; known Korean words become canonical English names."""
     return KOREAN_RELATION_NAMES.get(written_word, written_word)
 LIST_ITEM_PATTERN = re.compile(r"^\s*[-*]\s+(.*\S)\s*$")
 # A fence opens and closes a code block. What is inside is not prose: a comment in there is not a

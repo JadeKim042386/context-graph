@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A research document transferring detection and search principles from animals tracking distant food or mates into knowledge-base conclusion search strategies.">
+  <meta name="research-date" content="2026-09-12">
+  <title>Long-Range Target Tracking and Conclusion Search Strategy</title>
+  <style>
+    :root{--ink:#20242b;--muted:#5d6672;--line:#d9dee5;--paper:#fff;--wash:#f5f7fa;--accent:#315f8c;--good:#176b4d;--warn:#8a5b16}
+    *{box-sizing:border-box}body{margin:0;background:var(--wash);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    main{max-width:1120px;margin:0 auto;padding:42px 24px 80px;background:var(--paper)}h1,h2,h3{line-height:1.2;letter-spacing:-.02em}h1{font-size:clamp(2rem,4vw,3.4rem);margin:0 0 12px}h2{font-size:1.7rem;margin-top:52px;border-bottom:1px solid var(--line);padding-bottom:10px}h3{font-size:1.15rem;margin-top:28px}p,li{max-width:88ch}.lede{color:var(--muted);font-size:1.15rem;max-width:80ch}.meta{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 32px}.tag{border:1px solid var(--line);padding:4px 10px;border-radius:999px;color:var(--muted);font-size:.88rem}.callout{border-left:4px solid var(--accent);background:#eef4fa;padding:15px 18px;margin:22px 0}.warning{border-left-color:#ba7d22;background:#fff7e8}table{width:100%;border-collapse:collapse;margin:18px 0 26px;font-size:.95rem}th,td{border:1px solid var(--line);padding:10px 12px;vertical-align:top;text-align:left}th{background:#eef1f5}code{background:#f0f2f4;padding:1px 4px;border-radius:3px}a{color:#245d91}svg{width:100%;height:auto;border:1px solid var(--line);background:#fbfcfd;margin:12px 0}.small{font-size:.9rem;color:var(--muted)}
+  </style>
+</head>
+<body>
+<main>
+  <h1>Long-Range Target Tracking and Conclusion Search Strategy</h1>
+  <p class="lede">This document studies how domesticated silkmoths (<em>Bombyx mori</em>), polar bears, and wandering albatrosses find distant mates, prey, or productive feeding areas, then transfers those principles to conclusion search in an evidence-first knowledge base. It does not copy animal behavior literally; it abstracts the problem as updating target location and answer confidence from incomplete and intermittent clues.</p>
+  <div class="meta"><span class="tag">Atomic Claim focus</span><span class="tag">Sensor fusion</span><span class="tag">Explore–exploit balance</span><span class="tag">Evidence preservation</span><span class="tag">Research date: 2026-09-12</span></div>
+
+  <section><h2>1. Common conclusion</h2>
+    <p>None of the three species simply follows the strongest single clue in a straight line. They first locate an area where the target is likely to be found, change direction and search width when a clue is detected, and return to exploration when clues disappear or conflict. Long-range tracking is therefore a cycle of <strong>prior → detection → localization → verification → fallback</strong>.</p>
+    <div class="callout"><strong>Knowledge-base transfer:</strong> Before generating an answer, form a prior over the question's target, scope, and reference date; collect observable Claims; and narrow candidates using evidence direction and independence. When evidence breaks, do not force a conclusion. Choose the next search that is expected to add the most information.</div>
+    <svg viewBox="0 0 980 190" role="img" aria-label="Search-mode cycle"><defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#315f8c"/></marker></defs><g fill="#eef4fa" stroke="#315f8c" stroke-width="2"><rect x="20" y="65" width="165" height="58" rx="8"/><rect x="245" y="65" width="165" height="58" rx="8"/><rect x="470" y="65" width="165" height="58" rx="8"/><rect x="695" y="65" width="165" height="58" rx="8"/></g><g fill="#20242b" font-family="system-ui" font-size="18" text-anchor="middle"><text x="102" y="99">Broad search</text><text x="327" y="99">Detect clue</text><text x="552" y="99">Narrow target</text><text x="777" y="99">Verify · conclude</text></g><g stroke="#315f8c" stroke-width="2" fill="none" marker-end="url(#a)"><path d="M185 94h60"/><path d="M410 94h60"/><path d="M635 94h60"/><path d="M777 145 C777 180 102 180 102 123"/></g><text x="490" y="178" fill="#5d6672" font-family="system-ui" font-size="15" text-anchor="middle">Failure, conflict, or low confidence → search again or refine the question</text></svg>
+  </section>
+
+  <section><h2>2. Species-specific principles</h2>
+    <h3>2.1 Domesticated silkmoth (<em>Bombyx mori</em>): intermittent chemical clues and wind-referenced movement</h3>
+    <p>Male <em>Bombyx mori</em> detects the female's species-specific sex pheromone bombykol with high sensitivity and selectivity. After detecting a short odor filament, it first moves straight upwind in a <code>surge</code>; when the odor disappears, it searches for the filament again through side-to-side <code>zigzag/casting</code>. As it gets closer, it adjusts zigzag width and speed, and uses differences in the timing and intensity of input from both antennae to choose direction. The key is not simply following a concentration gradient, but combining wind direction with the onset and disappearance of odor.</p>
+    <ul><li>Evidence: sequential surge→zigzag behavior after odor stimulation and state-dependent use of optic flow have been reported.</li><li>Evidence: timing and intensity differences between the two antennae affect the initial travel direction.</li><li>Transfer: <strong>exploit while a clue is present; cross-search when it disappears</strong>. Record a failed search as a possible error in the current hypothesis's direction or width, not as an absence of information.</li></ul>
+    <h3>2.2 Polar bear: a large predator combining windscape, season, and prey distribution</h3>
+    <p>Because sea-ice contours and snow restrict visibility, polar bears cannot reliably find distant prey by sight alone. They locate ringed-seal breathing holes, lairs, and haul-outs using smell and environmental clues. A Hudson Bay telemetry study found predominantly crosswind movement under low-wind, fast-travel winter conditions, consistent with broad search that increases the chance of crossing an odor plume. Strong winds can increase turbulence and make odor localization harder, while downwind movement can dominate during slow travel or high winds; the policy changes with season, time, and wind strength.</p>
+    <ul><li>Some literature mentions odor detection from seal breathing holes at up to about 3 km, but this is not a direct measurement from the telemetry study and is a condition-dependent estimate.</li><li>Study limitation: GPS intervals of four hours or 30 minutes make it difficult to capture the brief upwind localization behavior immediately after odor detection.</li><li>Transfer: <strong>use windscape as a spatial prior for searchability</strong>. If the question's date, environment, or scope is unknown, lower the candidate priority of the same Claim and branch by conditions.</li></ul>
+    <h3>2.3 Wandering albatross: locating productive areas by smell and approaching with wind</h3>
+    <p>Wandering albatrosses search thousands of square kilometers of ocean for dispersed squid, carrion, and surface prey. Research combined responses to fish and marine-organism odors with GPS and stomach-temperature records to analyze approach paths after initial odor detection. Because odor plumes are irregular and fragmented by turbulence, crosswind search is expected to increase encounters, followed by upwind zigzags to narrow the location after detection. In free-flight approaches, 46.8% were associated with initial olfactory detection and represented 45.5% of captured prey mass during flight.</p>
+    <p>Dimethyl sulphide (DMS) also originates from phytoplankton and can create an odor landscape associated with seafloor topography, shelf boundaries, and ocean fronts. Because DMS physiology and orientation experiments were performed on Antarctic prions rather than wandering albatrosses, they are treated only as interspecies-transfer evidence, not directly generalized to albatrosses. The odor-based approach figures for wandering albatrosses come from separate GPS and prey-capture data. The bird may therefore select a <strong>productive area where prey is likely</strong> before tracking the odor of any individual prey item.</p>
+  </section>
+
+  <section><h2>3. Search strategies extracted from biological principles</h2>
+    <table><thead><tr><th>Biological principle</th><th>Knowledge-base strategy</th><th>Failure-prevention rule</th></tr></thead><tbody>
+      <tr><td>Silkmoth surge</td><td>Find the exact Concept, alias, and relation match first, then read Claims with direct evidence.</td><td>When direct evidence is absent, expand to adjacent Concepts instead of reading every related document.</td></tr>
+      <tr><td>Silkmoth casting</td><td>When evidence breaks, widen the search around the parent Claim through neighboring relations.</td><td>Do not increase search width and hop count indefinitely; abstain when information gained per cost is low.</td></tr>
+      <tr><td>Polar-bear windscape</td><td>Include reference date, scope, source status, freshness, and environmental conditions in the search prior and score.</td><td>Do not treat an old Claim as current; make the penalty explicit when validity or freshness is unclear.</td></tr>
+      <tr><td>Albatross DMS</td><td>Select Concepts, topics, and source groups where an answer is likely before selecting an individual answer.</td><td>A topic prior is not evidence for the answer itself. Require direct Evidence for the final conclusion.</td></tr>
+      <tr><td>Sensor fusion across species</td><td>Connect text, tables, images, video frames, and audio segments to one Claim and calculate agreement among independent clues.</td><td>Do not count multiple extracts from the same original as independent sources.</td></tr>
+      <tr><td>Explore–exploit transition</td><td>Stop searching and build a Context Pack once candidates are narrow enough; search again when results are insufficient.</td><td>Return conflict or insufficient rather than a definitive answer for conflicts, missing data, or weak locators.</td></tr>
+    </tbody></table>
+  </section>
+
+  <section><h2>4. Proposed conclusion-search policy</h2>
+    <ol><li><strong>Normalize the question:</strong> Split it into target (entity), relation (predicate), reference date (as-of), scope, and desired output format. Reuse an earlier result first when its canonical key matches and its dependency digest is current.</li><li><strong>Select a productive area:</strong> Search Concepts, aliases, relations, and source groups to estimate where an answer is likely. The topic prior controls search order but is not counted as conclusion evidence.</li><li><strong>Detect clues:</strong> Find direct Claim matches, semantic similarity, and date/scope matches. Every candidate must carry a Claim ID, Evidence ID, Source revision, and locator.</li><li><strong>Expand directionally:</strong> If candidates are insufficient, expand from one hop. Follow a valid relation; when evidence disappears, switch to lateral candidate search. The default maximum is two hops; further expansion is allowed only when expected information gain exceeds cost.</li><li><strong>Localize and verify:</strong> Rank directness, authority, freshness, scope, agreement, and completeness normalized to [0,1]. Check whether independent sources support the same Claim and whether an opposing Claim applies to the same validity scope.</li><li><strong>Conclude or abstain:</strong> Confirm a conclusion when each core Claim has direct Evidence and a locator and conflicts are resolved. For ties, conflicts, or missing data, present alternatives and criteria or return <code>abstain</code>.</li><li><strong>Feedback loop:</strong> Codex returns correct, revise, insufficient, or conflict instead of confirming a conclusion arbitrarily. On revise, add a new Claim/Evidence and invalidate the previous conclusion's dependency digest.</li></ol>
+  </section>
+
+  <section><h2>5. Improved score and information-gain model</h2>
+    <p>Add biological inspiration to the existing simple candidate score. The final score does not automatically guarantee answer truth; it is the <strong>priority of the next candidate to read</strong>.</p>
+    <pre><code>priority(candidate) = relevance × source_quality × freshness × scope_fit
+                   × independent_agreement × locator_quality
+                   + λ × expected_information_gain
+                   − μ × retrieval_cost
+
+expected_information_gain = expected_entropy_before − expected_entropy_after</code></pre>
+    <p><code>expected_information_gain</code> is the likelihood of resolving a conflict or substantially shrinking the candidate space. If two policies from different dates conflict, do not immediately choose the newest document; first search for Evidence that checks approval status, scope, and the <code>supersedes</code> relation. This asks how much the next sample reduces uncertainty about target location instead of continuing to follow the strongest odor.</p>
+  </section>
+
+  <section><h2>6. Validation plan and current comparison baseline</h2>
+    <table><thead><tr><th>Measurement</th><th>Current baseline</th><th>Post-improvement validation</th></tr></thead><tbody>
+      <tr><td>Search efficiency</td><td>Deterministic fixture of 50 questions, Pack compression ratio 0.0317</td><td>Compare candidate count, hop count, and search cost on the same questions with the prior/information-gain policy</td></tr>
+      <tr><td>Evidence quality</td><td>100% locator reproducibility, 100% fixture selection accuracy</td><td>Evaluate independent-source deduplication, date/scope conflicts, and media locators separately</td></tr>
+      <tr><td>End-to-end LLM</td><td>Synthetic held-out 3-question A/B: 100% accuracy and locator match, 66.7% abstain</td><td>Separate at least 50 questions into answerable/conflict/unanswerable and evaluate against blind gold</td></tr>
+      <tr><td>Latency</td><td>Pack p50 5.062 seconds, failing the 3-second gate</td><td>Measure p50/p95 separately for cache hit/miss, cold/warm runs, wrapper tokens, and payload tokens</td></tr>
+    </tbody></table>
+    <div class="callout warning"><strong>Interpretation limit:</strong> The connection from animal behavior to knowledge-search strategy is design inspiration and a hypothesis. Biological observations are not automatically evidence of algorithmic performance. A separate performance experiment must test whether the improved strategy actually reduces search cost, missing evidence, wrong answers, and unnecessary confirmation.</div>
+  </section>
+
+  <section><h2>7. Sources and further reading</h2>
+    <ol>
+      <li>Togunov, Derocher &amp; Lunn, <a href="https://www.nature.com/articles/srep46332">Windscapes and olfactory foraging in a large carnivore</a>, Scientific Reports 7, 46332 (2017), DOI <a href="https://doi.org/10.1038/srep46332">10.1038/srep46332</a>. Polar-bear telemetry, wind direction, and seasonal results.</li>
+      <li>Nevitt, Reid, Trathan &amp; Croxall, <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2290754/">Evidence for olfactory search in wandering albatross</a>, PNAS 105 (2008), PMCID PMC2290754. GPS, stomach temperature, approach paths, and the 46.8%/45.5% results.</li>
+      <li>Nevitt, <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC1617144/">Sensitivity to dimethyl sulphide suggests a mechanism for olfactory navigation by seabirds</a>, Biology Letters 2 (2006), PMCID PMC1617144. DMS detection and the marine odor landscape.</li>
+      <li>Ando &amp; Kanzaki, <a href="https://doi.org/10.1242/jeb.124834">A simple behaviour provides accuracy and flexibility in odour plume tracking</a>, Journal of Experimental Biology 218 (2015), DOI <a href="https://doi.org/10.1242/jeb.124834">10.1242/jeb.124834</a>. Surge–zigzag behavior and sensorimotor coupling in domesticated silkmoths (<em>Bombyx mori</em>).</li>
+      <li>Namiki et al., <a href="https://pubmed.ncbi.nlm.nih.gov/22227850/">Use of bilateral information to determine the walking direction during orientation to a pheromone source in the silkmoth</a>, Journal of Comparative Physiology A (2012), PMID 22227850.</li>
+      <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8629422/">Multisensory-motor integration in olfactory navigation of silkmoth</a>, Frontiers in Physiology (2021), PMCID PMC8629422. Comparison of turbulence, wind, and surge–zigzag algorithms.</li>
+      <li>A review of follow-up work by Vergassola et al., <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4211930/">Reactive Searching and Infotaxis in Odor Source Localization</a>. Conceptual connection to Bayesian information-gain search.</li>
+    </ol>
+  </section>
+  <footer><p class="small">This document is an HTML source record in the knowledge base. Manage source text, access dates, and locators as separate Evidence records; treat the transfer from biology to search strategy as a testable design hypothesis.</p></footer>
+</main>
+</body>
+</html>

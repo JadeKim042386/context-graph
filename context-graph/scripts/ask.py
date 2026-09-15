@@ -12,9 +12,8 @@ import sys
 
 from config import load_config, default_config_path
 
-# A single character such as an em dash (—) in the answer is enough to kill the
-# default console encoding on a Korean Windows box. It dies at the print, after
-# the question already ran, so the answer is lost. Pin the encoding here.
+# A single character such as an em dash (—) can break the default console encoding
+# on some Windows configurations. Pin UTF-8 here so a completed answer is not lost.
 for stream in (sys.stdout, sys.stderr):
     try:
         stream.reconfigure(encoding="utf-8", errors="replace")
@@ -396,21 +395,22 @@ its many much not of on or that the their there they this to was were what when 
 why will with""".split())
 WORD_PATTERN = re.compile(r"[\w가-힣]+", re.UNICODE)
 # Korean particles ride on the end of a word. Matching is done on the written form, so a question
-# that says "케이블은" has to be trimmed back to "케이블" to reach the note that says it.
+# A question containing a Korean noun plus a particle must be trimmed back to the bare noun
+# before it can reach a note using that noun.
 # Only these four may be taken off a two-syllable word to leave one syllable behind. The other
-# particle letters also end ordinary nouns - 결과, 추가, 경로, 정도 - and taking one off those
-# leaves a syllable that matches half the vocabulary.
+# Other particle letters also end ordinary nouns, and removing one from those nouns leaves a
+# syllable that matches half the vocabulary.
 BARE_SYLLABLE_PARTICLES = frozenset("은는을를")
 # Words that end in one of those letters without the letter being a particle at all. Measured
-# against the vault, taking 작은 down to 작 matched 130 statements about 작업 and 시작 that have
-# nothing to do with anything being small; 있는 matched 52 the same way.
+# Against the vault, stripping modifiers down to short stems matched many unrelated statements;
+# modifier forms therefore need an explicit exception list.
 # Only two-syllable words ending in one of those four letters ever reach this, so a word that
 # ends any other way would sit here doing nothing.
 MODIFIER_FORMS = frozenset({
     # Modifiers: the last letter is part of the verb, not a particle.
     "같은", "있는", "없는", "작은", "많은", "적은", "높은", "낮은", "좋은", "쓰는", "하는",
     "되는", "가는", "오는", "보는", "넣는", "여는", "닫는", "맞는", "받는", "주는", "아는",
-    # Nouns whose last letter only looks like one: 마을 is not 마 + 을.
+    # Nouns whose last letter only looks like a particle must remain intact.
     "마을", "노을", "가을", "겨울", "서울", "이름", "다음", "처음", "사람",
 })
 
@@ -430,9 +430,9 @@ def strip_korean_particle(word):
         return word
     for particle in KOREAN_PARTICLES:
         # Two syllables have to be left. The letters a particle is written with are also the
-        # last letter of plenty of ordinary words - 결과, 경로, 추가 - and taking one off those
-        # leaves a single syllable that matches half the vocabulary. Measured against this
-        # vault: trimming down to one syllable mangles 1,512 of its 4,085 Korean words.
+        # The last letter of many ordinary words is also a particle, and removing it leaves a
+        # single syllable that matches half the vocabulary. In this vault, reducing words to one
+        # syllable mangles many Korean terms.
         if word.endswith(particle) and len(word) - len(particle) >= 2:
             return word[:-len(particle)]
     return word
@@ -471,7 +471,7 @@ def asked_words(question):
     A single letter is dropped unless it was written as a capital: `a` in "a value" carries
     nothing, but the S, T, V and E of "role letters S T V E" are the whole question. A Korean
     word arrives with its particle attached, so the trimmed form is kept beside the written
-    one - otherwise "케이블은" never reaches the note that says "케이블".
+    one - otherwise a noun with its particle attached never reaches a note using the bare noun.
 
     Both forms of one word live in the same set, and a set counts once however many of its
     forms a statement happens to carry. Keeping them as separate words scored one statement
@@ -482,7 +482,8 @@ def asked_words(question):
         if len(word) == 1:
             # A single Latin letter is only worth matching when it was written as a capital:
             # `a` in "a value" says nothing, the S of "role S" is the question. A single Korean
-            # syllable is a whole word - 폭, 값, 층 - and Korean has no capitals to go by.
+            # A single Korean syllable can be a complete word, and Korean has no capitals to
+            # distinguish such words.
             if word.isupper() or _is_korean(word):
                 by_stem.setdefault(word.lower(), set()).add(word.lower())
             continue
@@ -490,18 +491,20 @@ def asked_words(question):
         if lowered in COMMON_WORDS:
             continue
         # The stem is what makes two forms the same word, so it is the key. Asking
-        # "트레이는 ... 트레이의" used to build two sets and count 트레이 twice, which put a
-        # statement holding no value above one that did - the very thing the sets were for.
+        # The same noun with different particles must share one set; otherwise it is counted
+        # twice and can outrank a statement that actually carries the requested value.
         stem = strip_korean_particle(lowered)
         forms = by_stem.setdefault(stem, {stem})
         forms.add(lowered)
-        # 폭은 has no two-syllable stem to fall back on, so the bare syllable is added here
+        # A two-syllable noun ending in a particle may have no useful stem, so its bare syllable
+        # is added here
         # instead. It cannot inflate the score: a set counts once however many forms match.
         if (_is_korean(lowered) and len(lowered) == 2
                 and lowered[1] in BARE_SYLLABLE_PARTICLES
                 and lowered not in MODIFIER_FORMS):
             # The bare syllable becomes the key as well. Keyed on the written form instead,
-            # 폭은 and 폭을 made two sets that both carried 폭, and the word counted twice.
+            # Different particle forms must not create separate sets that count the same noun
+            # twice.
             forms = by_stem.setdefault(lowered[0], set()) | forms
             by_stem.pop(stem, None)
             by_stem[lowered[0]] = forms
@@ -525,7 +528,7 @@ def matching_word_count(label, words):
         for form in forms:
             # A single Latin letter has to stand as a word of its own: `s` inside "statements"
             # says nothing, and counting it would make every English sentence a match. A single
-            # Korean syllable compounds into longer words (폭 inside 트레이폭), so it is matched
+            # A Korean syllable can also occur inside a longer compound, so it is matched
             # the way any other word is.
             if len(form) == 1 and not _is_korean(form):
                 if tokens is None:

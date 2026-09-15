@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "audit_id": "AUD-KE-SEMANTIC-CONFLICT-20260914-V2",
+  "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af",
+  "generated_at": "2026-09-14T06:15:14.428577+00:00",
+  "status": "passed",
+  "policy": "Preserve source and evidence locators; never infer claim-level conflicts; abstain until independently compared.",
+  "records": [
+    {
+      "conflict_source_id": "SRC-90BEA7BAF73F6B6D",
+      "source_path": "graphify-out/context-graph.conflicts.txt",
+      "source_locator": {
+        "type": "text-position",
+        "path": "graphify-out/context-graph.conflicts.txt",
+        "line_start": 1,
+        "line_end": 19,
+        "source_sha256": "96b494367ffc27c3f42355d3d64f565154ad916d044d6563891b300fde502fd3"
+      },
+      "evidence_ids": [
+        "EVD-FC916C1C207A5C16A618"
+      ],
+      "evidence_locators": [
+        {
+          "type": "text-position",
+          "path": "graphify-out/context-graph.conflicts.txt",
+          "line_start": 1,
+          "line_end": 19,
+          "source_sha256": "96b494367ffc27c3f42355d3d64f565154ad916d044d6563891b300fde502fd3"
+        }
+      ],
+      "status": "unknown",
+      "semantic_claims": [],
+      "semantic_parse_status": "not_inferred",
+      "resolution": "abstain",
+      "abstain_reason": "The local conflict report contains no independently verified claim pair; claim-level meaning is not inferred from a generated report without source comparison.",
+      "provenance": {
+        "activity_id": "ACT-KE-LOCAL-REBUILD-20260914-EVIDENCE",
+        "agent": "knowledge-engineer",
+        "method": "trace conflict report and abstain without semantic inference",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af",
+        "network_used": false
+      }
+    }
+  ],
+  "provenance": {
+    "activity_id": "ACT-KE-LOCAL-REBUILD-20260914-EVIDENCE",
+    "agent": "knowledge-engineer",
+    "method": "semantic conflict abstention audit",
+    "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af",
+    "network_used": false
+  }
+}

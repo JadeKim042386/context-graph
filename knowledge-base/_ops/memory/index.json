@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "current_goal": {
+    "pointer": "design/knowledge-base-comparative-results.json",
+    "status": "verified",
+    "updated_at": "2026-09-15",
+    "note": "Karpathy Second Brain/LLM-Wiki inspired comparison completed; production A/B remains required."
+  },
+  "approved_decision_pointers": [
+    {
+      "pointer": "knowledge/knowledge-base-architecture-design.html#s12",
+      "decision": "canonical records are edited first; projections are rebuilt after review and approval",
+      "status": "accepted",
+      "updated_at": "2026-09-15"
+    }
+  ],
+  "unresolved_pointers": [
+    {
+      "pointer": "design/knowledge-base-comparative-report.html#production-validation",
+      "issue": "synthetic fixture does not verify production LLM quality, cost, or latency",
+      "status": "open",
+      "updated_at": "2026-09-15"
+    }
+  ],
+  "snapshot_hash": {
+    "algorithm": "sha256",
+    "value": "0dfb5d47fe9ce466dcf137b7daa843d169ae757edab592a89383f950f7bf6bec",
+    "source": "design/performance-fixture.json",
+    "snapshot_id": "fixture://2026-09-12-fixed-v1",
+    "status": "verified",
+    "updated_at": "2026-09-15"
+  }
+}

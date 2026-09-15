@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "audit_id": "AUD-KE-LOCAL-REBUILD-20260914-V2",
+  "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af",
+  "generated_at": "2026-09-14T06:15:14.428577+00:00",
+  "counts": {
+    "sources": 22,
+    "evidence": 3389,
+    "graph_nodes": 3411,
+    "graph_edges": 3389,
+    "conclusions": 22
+  },
+  "requirements": [
+    {
+      "requirement_id": "raw-preservation",
+      "status": "passed",
+      "evidence": [
+        "source-manifest.json#/records",
+        "local_rebuild.py#frozen-source-hash-check"
+      ]
+    },
+    {
+      "requirement_id": "source-catalog",
+      "status": "passed",
+      "evidence": [
+        "source-manifest.json#/records"
+      ]
+    },
+    {
+      "requirement_id": "format-locators",
+      "status": "passed",
+      "evidence": [
+        "local-evidence.json#/records/*/locator"
+      ]
+    },
+    {
+      "requirement_id": "typed-graph",
+      "status": "passed",
+      "evidence": [
+        "typed-knowledge-graph.local-v2.json#/nodes",
+        "typed-knowledge-graph.local-v2.json#/edges"
+      ]
+    },
+    {
+      "requirement_id": "typed-conclusions",
+      "status": "passed",
+      "evidence": [
+        "conclusions.local-v2.json#/conclusions"
+      ]
+    },
+    {
+      "requirement_id": "html-projection",
+      "status": "passed",
+      "evidence": [
+        "knowledge-projection.local-v2.html"
+      ]
+    },
+    {
+      "requirement_id": "append-only-provenance",
+      "status": "passed",
+      "evidence": [
+        "build-log.jsonl",
+        "local_rebuild.py#append_build_event",
+        "local-evidence.json#/records/*/provenance"
+      ]
+    },
+    {
+      "requirement_id": "gold-isolation",
+      "status": "passed",
+      "evidence": [
+        "local-evidence.json#/visibility_counts/evaluator-only=10",
+        "local-evidence.json#/records[visibility=evaluator-only]/content=null"
+      ]
+    },
+    {
+      "requirement_id": "conflict-abstain",
+      "status": "passed",
+      "evidence": [
+        "semantic-conflict-audit.json#/records",
+        "conclusions.local-v2.json#/conflict_sets",
+        "conclusions.local-v2.json#/conflict_policy"
+      ]
+    }
+  ],
+  "unverified": [
+    "Local source statements were projected but not independently truth-validated.",
+    "Conflict claim semantics are intentionally not inferred; the traceable decision is abstain.",
+    "External network content remains outside this local-only rebuild."
+  ],
+  "provenance": {
+    "activity_id": "ACT-KE-LOCAL-REBUILD-20260914-EVIDENCE",
+    "agent": "knowledge-engineer",
+    "method": "local rebuild requirement audit",
+    "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af",
+    "network_used": false
+  }
+}

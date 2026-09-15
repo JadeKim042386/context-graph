@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760" role="img" aria-labelledby="title desc">
+  <title id="title">context-graph project folder structure</title>
+  <desc id="desc">Relationships between the project Skill, agents, knowledge data, HTML documents, and comparison experiments</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#2563eb"/></marker>
+    <filter id="shadow"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0f172a" flood-opacity=".12"/></filter>
+    <style>
+      .title{font:700 30px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#0f172a}
+      .sub{font:400 16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#475569}
+      .root{font:700 22px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#fff}
+      .head{font:700 18px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#0f172a}
+      .item{font:600 15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#0f172a}
+      .note{font:400 13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#475569}
+    </style>
+  </defs>
+  <rect width="1400" height="760" fill="#f8fafc"/>
+  <text x="70" y="62" class="title">context-graph · Project Folder Structure</text>
+  <text x="70" y="91" class="sub">Files organized around the Skill that collects, analyzes, and modifies knowledge</text>
+
+  <rect x="540" y="125" width="320" height="70" rx="16" fill="#1d4ed8" filter="url(#shadow)"/>
+  <text x="700" y="158" text-anchor="middle" class="root">context-graph/</text>
+  <text x="700" y="181" text-anchor="middle" fill="#dbeafe" font-size="14">Project root</text>
+
+  <path d="M700 195V240 M180 240H1220" stroke="#2563eb" stroke-width="3"/>
+  <path d="M180 240V275 M425 240V275 M700 240V275 M975 240V275 M1220 240V275" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="70" y="275" width="220" height="245" rx="16" fill="#eff6ff" stroke="#60a5fa" stroke-width="2"/>
+    <text x="95" y="310" class="head">context-graph/</text>
+    <text x="95" y="339" class="item">skills/knowledge-engineering/</text>
+    <text x="110" y="363" class="note">SKILL.md · references/ · scripts/</text>
+    <text x="95" y="398" class="item">agents/</text><text x="110" y="421" class="note">analysis and editing roles</text>
+    <text x="95" y="455" class="item">tests/</text><text x="110" y="478" class="note">Skill and graph tests</text>
+    <text x="95" y="505" class="item">scripts/</text>
+
+    <rect x="315" y="275" width="220" height="245" rx="16" fill="#ecfdf5" stroke="#34d399" stroke-width="2"/>
+    <text x="340" y="310" class="head">knowledge-base/</text>
+    <text x="340" y="347" class="item">Canonical records</text><text x="355" y="371" class="note">concepts, claims, sources, evidence</text>
+    <text x="340" y="408" class="item">_ops/</text><text x="355" y="432" class="note">operations and rebuild artifacts</text>
+    <text x="340" y="469" class="item">memory/</text><text x="355" y="493" class="note">state pointers</text>
+
+    <rect x="560" y="275" width="280" height="245" rx="16" fill="#fff7ed" stroke="#fb923c" stroke-width="2"/>
+    <text x="585" y="310" class="head">knowledge/</text>
+    <text x="585" y="350" class="item">Human-readable HTML</text><text x="600" y="376" class="note">collected knowledge and explanations</text>
+    <text x="585" y="420" class="item">Source-linked documents</text><text x="600" y="446" class="note">inputs for search and analysis</text>
+
+    <rect x="865" y="275" width="220" height="245" rx="16" fill="#f5f3ff" stroke="#a78bfa" stroke-width="2"/>
+    <text x="890" y="310" class="head">design/</text>
+    <text x="890" y="350" class="item">Comparison experiments</text><text x="905" y="374" class="note">performance and efficiency results</text>
+    <text x="890" y="415" class="item">README visuals</text><text x="905" y="439" class="note">workflow illustrations</text>
+    <text x="890" y="480" class="item">Test fixtures</text>
+
+    <rect x="1110" y="275" width="220" height="245" rx="16" fill="#f1f5f9" stroke="#94a3b8" stroke-width="2"/>
+    <text x="1135" y="310" class="head">work/</text>
+    <text x="1135" y="350" class="item">coordination/</text><text x="1150" y="374" class="note">work reports and handoffs</text>
+    <text x="1135" y="415" class="item">Work logs</text><text x="1150" y="439" class="note">decisions and status sharing</text>
+  </g>
+
+  <path d="M425 520V590 H700 V645" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M700 520V645" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M975 520V590 H700 V645" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <rect x="500" y="645" width="400" height="65" rx="14" fill="#dbeafe" stroke="#60a5fa" filter="url(#shadow)"/>
+  <text x="700" y="674" text-anchor="middle" class="head">Skill work center</text>
+  <text x="700" y="697" text-anchor="middle" class="note">knowledge/ material → knowledge-base records → analysis, proposals, modification</text>
+</svg>

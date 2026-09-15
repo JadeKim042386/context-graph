@@ -1,0 +1,44 @@
+# DIRECT HANDOFF
+
+- status: complete
+- exact_output_file: `knowledge-base/_ops/rebuild/knowledge-projection.local-v2.html`
+- changed_artifacts:
+  - `knowledge-base/_ops/rebuild/local_rebuild.py`
+  - `knowledge-base/_ops/rebuild/test_local_knowledge_rebuild.py`
+  - `knowledge-base/_ops/rebuild/typed-knowledge-graph.local-v2.json`
+  - `knowledge-base/_ops/rebuild/conclusions.local-v2.json`
+  - `knowledge-base/_ops/rebuild/semantic-conflict-audit.json`
+  - `knowledge-base/_ops/rebuild/local-rebuild-audit.json`
+  - `knowledge-base/_ops/rebuild/knowledge-projection.local-v2.html`
+  - `knowledge-base/_ops/rebuild/rebuild-index.json`
+  - `knowledge-base/_ops/rebuild/knowledge-projection.html`
+  - `knowledge-base/_ops/rebuild/build-log.jsonl`
+  - `work/coordination/KE-KNOWLEDGE-REBUILD-004.md`
+- checks_run:
+  - RED: `pytest -q knowledge-base/_ops/rebuild/test_local_knowledge_rebuild.py` — 2 passed, 3 failed as expected before implementation; failures isolated the two partial gates and audit status.
+  - GREEN: `pytest -q knowledge-base/_ops/rebuild/test_local_knowledge_rebuild.py` — 5 passed in 0.59s; dependency/configuration warnings only.
+  - `python knowledge-base/_ops/rebuild/local_rebuild.py` — two post-implementation executions succeeded with source 22, evidence 3,389, graph node/edge 3,411/3,389, conclusions 22, semantic conflict record 1, requirements 9.
+  - Build-log append regression — PASS; a temporary log retained its original event, two follow-up rebuilds appended two events, all three event IDs were unique, and both appended events had `status=local-v2-generated` plus the inventory snapshot.
+  - Actual build log — PASS; the pre-existing events were retained and each of the two local builder executions appended a new provenance event.
+  - Semantic conflict regression — PASS; the single audit record resolves its source/evidence IDs, preserves evidence locators, has `semantic_claims=[]`, `semantic_parse_status=not_inferred`, `resolution=abstain`, and records a non-empty abstain reason.
+  - JSON/count/reference/snapshot checks — PASS; source 22, evidence 3,389, graph 3,411/3,389, conclusions 22 and requirements 9 agree on inventory snapshot `66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af`.
+  - Evidence integrity — PASS; every evidence record has a manifest-resolved `source_id`, non-empty locator and provenance, a 64-character SHA-256 content digest, and provenance bound to the inventory snapshot. Locator `source_sha256` is validated against the corresponding source-manifest SHA rather than against the inventory snapshot.
+  - Evaluator-only isolation — PASS; 10 records remain `visibility=evaluator-only`, `content=null`, `status=sealed`.
+  - HTML/index discovery — PASS; existing projection and rebuild index link local evidence, v2 graph/conclusions, semantic conflict audit, local audit, and local-v2 HTML without replacing legacy L3/L4.
+  - Existing JSONL/HTML parser and `git diff --check` validation — PASS in the integration stage.
+- findings:
+  - All nine local design requirements now record `status=passed`; the prior `append-only-provenance` and `conflict-abstain` partial gates are closed.
+  - `local_rebuild.py` appends a uniquely identified provenance event on every normal follow-up rebuild while preserving every existing JSONL event.
+  - The semantic conflict audit is traceable to conflict source `SRC-90BEA7BAF73F6B6D` and its local evidence, but deliberately makes no claim-level inference. Its verified behavior is abstention, not conflict resolution.
+  - Local source coverage remains 22/22. Evidence is 3,389 records: 3,379 projected and 10 evaluator-only sealed records.
+  - The local-v2 graph contains 22 Source nodes and 3,389 Evidence nodes, with one `has_evidence` edge per evidence record.
+  - Existing source files, legacy `typed-knowledge-graph.json`, legacy `conclusions.json`, and `graphify-out` were preserved.
+  - No external fetch was attempted.
+- next_role: knowledge curator may independently compare source documents if claim-level conflict resolution is required; an external-source verifier may process the external manifest only when network access is separately available and authorized.
+- terminally_blocked: false
+- unresolved:
+  - External URL 1,203 and media reference 17 have zero fetched content; content and rights remain unverified. This is outside this local-only gate.
+  - Local source statements have provenance and locators but were not independently fact-checked.
+  - The conflict report contains no independently verified claim pair, so claim-level conflict meaning remains intentionally unasserted; the system abstains.
+  - Four generated binaries have preservation and byte-range locators only; content extraction remains abstained.
+  - Test environment still emits non-failing `requests` dependency and `pytest-asyncio` configuration warnings.

@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "report_id": "RPT-KE-EXTERNAL-20260914-001",
+  "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af",
+  "generated_at": "2026-09-14T05:31:54.969916+00:00",
+  "status": "partial",
+  "manifest": {
+    "path": "knowledge-base/_ops/rebuild/external-source-manifest.json",
+    "manifest_id": "MAN-KE-EXTERNAL-20260914-001",
+    "url_records": 1203,
+    "media_records": 17,
+    "fetch_status_counts": {
+      "not_started": 1203
+    },
+    "rights_status": "unverified"
+  },
+  "validation_history": [
+    {
+      "check": "jq manifest schema and stable IDs",
+      "status": "command_error",
+      "exit_code": 5,
+      "error_class": "jq-root-scope",
+      "error": "Cannot index array with string records",
+      "cause": "The initial expression changed the active jq input to an array before reading .records; this was a validation-command defect, not a manifest parse failure."
+    },
+    {
+      "check": "jq manifest schema and stable IDs",
+      "status": "passed",
+      "exit_code": 0,
+      "command_pattern": ". as $m | ($m.records | map(.stable_id))",
+      "result": true,
+      "verified": {
+        "unique_url_stable_ids": 1203,
+        "unique_media_stable_ids": 17,
+        "locator_and_provenance_complete": true
+      }
+    }
+  ],
+  "network": {
+    "overall_status": "unverified",
+    "bulk_probe_performed": false,
+    "content_cache_count": 0,
+    "sandbox_attempt": {
+      "url": "https://www.w3.org/TR/prov-o/",
+      "method": "HEAD",
+      "status": "failed",
+      "curl_exit_code": 6,
+      "error": "Could not resolve host"
+    },
+    "single_escalated_check": {
+      "url": "https://www.w3.org/TR/prov-o/",
+      "method": "HEAD",
+      "http_status": 200,
+      "body_fetched": false,
+      "content_cached": false,
+      "interpretation": "One successful HEAD request does not verify the remaining URLs or any source content."
+    }
+  },
+  "integration": {
+    "rebuild_index": "linked",
+    "knowledge_projection": "linked",
+    "typed_graph": "unchanged-no-fetched-content",
+    "conclusions": "unchanged-existing-unknown-and-abstain-retained",
+    "graphify_out": "preserved-not-overwritten"
+  },
+  "unresolved": [
+    "HTTP status and redirect chain for 1,203 URLs",
+    "Content hashes and immutable cache for authoritative sources",
+    "Robots, timeout, and extraction outcomes",
+    "Rights or license status for all external sources",
+    "Binary acquisition and extraction for 17 media references",
+    "L3 external Source/Media nodes and evidence edges"
+  ]
+}

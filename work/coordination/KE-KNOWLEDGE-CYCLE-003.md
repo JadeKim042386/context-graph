@@ -1,0 +1,49 @@
+# DIRECT HANDOFF
+
+- status: complete
+- exact_output_file: `knowledge-base/_ops/rebuild/knowledge-cycle-report.html`
+- changed_artifacts:
+  - `knowledge-base/_ops/rebuild/local_rebuild.py`
+  - `knowledge-base/_ops/rebuild/test_local_knowledge_rebuild.py`
+  - `knowledge-base/_ops/rebuild/validate_knowledge_cycle.py`
+  - `knowledge-base/_ops/rebuild/local-evidence.json`
+  - `knowledge-base/_ops/rebuild/typed-knowledge-graph.local-v2.json`
+  - `knowledge-base/_ops/rebuild/conclusions.local-v2.json`
+  - `knowledge-base/_ops/rebuild/semantic-conflict-audit.json`
+  - `knowledge-base/_ops/rebuild/local-rebuild-audit.json`
+  - `knowledge-base/_ops/rebuild/knowledge-projection.local-v2.html`
+  - `knowledge-base/_ops/rebuild/knowledge-projection.html`
+  - `knowledge-base/_ops/rebuild/build-log.jsonl`
+  - `knowledge-base/_ops/rebuild/knowledge-cycle-report.html`
+  - `work/coordination/KE-KNOWLEDGE-CYCLE-PLAN-001.md`
+  - `work/coordination/GATES.md`
+  - `work/coordination/KE-KNOWLEDGE-CYCLE-003.md`
+- cycles_run: 3
+- checks_run:
+  - Cycle 1 baseline — HTML locator model 0/3,196; embedded projection JSON parse 0/1; public gold locator exposure 10.
+  - Cycle 1 GREEN — locator model 3,196/3,196, embedded JSON 1/1, source/evidence/graph/conclusion counts unchanged, `pytest` 7 passed.
+  - Cycle 2 RED — detected 10 `/evaluator_sidecar` locators in public HTML; new isolation test 1 failed / existing 7 passed.
+  - Cycle 2 GREEN — public locator exposure 10→0, evaluator-only 10/10 sealed, restricted evidence/graph preserved, `pytest` 8 passed.
+  - Cycle 3 RED — new report test 1 failed / existing 8 passed because `knowledge-cycle-report.html` was absent.
+  - `python knowledge-base/_ops/rebuild/validate_knowledge_cycle.py --scope all` — exit 0: `CYCLE_INTEGRITY_OK`, `CYCLE_LOCATOR_OK`, `CYCLE_GOLD_ISOLATION_OK`, `CYCLE_REPORT_OK`, `CYCLE_DIFF_OK`, `CYCLE_ALL_OK`.
+  - Hard gates — 6/6 passed.
+  - `pytest -q knowledge-base/_ops/rebuild/test_local_knowledge_rebuild.py` — 9 passed in 0.92s; non-failing dependency/configuration warnings only.
+  - Embedded report JSON — independently validated cycle-1, cycle-2, cycle-3, and the stopping object through `json.loads`.
+  - Integrity validator — source 22, evidence 3,389, graph nodes/edges 3,411/3,389, conclusions 22, requirements 9/9, snapshot/reference/provenance/content SHA agree.
+  - Diff validator — `git diff --check` exit 0.
+- findings:
+  - Cycle 1 replaced the misleading global CSS `nth-of-type` locator with an explicit document-global ordinal and Web Annotation `TextQuoteSelector`, and restored the machine-readable JSON projection.
+  - Cycle 2 removed evaluator-only gold restricted locators from public HTML, reducing exposure from 10 to 0; only stable IDs and sealed status remain.
+  - Cycle 3 added five validator scopes and a cumulative HTML report. Core source/evidence/graph/conclusion metrics match Cycle 2, with no regression and zero additional improvement.
+  - Final coverage is source 22/22, evidence 3,389/3,389, graph Source 22 + Evidence 3,389, and conclusion 22/22.
+  - Design gates are 9/9 passed; one semantic conflict preserves source/evidence locators and is handled as `semantic_claims=[]`, `not_inferred`, and `abstain`.
+  - Existing originals, legacy L3/L4, and `graphify-out` were preserved; no external fetch was performed.
+- stopping_reason: Core source/evidence/graph/conclusion improvement was 0 in Cycle 3; the minimum two cycles plus one meaningful post-Cycle-2 pass ran, hard gates 6/6 passed, and no new high-severity local defect remained, satisfying the plan's stopping condition.
+- next_role: No follow-up is required for the local cycle. When separate approval and network availability exist, an external-source verifier may process unfetched URL/media records and a knowledge curator may independently verify source claims.
+- terminally_blocked: false
+- unresolved:
+  - The 1,203 external URLs and 17 media references have zero fetched content, so content and rights remain unverified; they are outside this local-only cycle.
+  - Local source assertions have provenance and locators but were not independently fact-checked.
+  - Four generated binaries have preservation and byte-range locators only; content extraction remains abstained.
+  - Claim-level conflict meaning was not inferred without evidence; the system abstains until an independent source pair is available.
+  - The environment emits `requests` dependency mismatch and `pytest-asyncio` loop-scope warnings, but tests do not fail.

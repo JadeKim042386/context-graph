@@ -1,0 +1,45 @@
+# DIRECT HANDOFF
+
+- status: partial
+- exact_output_file: `knowledge-base/_ops/rebuild/knowledge-projection.local-v2.html`
+- changed_artifacts:
+  - `knowledge-base/_ops/rebuild/local_rebuild.py`
+  - `knowledge-base/_ops/rebuild/test_local_knowledge_rebuild.py`
+  - `knowledge-base/_ops/rebuild/local-evidence.json`
+  - `knowledge-base/_ops/rebuild/typed-knowledge-graph.local-v2.json`
+  - `knowledge-base/_ops/rebuild/conclusions.local-v2.json`
+  - `knowledge-base/_ops/rebuild/local-rebuild-audit.json`
+  - `knowledge-base/_ops/rebuild/knowledge-projection.local-v2.html`
+  - `knowledge-base/_ops/rebuild/rebuild-index.json`
+  - `knowledge-base/_ops/rebuild/knowledge-projection.html`
+  - `knowledge-base/_ops/rebuild/build-log.jsonl`
+  - `work/coordination/KE-KNOWLEDGE-REBUILD-003.md`
+- checks_run:
+  - `python knowledge-base/_ops/rebuild/local_rebuild.py --evidence-only` — PASS; generated 3,389 evidence records from 22 sources.
+  - `python knowledge-base/_ops/rebuild/local_rebuild.py` — PASS; generated graph nodes/edges 3,411/3,389, 22 conclusions, and 9 audit requirements.
+  - `pytest -q knowledge-base/_ops/rebuild/test_local_knowledge_rebuild.py` — PASS; 3 passed in 0.23s. Only `requests` dependency and `pytest-asyncio` configuration warnings occurred.
+  - `jq` JSON validation — PASS; evidence 3,389, source coverage 22, graph 3,411/3,389, conclusions 22, requirements 9, and v2 index counts match.
+  - `jq` provenance validation — PASS after correction; an initial predicate-writing error produced false results, but the corrected check confirmed that every evidence provenance record points to the same inventory snapshot and has `network_used=false`.
+  - `jq` evaluator-only isolation validation — PASS; all 10 records have `visibility=evaluator-only`, `content=null`, and `status=sealed`.
+  - `jq` graph/conclusion reference validation — PASS; every conclusion evidence ID exists in a v2 graph node.
+  - `jq` snapshot validation — PASS; source manifest, evidence, graph, conclusions, audit, and index all use `66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af`.
+  - `jq -e . knowledge-base/_ops/rebuild/build-log.jsonl` — PASS; preserved existing events and appended one local-v2 link event.
+  - Python HTML5 parser — PASS; parsed both the existing projection and the local-v2 projection.
+  - Projection link checks — PASS; the existing `knowledge-projection.html` exposes local evidence and local-v2 HTML.
+  - `git diff --check` — PASS.
+- findings:
+  - All 22/22 sources in the frozen snapshot connect to at least one local evidence record.
+  - The 3,389 evidence records are split into 3,379 projected records and 10 evaluator-only records.
+  - The v2 graph has Source 22 + Evidence 3,389 = 3,411 nodes, with one `has_evidence` edge per evidence record, for 3,389 edges total.
+  - There is one source-content-coverage conclusion per source, 22 total: 18 observed and 4 binary-extraction abstentions. One unresolved conflict projection is preserved in a separate conflict set under the abstention policy.
+  - Seven of nine design requirements passed and two were partial: append-only provenance automation and conflict meaning interpretation.
+  - Added local-v2 L2–L5 outputs and metrics to `rebuild-index.json` and the existing `knowledge-projection.html`; existing L3/L4 files and `graphify-out` were not modified.
+  - No external fetch was performed.
+- next_role: The knowledge curator should independently assess the meaning of the conflict projection, and the rebuild maintainer should verify that each builder rerun automatically appends a provenance event. External-material verification requires a separately approved and available network environment.
+- terminally_blocked: false
+- unresolved:
+  - Source-body claims are linked to locators and provenance, but independent fact checking was not performed.
+  - Conflict material is structurally preserved, but claim-level semantic parsing and resolution are unverified.
+  - Automatic build-log append on local-builder reruns is not implemented; only the integrated event from this run was appended.
+  - Four generated binary records preserve the original and byte-range locators, but content extraction abstains.
+  - The 1,203 external URLs and 17 media references were not fetched as previously directed; content and rights remain unverified.

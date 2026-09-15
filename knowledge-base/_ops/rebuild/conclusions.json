@@ -1,0 +1,465 @@
+{
+  "schema_version": 1,
+  "conclusions_id": "CONSET-KE-REBUILD-20260914-001",
+  "graph_id": "KG-KE-REBUILD-20260914-001",
+  "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af",
+  "conflict_policy": "Preserve each conflict_set and its members; never merge conflicts into a single score.",
+  "conclusions": [
+    {
+      "id": "CON-268323667BB12746",
+      "subject_id": "SRC-FC5A4B65AFD0E921",
+      "statement": "고정 snapshot에서 design/Compare.dc.html 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-FC5A4B65AFD0E921"
+      ],
+      "conclusion_method": "text-position-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-37CCC25DA2E64D05",
+      "subject_id": "SRC-682D9DD2C2037ECE",
+      "statement": "고정 snapshot에서 design/Flow.dc.html 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-682D9DD2C2037ECE"
+      ],
+      "conclusion_method": "text-position-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-B7C41B1594CACD92",
+      "subject_id": "SRC-F09907FFD68AB698",
+      "statement": "고정 snapshot에서 design/Main.dc.html 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-F09907FFD68AB698"
+      ],
+      "conclusion_method": "text-position-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-B9582A0A10169687",
+      "subject_id": "SRC-4E4744D410BED4A8",
+      "statement": "고정 snapshot에서 design/__pycache__/knowledge_base_performance.cpython-310.pyc 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-4E4744D410BED4A8"
+      ],
+      "conclusion_method": "byte-range-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-EE7E3E097E1CBDEE",
+      "subject_id": "SRC-7B1BE9B0778F6F5A",
+      "statement": "고정 snapshot에서 design/__pycache__/test_knowledge_base_performance.cpython-310-pytest-8.3.4.pyc 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-7B1BE9B0778F6F5A"
+      ],
+      "conclusion_method": "byte-range-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-C751DBD943615EEF",
+      "subject_id": "SRC-04176639FB221D05",
+      "statement": "고정 snapshot에서 design/__pycache__/test_knowledge_base_performance.cpython-310.pyc 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-04176639FB221D05"
+      ],
+      "conclusion_method": "byte-range-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-693B5570699B5C32",
+      "subject_id": "SRC-42FE4B8C6C764B25",
+      "statement": "고정 snapshot에서 design/canvas.json 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-42FE4B8C6C764B25"
+      ],
+      "conclusion_method": "json-pointer-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-088D7F8FD3A468ED",
+      "subject_id": "SRC-4F01007A737AAFA8",
+      "statement": "고정 snapshot에서 design/knowledge-base-context-efficiency-design.html 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-4F01007A737AAFA8"
+      ],
+      "conclusion_method": "text-position-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-B92CB84CC4544D01",
+      "subject_id": "SRC-97D32C8972422312",
+      "statement": "고정 snapshot에서 design/knowledge-base-performance-validation.html 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-97D32C8972422312"
+      ],
+      "conclusion_method": "text-position-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-EAE19C631C34451F",
+      "subject_id": "SRC-60621EF09CAA64CA",
+      "statement": "고정 snapshot에서 design/knowledge_base_performance.py 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-60621EF09CAA64CA"
+      ],
+      "conclusion_method": "text-position-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-B6D82E01595DE44B",
+      "subject_id": "SRC-4B35B84D44DA6530",
+      "statement": "고정 snapshot에서 design/make_demo_gif.py 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-4B35B84D44DA6530"
+      ],
+      "conclusion_method": "text-position-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-D9B4FAF617B645B3",
+      "subject_id": "SRC-0581F571F2EACEF4",
+      "statement": "고정 snapshot에서 design/performance-fixture.json 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-0581F571F2EACEF4"
+      ],
+      "conclusion_method": "json-pointer-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-163FDB98430F51BE",
+      "subject_id": "SRC-562DD7C860BAEA4F",
+      "statement": "고정 snapshot에서 design/test_knowledge_base_performance.py 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-562DD7C860BAEA4F"
+      ],
+      "conclusion_method": "text-position-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-CD00FF85B79F41E7",
+      "subject_id": "SRC-C5666ACCA1BBC1AC",
+      "statement": "고정 snapshot에서 graphify-out/.context-graph.json.fingerprint 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-C5666ACCA1BBC1AC"
+      ],
+      "conclusion_method": "json-pointer-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-1D392970A3E12117",
+      "subject_id": "SRC-242118F263E5F5A9",
+      "statement": "고정 snapshot에서 graphify-out/cache/last_query_stamp 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-242118F263E5F5A9"
+      ],
+      "conclusion_method": "text-position-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-BC3B03080DCA9552",
+      "subject_id": "SRC-90BEA7BAF73F6B6D",
+      "statement": "고정 snapshot에서 graphify-out/context-graph.conflicts.txt 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-90BEA7BAF73F6B6D"
+      ],
+      "conclusion_method": "text-position-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-A6F0FBACB3A19E25",
+      "subject_id": "SRC-6CEC27816BFCD8EE",
+      "statement": "고정 snapshot에서 graphify-out/context-graph.json 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-6CEC27816BFCD8EE"
+      ],
+      "conclusion_method": "text-position-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-7DA5169366D8443F",
+      "subject_id": "SRC-667037E800445645",
+      "statement": "고정 snapshot에서 knowledge-base/_ops/memory/index.json 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-667037E800445645"
+      ],
+      "conclusion_method": "json-pointer-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-AC3294955D4703B0",
+      "subject_id": "SRC-3BAA254AE6B353B5",
+      "statement": "고정 snapshot에서 knowledge/animal-target-tracking-and-inference.html 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-3BAA254AE6B353B5"
+      ],
+      "conclusion_method": "text-position-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-C4120AFCB49252A8",
+      "subject_id": "SRC-C04E8BB5CF924667",
+      "statement": "고정 snapshot에서 knowledge/knowledge-base-architecture-design.html 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-C04E8BB5CF924667"
+      ],
+      "conclusion_method": "text-position-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-1DD842CF262EB594",
+      "subject_id": "SRC-41B539CE79A6A913",
+      "statement": "고정 snapshot에서 knowledge/knowledge-engineering-comparative-review.html 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-41B539CE79A6A913"
+      ],
+      "conclusion_method": "text-position-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-FFAE7EB239A815A2",
+      "subject_id": "SRC-73214D517BC6E5D4",
+      "statement": "고정 snapshot에서 knowledge/knowledge-engineering.html 파일과 SHA-256 지문을 직접 관찰했다.",
+      "status": "observed",
+      "evidence_ids": [
+        "SRC-73214D517BC6E5D4"
+      ],
+      "conclusion_method": "text-position-fingerprint-observation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "source locator and sha256 observation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-6F4F72549A39BF51",
+      "subject_id": null,
+      "statement": "외부 URL 1203개의 내용은 이 snapshot에 수집되지 않아 내용·가용성·권리를 확정할 수 없다.",
+      "status": "unknown",
+      "evidence_ids": [
+        "SRC-3BAA254AE6B353B5",
+        "SRC-41B539CE79A6A913",
+        "SRC-4F01007A737AAFA8",
+        "SRC-682D9DD2C2037ECE",
+        "SRC-73214D517BC6E5D4",
+        "SRC-F09907FFD68AB698",
+        "SRC-FC5A4B65AFD0E921"
+      ],
+      "conclusion_method": "html-reference-only-no-external-fetch",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "external href/src inventory without network retrieval",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-D7804BC9286886E2",
+      "subject_id": null,
+      "statement": "외부 미디어 참조 17건은 원본 바이너리·OCR·전사·프레임이 수집되지 않아 미디어 내용 판단을 보류한다.",
+      "status": "abstain",
+      "evidence_ids": [
+        "SRC-73214D517BC6E5D4"
+      ],
+      "conclusion_method": "media-reference-without-binary-extraction",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "media tag inventory without media extraction",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-C7A557FA7F3B63B0",
+      "subject_id": "ORP-C13A0044F8EF69E4",
+      "statement": "design/Compare.dc.html의 로컬 참조 ./support.js는 missing-target 상태이므로 해당 대상을 근거로 사용할 수 없다.",
+      "status": "abstain",
+      "evidence_ids": [
+        "ORP-C13A0044F8EF69E4"
+      ],
+      "conclusion_method": "broken-reference-preservation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "orphan node review without inferred target",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-FEAC2FFB03AF0A88",
+      "subject_id": "ORP-FC19B04B209B9A49",
+      "statement": "design/Flow.dc.html의 로컬 참조 ./support.js는 missing-target 상태이므로 해당 대상을 근거로 사용할 수 없다.",
+      "status": "abstain",
+      "evidence_ids": [
+        "ORP-FC19B04B209B9A49"
+      ],
+      "conclusion_method": "broken-reference-preservation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "orphan node review without inferred target",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    },
+    {
+      "id": "CON-132FEB3C6FBE5602",
+      "subject_id": "ORP-FE4E7D15BB106C3D",
+      "statement": "design/Main.dc.html의 로컬 참조 ./support.js는 missing-target 상태이므로 해당 대상을 근거로 사용할 수 없다.",
+      "status": "abstain",
+      "evidence_ids": [
+        "ORP-FE4E7D15BB106C3D"
+      ],
+      "conclusion_method": "broken-reference-preservation",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "orphan node review without inferred target",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    }
+  ],
+  "conflict_sets": [
+    {
+      "id": "CFS-AD83A648ABE8C9B0",
+      "status": "unknown",
+      "member_claim_ids": [],
+      "evidence_ids": [
+        "SRC-90BEA7BAF73F6B6D"
+      ],
+      "resolution": "abstain",
+      "conclusion_method": "preserve-unparsed-conflict-projection",
+      "provenance": {
+        "activity_id": "ACT-KE-REBUILD-20260914-CONCLUSIONS",
+        "agent": "knowledge-engineer",
+        "method": "conflict projection preserved without score aggregation",
+        "inventory_snapshot_sha256": "66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af"
+      }
+    }
+  ]
+}

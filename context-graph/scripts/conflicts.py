@@ -35,10 +35,10 @@ WATCH_BREAKERS = ("+", "-", "±", "x ", "×", "plus", "over", "than", "gap")
 WATCH_BINDERS = ("is", "of", "at", "was", "stays", "fixed", "set", "to", "the", "a", "an",
                  # A bound is still that name's value, and the notes say so in words.
                  "max", "min", "maximum", "minimum", "about", "approximately", "approx",
-                 # Korean particles ride on the end of the name, so the name is read with one
-                 # attached and the particle is what stands between it and the number.
+                 # Korean particles can attach to a name; preserve them so multilingual
+                 # documents remain searchable.
                  "은", "는", "이", "가", "을", "를", "의", "로", "으로", "까지", "이상", "이하",
-                 # The same bounds, written the way the Korean notes write them.
+                 # The same bounds, written in Korean source notes.
                  "최대", "최소", "약", "대략", "기준", "이내", "정도", "고정")
 
 NAMED_VALUE = re.compile(

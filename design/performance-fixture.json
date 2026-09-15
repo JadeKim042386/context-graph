@@ -1,0 +1,28 @@
+{
+  "version": "2026-09-12-fixed-v1",
+  "question_sets": [
+    {"id":"q01","keywords":["ontology","class","relationship"],"answer":"온톨로지는 개념과 관계를 명시적으로 정의한다.","variants":["온톨로지에서 클래스와 관계를 어떻게 정의하나?","개념과 관계를 명시하는 지식 구조는?","ontology의 class relation 정의 방법은?","클래스-관계 모델을 만들 때 필요한 것은?","온톨로지 구조에서 관계를 표현하는 원칙은?"]},
+    {"id":"q02","keywords":["evidence","source","locator"],"answer":"Evidence는 출처와 재현 가능한 위치 정보에 연결해야 한다.","variants":["근거를 출처와 위치까지 추적하려면?","evidence provenance를 어떻게 보장하나?","출처 근거의 재현 가능한 기록 형식은?","지식 주장의 근거를 어디까지 저장해야 하나?","source locator가 필요한 이유는?"]},
+    {"id":"q03","keywords":["context","pack","token"],"answer":"Context Pack은 질문에 필요한 최소 주장과 근거만 전달한다.","variants":["컨텍스트 팩으로 토큰을 줄이는 방법은?","Context Pack에는 무엇만 넣어야 하나?","세션 컨텍스트를 최소화하는 지식 전달 방식은?","원문 전체 대신 어떤 정보를 Codex에 보내나?","token 절감을 위한 최소 근거 묶음은?"]},
+    {"id":"q04","keywords":["retrieval","ranking","relevance"],"answer":"검색 후보를 관련성·근거 품질·최신성으로 순위화한다.","variants":["지식 검색 결과를 어떤 기준으로 정렬하나?","retrieval ranking의 핵심 점수는?","관련 지식을 빠르게 선택하는 방법은?","근거가 좋은 검색 결과를 우선하려면?","검색 후보의 우선순위를 계산하는 방법은?"]},
+    {"id":"q05","keywords":["question","canonical","duplicate"],"answer":"정규화한 질문 키와 조건 비교로 반복 질문을 재사용한다.","variants":["같은 질문을 반복하지 않으려면?","질문이 같은 문제인지 판단하는 기준은?","canonical question key를 왜 저장하나?","표현이 다른 중복 질문을 찾는 방법은?","질문 이력을 재사용하는 검색 전략은?"]},
+    {"id":"q06","keywords":["claim","supersede","version"],"answer":"기존 Claim을 덮어쓰지 않고 새 버전이 supersede하도록 연결한다.","variants":["기존 지식 주장을 안전하게 갱신하는 방법은?","Claim version을 어떻게 관리하나?","오래된 주장을 새 주장으로 대체하려면?","supersede 관계는 언제 쓰나?","지식 변경 이력을 보존하는 갱신 방식은?"]},
+    {"id":"q07","keywords":["conflict","contradict","abstain"],"answer":"충돌이 해소되지 않으면 반대 근거를 제시하고 판단을 보류한다.","variants":["서로 모순되는 지식이 있으면 어떻게 하나?","contradict 관계를 검색에 어떻게 반영하나?","근거 충돌 시 결론을 내리지 않는 조건은?","abstain은 언제 반환해야 하나?","충돌하는 Claim의 처리 원칙은?"]},
+    {"id":"q08","keywords":["media","video","audio","ocr"],"answer":"미디어는 전사·OCR·timecode와 추출 provenance를 함께 기록한다.","variants":["영상과 오디오 근거를 지식으로 저장하는 방법은?","이미지 OCR 결과의 위치를 어떻게 보존하나?","media evidence에 timecode가 필요한 이유는?","영상 근거를 재현 가능하게 기록하려면?","오디오·이미지 지식의 extraction provenance는?"]},
+    {"id":"q09","keywords":["quality","validation","review"],"answer":"구조·근거·관계·최신성 검증과 Codex review를 통과시킨다.","variants":["지식 품질을 보장하는 검증 게이트는?","validation과 review의 차이는?","accepted Claim의 품질 기준은?","근거 있는 지식인지 확인하는 절차는?","지식 레코드를 승격하기 전 무엇을 검사하나?"]},
+    {"id":"q10","keywords":["atomic","index","staging"],"answer":"staging에서 원본과 인덱스를 함께 검증한 뒤 원자적으로 활성화한다.","variants":["인덱스 재생성 중 장애를 안전하게 처리하려면?","원본과 검색 인덱스를 일관되게 바꾸는 방법은?","staging과 atomic activation의 목적은?","재인덱싱 실패 시 이전 결과를 보존하려면?","지식 변경을 원자적으로 적용하는 워크플로우는? "]}
+  ],
+  "snapshot_id": "fixture://2026-09-12-fixed-v1",
+  "special_cases": [
+    {"id":"conflict-01","query":"충돌하는 보존 정책은 어떻게 처리하나?","claims":[{"id":"claim-conflict-a","topic":"conflict","keywords":["충돌하는","보존","정책"],"statement":"보존 기간은 30일이다.","status":"accepted","evidence":"정책 A의 직접 근거","locator":"fixture://conflict/a"},{"id":"claim-conflict-b","topic":"conflict","keywords":["충돌하는","보존","정책"],"statement":"보존 기간은 90일이다.","status":"accepted","evidence":"정책 B의 직접 근거","locator":"fixture://conflict/b"}]},
+    {"id":"conflict-02","query":"서로 다른 승인 상태가 동시에 발견되면?","claims":[{"id":"claim-conflict-c","topic":"approval","keywords":["승인","상태"],"statement":"자료는 승인되었다.","status":"accepted","evidence":"승인 기록","locator":"fixture://conflict/c"},{"id":"claim-conflict-d","topic":"approval","keywords":["승인","상태"],"statement":"자료는 승인되지 않았다.","status":"accepted","evidence":"거절 기록","locator":"fixture://conflict/d"}]},
+    {"id":"unanswerable-01","query":"현재 배포 리전은 어디인가?","claims":[]},
+    {"id":"unanswerable-02","query":"운영 API 비밀키 값은 무엇인가?","claims":[]}
+  ],
+  "evaluator_sidecar": {
+    "conflict-01":{"label":"conflict","gold_claims":["claim-conflict-a","claim-conflict-b"]},
+    "conflict-02":{"label":"conflict","gold_claims":["claim-conflict-c","claim-conflict-d"]},
+    "unanswerable-01":{"label":"unanswerable","gold_claims":[]},
+    "unanswerable-02":{"label":"unanswerable","gold_claims":[]}
+  }
+}

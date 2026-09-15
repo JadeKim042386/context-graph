@@ -1,0 +1,29 @@
+# DIRECT HANDOFF — KE-KNOWLEDGE-REBUILD-002
+
+- status: partial
+- exact_output_file: `knowledge-base/_ops/rebuild/external-source-manifest.json`
+- supporting_outputs:
+  - `knowledge-base/_ops/rebuild/external-source-validation-report.json`
+  - `knowledge-base/_ops/rebuild/rebuild-index.json`
+  - `knowledge-base/_ops/rebuild/knowledge-projection.html`
+  - `knowledge-base/_ops/rebuild/GATES.md`
+- checks_run:
+  - `jq -e 'type=="object"'` on all eight rebuild JSON documents — exit 0
+  - `jq -s -e ... build-log.jsonl` — exit 0
+  - cross-file jq snapshot/count/stable-ID/source-reference integrity — exit 0
+  - Python `HTMLParser` plus embedded `projection-summary` count/path assertions — `EXTERNAL_L5_HTML_OK`
+  - `git diff --check` — exit 0; untracked artifacts are outside its content-check scope
+- findings:
+  - 1,203 unique external URL records and 17 media records have unique stable IDs, first-reference HTML attribute locators, provenance, extraction-format classification, and `rights_status=unverified`.
+  - All 1,203 URL records remain `fetch_status=not_started`; `fetched_content=0` and no fetched cache was created.
+  - The first jq validator failed with exit 5 because its expression lost the root object while processing an array. The corrected `. as $m | ($m.records | map(.stable_id))` validator returned `true`.
+  - The L5 index and HTML projection link the external manifest and validation report without changing the existing typed graph, conclusions, source files, or `graphify-out/`.
+  - A sandbox HEAD request failed with curl exit 6 (`Could not resolve host`). One separately escalated W3C HEAD returned HTTP 200, but fetched no body and does not verify bulk URL access or content.
+- next_role: environment/network-permission owner, then knowledge-engineer
+- terminally_blocked: true for HTTP/content-cache/media-extraction work in the current authorized environment; false for the completed local reference manifest
+- unresolved:
+  - HTTP status, redirects, robots outcome, and timeout result for the 1,203 URLs
+  - immutable content hashes/cache for authoritative external sources
+  - rights/license verification for every external source
+  - binary acquisition, OCR/transcript/frame extraction, and stable binary locators for 17 media references
+  - external Source/Media nodes and Evidence edges in a new L3 graph revision after content acquisition

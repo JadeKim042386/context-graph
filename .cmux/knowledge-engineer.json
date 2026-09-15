@@ -1,0 +1,21 @@
+{
+  "workspace": "workspace:1",
+  "surface": "surface:2",
+  "surface_uuid": "9F59D7AF-01FB-4DC1-9C3F-9CD8CCD09245",
+  "tab_title": "Confirm knowledge-engineer role | context-graph",
+  "provider": "cmux-cli",
+  "model": "gpt-5.6-sol",
+  "protocol": {
+    "assignment_prefix": "KE_ASSIGNMENT",
+    "completion_prefix": "KE_COMPLETION",
+    "blocked_prefix": "KE_BLOCKED",
+    "heartbeat_prefix": "KE_HEARTBEAT",
+    "required_completion_fields": ["work_id", "status", "changed", "verification", "unverified", "next_action"]
+  },
+  "communication": {
+    "read_command": "cmux read-screen --surface surface:2 --scrollback --lines 160",
+    "send_command": "cmux send --surface surface:2 <text> && cmux send-key --surface surface:2 Return",
+    "health_command": "cmux surface-health --surface surface:2",
+    "event_command": "cmux events --reconnect --category surface --limit 100"
+  }
+}

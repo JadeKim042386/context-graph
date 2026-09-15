@@ -1,0 +1,66 @@
+# DIRECT HANDOFF
+
+- status: partial
+- exact_output_file: `knowledge-base/_ops/rebuild/external-knowledge-projection.html`
+- batches:
+  - URL: 39 regular batches plus 1 deterministic final-retry batch and 1 deterministic recovery batch; 790 logical result records covering 775 unique URL records from 1,203 manifest records.
+  - Media: 1 batch, 17/17 metadata attempts.
+  - Recovery sample: 10 records = HTTP 403×4, HTTP 405×2, DNS×2, timeout×1, connection-refused×1; result `metadata_fetched=2`, `http_error=6`, `failed=2`.
+  - Request policy: Python standard-library `urllib`, respectful User-Agent/Accept headers, safe public-host redirects, HEAD metadata followed only where robots allowed by GET Range metadata fallback, bounded retries/backoff with `Retry-After`, workers 4, timeout 10 seconds; no response body retained.
+- counts:
+  - Before recovery: `metadata_fetched=693`, `http_error=64`, `failed=18`, `not_started=428`.
+  - URL manifest final unique-record status: `metadata_fetched=695`, `http_error=64`, `failed=16`, `not_started=428`.
+  - Final HTTP errors: `401=1`, `403=53`, `404=4`, `405=6`; network failures: DNS=12, timeout=3, connection refused=1.
+  - Final retry: deterministic sample 10 = five `not_started` + five `http_error`; result `metadata_fetched=5`, `HTTP 403=5`.
+  - Recovery safety result: GET fallback used 5 times only after robots `allowed=2` or `not_found_allow=3`; one `robots_disallow` target received no fallback. Persistent 403/405 was not bypassed.
+  - Media: `metadata_fetched=17`.
+  - Result locators/provenance linked: URL 775 unique, media 17, total 792.
+  - Body/content SHA-256: 0; metadata-only requests did not retain bodies, so no immutable body cache was created.
+  - Rights/license: 4 records have explicit HTTP `License`/`Rights`/`Link rel=license` evidence; all others remain `unverified`.
+  - External graph: nodes 2,012 = ExternalSource 1,203 + MediaReference 17 + latest FetchObservation 792; edges 809 = observation edges 792 + media/source edges 17.
+  - External conclusions: 1,220 = observed 712 + abstain 508.
+- changed_artifacts:
+  - `knowledge-base/_ops/rebuild/fetch_external_sources.py`
+  - `knowledge-base/_ops/rebuild/external-fetch-results.json`
+  - `knowledge-base/_ops/rebuild/external-source-manifest.json`
+  - `knowledge-base/_ops/rebuild/build_external_knowledge.py`
+  - `knowledge-base/_ops/rebuild/typed-external-knowledge-graph.json`
+  - `knowledge-base/_ops/rebuild/external-conclusions.json`
+  - `knowledge-base/_ops/rebuild/external-knowledge-projection.html`
+  - `knowledge-base/_ops/rebuild/rebuild-index.json`
+  - `knowledge-base/_ops/rebuild/knowledge-projection.html`
+  - `knowledge-base/_ops/rebuild/knowledge-cycle-report.html`
+  - `knowledge-base/_ops/rebuild/validate_knowledge_cycle.py`
+  - `knowledge-base/_ops/rebuild/test_external_knowledge_rebuild.py`
+  - `work/coordination/KE-KNOWLEDGE-CYCLE-PLAN-001.md`
+  - `work/coordination/KE-KNOWLEDGE-EXTERNAL-001.md`
+- checks_run:
+  - External RED: 1 passed / 2 failed because external graph and L5 projection did not yet exist.
+  - `python knowledge-base/_ops/rebuild/fetch_external_sources.py --final-retry --batch-size 10 --timeout 10 --workers 4` — PASS; 5 metadata fetched, 5 HTTP 403, one bounded retry only.
+  - `python knowledge-base/_ops/rebuild/build_external_knowledge.py` — PASS; graph 2,012/809, conclusions 1,220, current manifest counts projected.
+  - Recovery TDD — RED on missing `fetch_recovery`, missing deterministic selection, and absent recovery batch; GREEN after the bounded implementation/run.
+  - `python knowledge-base/_ops/rebuild/fetch_external_sources.py --recovery --batch-size 10 --timeout 10 --workers 4` — PASS; 2 metadata fetched, 6 HTTP errors, 2 network failures.
+  - `pytest -q knowledge-base/_ops/rebuild/test_external_knowledge_rebuild.py` — PASS; 6/6 passed.
+  - `python knowledge-base/_ops/rebuild/validate_knowledge_cycle.py --scope all` — PASS: `CYCLE_INTEGRITY_OK`, `CYCLE_LOCATOR_OK`, `CYCLE_GOLD_ISOLATION_OK`, `CYCLE_EXTERNAL_OK`, `CYCLE_REPORT_OK`, `CYCLE_DIFF_OK`, `CYCLE_ALL_OK`.
+  - `pytest -q knowledge-base/_ops/rebuild/test_local_knowledge_rebuild.py` — PASS; 9 passed in 0.92s, non-failing environment warnings only.
+  - Manifest/result check — PASS; all 792 latest unique URL/media observations resolve to an `external-fetch-results.json` batch/stable-ID locator and immutable fetch provenance.
+  - Graph/conclusion reference check — PASS; every source, media and conclusion evidence ID resolves in the external graph.
+  - JSON/HTML/snapshot check — PASS; manifest, result, external graph, conclusions, external L5 and cycle projection share inventory snapshot `66dee5187dca93f9069f3388f8374ed88fece66f4a3094f1ca47f005b8ad90af` and embedded JSON parses.
+- findings:
+  - Accessible metadata for 712 URL/media records was promoted without treating metadata availability as body/content validation.
+  - Recovery added respectful headers, safe redirects, bounded exponential backoff/Retry-After, deterministic network classes, robots gating, and safe HEAD-to-GET metadata fallback.
+  - The recovery made measurable progress for two former DNS failures; four sampled 403s, two 405s, one timeout, and one connection-refused target remained unresolved under the bounded safety policy.
+  - HTTP/DNS/timeout/connection failures and all not-started records are represented as `unknown`/`abstain`, never as negative content claims.
+  - Rights were promoted only for four explicit HTTP-header observations; no license was inferred from host, file type or surrounding HTML.
+  - External result observations are separated from the preserved local-v2 graph/conclusions and are discoverable from the rebuild index and both L5 reports.
+  - Existing local originals, legacy graph/conclusion artifacts and `graphify-out` were not overwritten.
+  - stopping_reason: The approved deterministic recovery of 10 records improved two DNS failures, but six HTTP/robots failures and two network failures remained after bounded retries. Stopping without bypassing access controls, robots rules, or rate limits; hand off as partial because 428 records are not started and 80 remain errored.
+- next_role: main-dispatcher
+- terminally_blocked: false
+- unresolved:
+  - 428 URLs are `not_started`; 64 HTTP errors and 16 network failures remain unresolved abstentions.
+  - Persistent 403/401, robots disallow, paywall/protected access, or server policy cannot be bypassed; an authoritative alternate public locator or source-owner access is required.
+  - Body content SHA/cache count is 0; no text, HTML, PDF, or media content extraction was performed.
+  - Only 4 records have HTTP-header evidence for rights/license; the remaining 1,216 URL/media records are `unverified`.
+  - Of the two sampled HEAD 405 records, one also returned 405 for a robots-approved GET and one did not use fallback because of robots disallow.
+  - The `requests` dependency mismatch and `pytest-asyncio` loop-scope warning are not test failures, but environment cleanup remains.
