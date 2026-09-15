@@ -20,7 +20,7 @@ The project Skill is `context-graph/skills/knowledge-engineering/SKILL.md`. It c
 
 ### Codex or ChatGPT Skills
 
-Download `knowledge-engineering-skill-v0.3.5.zip` from the [v0.3.5 release](https://github.com/JadeKim042386/context-graph/releases/tag/v0.3.5), then open **Skills → Create → Upload** and select the ZIP file. Enable the uploaded Skill for the workspace or project where it should run.
+Download `context-graph-skill-v0.3.5.zip` from the [v0.3.5 release](https://github.com/JadeKim042386/context-graph/releases/tag/v0.3.5), then open **Skills → Create → Upload** and select the ZIP file. Enable the uploaded Skill for the workspace or project where it should run.
 
 ### Claude Code
 
