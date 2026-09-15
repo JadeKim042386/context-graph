@@ -16,6 +16,35 @@ Collect sources → organize originals → analyze → propose → review and mo
 
 The project Skill is `context-graph/skills/knowledge-engineering/SKILL.md`. It connects knowledge building, analysis, proposals, review, and modification in one workflow.
 
+## Install and share
+
+### Codex or ChatGPT Skills
+
+Download `knowledge-engineering-skill-v0.3.4.zip` from the [v0.3.4 release](https://github.com/JadeKim042386/context-graph/releases/tag/v0.3.4), then open **Skills → Create → Upload** and select the ZIP file. Enable the uploaded Skill for the workspace or project where it should run.
+
+### Claude Code
+
+Install the repository as a local Claude Code marketplace:
+
+```text
+/plugin marketplace add https://github.com/JadeKim042386/context-graph.git
+/plugin install context-graph@context-graph
+```
+
+The plugin can also be submitted to Anthropic's [official Claude Code plugin directory](https://github.com/anthropics/claude-plugins-official) for review. Approval is controlled by Anthropic; the repository remains installable directly while review is pending.
+
+### Repository installation
+
+For either runtime, clone the tagged release and use the included Skill directory:
+
+```bash
+git clone --branch v0.3.4 https://github.com/JadeKim042386/context-graph.git
+```
+
+Codex-compatible Skill path: `context-graph/skills/knowledge-engineering/`
+
+Claude Code plugin root: `context-graph/`
+
 ## Skill scope
 
 - Collect and normalize papers, web pages, and media
