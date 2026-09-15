@@ -44,6 +44,17 @@ def test_the_plugin_manifest_has_a_name_and_a_version():
     assert plugin["version"]
 
 
+def test_the_plugin_packages_a_knowledge_engineer_agent():
+    agent = _read_text("context-graph", "agents", "knowledge-engineer.md")
+    assert "name: knowledge-engineer" in agent
+    assert "skills: context-graph" in agent
+    assert "analysis" in agent.lower()
+    assert "propose" in agent.lower()
+    assert "modify" in agent.lower()
+    assert "build_map.py" in agent
+    assert "ask.py" in agent
+
+
 def test_all_four_refresh_points_are_hooked():
     hooks = _read_json("context-graph", "hooks", "hooks.json")["hooks"]
     assert set(hooks) == {"SessionStart", "SubagentStop", "PreCompact", "PostCompact"}

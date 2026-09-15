@@ -1,4 +1,19 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+.DS_Store
+
+# Legacy graph/visual-workbench outputs unrelated to the Knowledge Engineering Skill.
+/graphify-out/
+/assets/
+/design/Main.dc.html
+/design/Flow.dc.html
+/design/Compare.dc.html
+/design/canvas.json
+/design/make_demo_gif.py
+
+# Local scratch files produced while rendering the legacy design canvas.
+/design/support.js
+/design/*.gif
+
 design/context-graph-diagrams.html
