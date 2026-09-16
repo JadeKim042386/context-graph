@@ -1,26 +1,53 @@
 # Context Graph · Knowledge Engineering Skill
 
-![Knowledge Engineering Skill overview](design/knowledge-engineering-skill-overview.png)
+This project provides a cross-runtime Knowledge Engineering Skill for Codex and
+Claude Code. It turns source material into traceable, reviewable knowledge and
+HTML-first projections that answer with evidence or deliberately abstain.
 
-This project turns collected material into organized knowledge through analysis, proposals, and human-guided revision.
+## 1. Overall structure
 
-## Core workflow
+![Overall knowledge-engineering structure](context-graph/assets/readme/overall-structure-v2.png)
 
-```text
-Collect sources → organize originals → analyze → propose → review and modify
-```
+The system moves from a bounded question and preserved source material to
+canonical records, evidence checks, graph validation, projections, and measured
+retrieval. The final answer state is `answer`, `conflict`, or `abstain`.
 
-### What each stage does
+## 2. Operation flow and order
 
-![Knowledge Engineering Skill stage inputs, actions, and outputs](design/knowledge-engineering-workflow-detail.png)
+![Knowledge-engineering workflow and state transitions](context-graph/assets/readme/workflow-static-v4.png)
 
-The project Skill is `context-graph/skills/knowledge-engineering/SKILL.md`. It connects knowledge building, analysis, proposals, review, and modification in one workflow.
+The workflow has eight ordered stages:
 
-## Install and share
+1. **Scope** — define the question, domain, date, and acceptance criteria.
+2. **Collect** — preserve documents, datasets, images, video, audio, or URLs.
+3. **Normalize** — create stable Source, Evidence, Claim, Media, and provenance records.
+4. **Model** — represent typed entities, relations, time, and ontology constraints.
+5. **Validate** — check schemas, locators, hashes, freshness, reasoning, conflicts, and gold isolation.
+6. **Review** — compare supporting and counter-evidence and decide accept, revise, hold, or reject.
+7. **Project** — rebuild HTML, graph, search, reports, Context Packs, memory pointers, and optional Archify diagrams.
+8. **Measure** — compare strategies on the same snapshot and question order.
+
+The analysis/proposal role is read-only and returns an evidence-backed handoff.
+Together, analysis, proposal, review, and modification keep changes evidence-backed.
+The modification role applies only an approved request, preserves provenance,
+creates revisions, rebuilds projections, and verifies the result.
+
+## 3. Installation and use
 
 ### Codex or ChatGPT Skills
 
-Download `context-graph-skill-v0.3.6.zip` from the [v0.3.6 release](https://github.com/JadeKim042386/context-graph/releases/tag/v0.3.6), then open **Skills → Create → Upload** and select the ZIP file. Enable the uploaded Skill for the workspace or project where it should run.
+Download the latest release, then install the skill from:
+
+```text
+context-graph/skills/knowledge-engineering/
+```
+
+For a project-local installation, clone the repository and keep that directory
+available from the project root:
+
+```bash
+git clone --branch v0.4.0 https://github.com/JadeKim042386/context-graph.git
+```
 
 ### Claude Code
 
@@ -31,74 +58,80 @@ Install the repository as a local Claude Code marketplace:
 /plugin install context-graph@context-graph
 ```
 
-The plugin can also be submitted to Anthropic's [official Claude Code plugin directory](https://github.com/anthropics/claude-plugins-official) for review. Approval is controlled by Anthropic; the repository remains installable directly while review is pending.
+Claude Code uses the same `SKILL.md` and reads `CLAUDE.md` host instructions
+when present. It does not require `AGENTS.md`.
 
-### Repository installation
+### Use
 
-For either runtime, clone the tagged release and use the included Skill directory:
-
-```bash
-git clone --branch v0.3.6 https://github.com/JadeKim042386/context-graph.git
-```
-
-Codex-compatible Skill path: `context-graph/skills/knowledge-engineering/`
-
-Claude Code plugin root: `context-graph/`
-
-### Runtime compatibility
-
-The skill content is shared by Codex and Claude Code, while each runtime keeps
-its own project instructions. Codex projects may use `AGENTS.md`; Claude Code
-projects should use `CLAUDE.md`. Claude Code does not automatically load
-`AGENTS.md`. The skill does not require either file unless the host project
-already uses it for shared rules.
-
-Script paths are also runtime-specific: Claude Code resolves plugin scripts
-through `${CLAUDE_PLUGIN_ROOT}`, while Codex and repository checkouts use paths
-relative to the project root. This avoids requiring a Claude-only environment
-variable in Codex.
-
-## Skill scope
-
-- Collect and normalize papers, web pages, and media
-- Create `Concept`, `Claim`, `Source`, `Evidence`, `Media`, `Review`, `Decision`, and `Question` records
-- Organize the scope, meaning, and relationships of source material
-- Write proposals based on analysis
-- Apply reviewed changes to knowledge records
-
-## Folder structure
-
-![Project folder structure: Skill, knowledge data, documents, design material, and work records](design/project-folder-structure.svg)
-
-Canonical records are reviewed and modified by people. Generated HTML, indexes, and graphs are derived from those records and are not edited directly.
-
-## Record types and decisions
-
-| Record | Purpose |
-|---|---|
-| `Source` | URL or path, revision, hash, and rights state of an original |
-| `Evidence` | A selector, page, row, region, or time range that can be found again |
-| `Claim` | One sentence that can be reviewed as true or false |
-| `Review` | A reviewer's finding and proposed correction |
-| `Decision` | An accepted, held, or rejected change |
-| `Question` | A repeatable question with scope and reference date |
-
-Answers use one of three states:
-
-- `answer`: an accepted Claim has reproducible Evidence
-- `conflict`: evidence within the same scope is incompatible
-- `abstain`: evidence is missing, stale, unknown, or unlocatable
-
-Matching words alone do not establish agreement. Compare question scope, Claim meaning, Evidence location, Source revision, and answer scope.
-
-## Existing local graph tool
-
-The existing `context-graph/scripts/` tool copies explicit statements and relationships from Markdown and HTML into a local graph. It is separate from the new Knowledge Engineering Skill.
+From the project root, ask for a knowledge analysis, proposal, review,
+modification, or evidence-backed answer. Useful commands are:
 
 ```bash
+python context-graph/skills/knowledge-engineering/scripts/update_memory.py --help
+python context-graph/skills/knowledge-engineering/scripts/validate_workspace.py --root . --profile project
 python context-graph/scripts/build_map.py --help
 python context-graph/scripts/ask.py "question"
 python context-graph/scripts/ask.py --conflicts
+```
+
+For Codex package validation, run the `quick_validate.py` script provided by the
+installed `skill-creator` skill. Do not hard-code a machine-specific path.
+
+## 4. Folder structure
+
+![Knowledge-engineering repository folder structure](context-graph/assets/readme/folder-structure-v2.png)
+
+| Folder | What it contains | Editing rule |
+|---|---|---|
+| `context-graph/skills/knowledge-engineering/` | Skill instructions, references, and helper scripts | Change shared workflow rules deliberately |
+| `context-graph/agents/` | Analysis, modification, and coordination roles | Keep role boundaries explicit |
+| `context-graph/tests/` | Skill, packaging, parser, and integration tests | Add regression coverage for contract changes |
+| `knowledge/` | Explicitly authored human-readable HTML | Preserve source links and evidence boundaries |
+| `knowledge-base/_ops/rebuild/` | Canonical JSON, validators, snapshots, and generated projections | Rebuild generated files; do not hand-edit them |
+| `design/` | Experiments, comparisons, fixtures, and visual design material | Label proxy and synthetic results clearly |
+| `work/coordination/` | Handoffs, decisions, checks, and limitations | Keep operational history separate from source data |
+
+## 5. Record information
+
+![Knowledge-engineering record and evidence chain](context-graph/assets/readme/record-chain-v2.png)
+
+Records are small, stable, and connected by provenance. A content claim is
+usable only when its chain can be replayed:
+
+```text
+Claim → Evidence → Source revision
+   ↑          ↑
+Review    Provenance activity
+```
+
+| Record | Purpose | Important information |
+|---|---|---|
+| `Source` | Identifies the original material | `id`, revision, title, URL/path, access date, hash, rights |
+| `Evidence` | Points to the exact supporting location | `id`, source revision, locator, observed text/data, freshness |
+| `Claim` | States one atomic proposition | `id`, statement, scope, status, evidence references, `supersedes` |
+| `Media` | Describes image, video, or audio evidence | format, hash, rights, region/page/timecode locator, derivative links |
+| `Review` / `Decision` | Records human assessment and approval | reviewer, criteria, decision, status, conflicts, date |
+| `Validation` | Records quality and consistency checks | method, snapshot, result, failures, replay details |
+
+Metadata-only observations cannot support content claims. Generated HTML,
+graphs, indexes, reports, and optional Archify diagrams are projections rebuilt
+from approved inputs; they are never hand-edited. Memory stores pointers rather
+than source text and is updated only after an approved decision, verified
+snapshot, or goal-state transition.
+
+## Contracts and verification
+
+Detailed contracts are in `context-graph/skills/knowledge-engineering/references/`:
+
+- `record-schema.md` — canonical record fields
+- `evidence-rules.md` — support, conflict, freshness, and reproducibility rules
+- `memory-update.md` — pointer-only Second Brain state updates
+- `validation-gates.md` — workspace and projection checks
+
+```bash
+pytest -q context-graph/tests/test_final_skill_contract.py
+pytest -q context-graph/tests/test_knowledge_engineering_skill.py
+pytest -q context-graph/tests
 ```
 
 ## License
