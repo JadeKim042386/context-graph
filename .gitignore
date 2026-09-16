@@ -17,3 +17,23 @@ __pycache__/
 /design/*.gif
 
 design/context-graph-diagrams.html
+
+# Local knowledge, research, coordination, and host configuration.
+# These are intentionally excluded from the installable skill package.
+/.cmux/
+/AGENTS.md
+/GATES.md
+/design/
+/knowledge/
+/knowledge-base/
+/work/
+/requirements-ontology.txt
+/GATES-load.md
+/GATES-source-grounded.md
+
+# Experimental README renderings; the released package keeps only the
+# referenced documentation images.
+/context-graph/assets/readme/workflow-base-v2.png
+/context-graph/assets/readme/workflow-storyboard-v3.png
+/context-graph/assets/readme/workflow-v2.gif
+/context-graph/assets/readme/workflow-v3.gif
