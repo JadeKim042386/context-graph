@@ -79,8 +79,9 @@ installed `skill-creator` skill. Do not hard-code a machine-specific path.
 | `skills/knowledge-engineering/` | Skill instructions, references, and helper scripts | Change shared workflow rules deliberately |
 | `agents/` | Analysis, modification, and coordination roles | Keep role boundaries explicit |
 | `tests/` | Skill, packaging, parser, and integration tests | Add regression coverage for contract changes |
-| `knowledge/` | Explicitly authored human-readable HTML | Preserve source links and evidence boundaries |
-| `knowledge-base/_ops/rebuild/` | Canonical JSON, validators, snapshots, and generated projections | Rebuild generated files; do not hand-edit them |
+| `scripts/` | Map-building, parsing, lookup, and validation helpers | Run from the consuming project root |
+| `assets/readme/` | Documentation images for the skill package | Keep images aligned with the package workflow |
+| `.claude-plugin/` | Claude Code plugin metadata | Keep package source and version aligned |
 
 ## 5. Record information
 
