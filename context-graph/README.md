@@ -1,46 +1,88 @@
 # Context Graph Skill Package
 
-This directory contains the project's Knowledge Engineering Skill and the existing local graph tool.
+This package provides a cross-runtime Knowledge Engineering Skill for Codex and
+Claude Code. It turns source material into traceable, reviewable knowledge and
+HTML-first projections that can answer with evidence or deliberately abstain.
 
-## Core Skill
+## What the skill does
 
-`knowledge-engineering/SKILL.md` defines this flow:
+The final structure is:
 
 ```text
-Collect → preserve originals → create canonical records
-      → analyze and propose → review and modify
+1 Scope → 2 Collect → 3 Normalize → 4 Model
+      → 5 Validate → 6 Review → 7 Project → 8 Measure
+      → retrieve the smallest supported evidence set
+      → answer | conflict | abstain
 ```
 
-Detailed contracts are in `skills/knowledge-engineering/references/`.
+Each stage has one job:
+
+| Stage | Core responsibility | Output |
+|---|---|---|
+| Scope | Define the question and acceptance criteria | Bounded question |
+| Collect | Preserve documents, datasets, images, video, audio, and URLs | Immutable source revision |
+| Normalize | Create stable Source, Evidence, Claim, Media, and provenance records | Reviewable canonical records |
+| Model | Add typed entities, relations, time, and ontology constraints | Graph/RDF/OWL/SHACL model |
+| Validate | Check schema, locators, hashes, freshness, reasoning, conflicts, and gold isolation | Promotion evidence |
+| Review | Compare support and counter-evidence | Approved, held, revised, or rejected decision |
+| Project | Rebuild HTML, graph, search, reports, Context Packs, memory pointers, and optional Archify diagrams | Reproducible views |
+| Measure | Compare strategies on the same snapshot and question order | Local performance evidence |
+
+The analysis/proposal role reasons and returns an evidence-backed handoff without
+editing. The review and modification roles apply only an approved request,
+preserve provenance, create revisions, rebuild projections, and verify the result.
+When delegated reasoning is required and cmux is exposed by the project, its
+configured knowledge-engineer subagent is preferred; otherwise use the host's
+documented coordination mechanism and report any limitation.
+
+## Installation and use
+
+### Codex
+
+Copy or link this package's `skills/knowledge-engineering/` directory into the
+project's configured Codex skills location, or keep the package in the project
+and reference the skill at:
+
+```text
+skills/knowledge-engineering/SKILL.md
+```
+
+### Claude Code
+
+Install the same package as a Claude Code plugin checkout. Claude Code uses the
+skill's `SKILL.md` and its `CLAUDE.md` host instructions when present; it does
+not require `AGENTS.md`. The skill itself does not assume a host-specific
+environment variable.
+
+After installation, run from the project root and ask for a knowledge-analysis,
+proposal, review, modification, or evidence-backed answer.
+
+## Retrieval limits
+
+Graph answers follow the project's existing limits: ask in the language the
+document is written in, respect the configured `answer_budget`, and ask
+narrowly so broad questions return only the relevant set.
+
+## Contracts and tools
+
+Detailed contracts are in `skills/knowledge-engineering/references/`:
 
 | Reference | Purpose |
 |---|---|
-| `record-schema.md` | Concept, Claim, Source, Evidence, Review, and Decision fields |
-| `evidence-rules.md` | How to compare questions, Claims, Evidence, and answers |
-| `memory-update.md` | Existing project-state pointer conventions |
-| `validation-gates.md` | Existing workspace and artifact checks |
-
-## Provided scripts
+| `record-schema.md` | Canonical Source, Evidence, Claim, Media, Review, and Decision fields |
+| `evidence-rules.md` | Support, conflict, freshness, and reproducibility rules |
+| `memory-update.md` | Pointer-only Second Brain state updates |
+| `validation-gates.md` | Workspace, provenance, projection, and cycle checks |
 
 ```bash
 python skills/knowledge-engineering/scripts/update_memory.py --help
-python skills/knowledge-engineering/scripts/validate_workspace.py --root ..
+python skills/knowledge-engineering/scripts/validate_workspace.py --root .. --profile portable
 ```
 
-`update_memory.py` updates pointers without copying source text. `validate_workspace.py` checks required project artifacts and JSON parsing.
+For Codex package validation, run the `quick_validate.py` script provided by the
+installed `skill-creator` skill. Do not hard-code a machine-specific path.
 
-## Answer scope limits
-
-Graph queries follow these rules:
-
-- Answer in the language recorded by the documents.
-- Ask in the language the document you want is written in so matching reaches that document.
-- Follow the configured `answer_budget`; the default is 8,000 characters.
-- Ask narrowly: for broad questions, return a narrow relevant set instead of listing every document.
-
-## Existing graph commands
-
-The existing `scripts/` copy explicit Markdown and HTML statements and `[[target]]` relationships without model inference.
+The existing graph tools remain deterministic and explicit:
 
 ```bash
 python scripts/build_map.py --help
@@ -48,11 +90,18 @@ python scripts/ask.py "question"
 python scripts/ask.py --conflicts
 ```
 
-## Tests
+## Verification
 
 ```bash
+pytest -q tests/test_final_skill_contract.py
 pytest -q tests/test_knowledge_engineering_skill.py
 pytest -q tests
 ```
 
-Report any existing graph ID-stability failure separately from Skill changes.
+Explicitly named authored HTML under `knowledge/` is an input. Generated HTML,
+graph files, indexes, reports, and optional Archify diagrams under rebuild/output
+folders are projections rebuilt from approved inputs; they are not hand-edited.
+Every content claim must retain a Claim → Evidence → Source revision chain;
+metadata-only observations cannot support content claims. Keep source copies, secrets,
+transient model output, and sealed evaluator answers out of memory and Context
+Packs.

@@ -22,4 +22,6 @@ Do not store source text, long summaries, credentials, personal data, or transie
 
 `Review/Decision → AGENTS.md rules (when needed) → memory/index.json → projection rebuild → validators → report`
 
-`scripts/update_memory.py` preserves the existing JSON and updates pointers only. After an automatic update, check the diff and parse the JSON.
+`scripts/update_memory.py` preserves the existing JSON and updates pointers only.
+Pass an explicit `--status`; the updater refuses to silently mark a goal as
+verified. After an automatic update, check the diff and parse the JSON.

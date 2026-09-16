@@ -1,67 +1,76 @@
 ---
 name: knowledge-engineering
-description: Use when collecting, analyzing, proposing, reviewing, modifying, or answering from project knowledge that must remain evidence-linked, reproducible, and safe to update.
+description: Use when analyzing, proposing, collecting, modeling, reviewing, modifying, or answering from project knowledge that must remain evidence-linked and reproducible.
 ---
 
-# Knowledge Engineering Skill
+# Knowledge Engineering
 
-Manage project knowledge as **originals → canonical records → review and approval → search and answers**. Keep originals separate from generated results; do not guess when evidence cannot be reproduced.
+Use an evidence-first Second Brain workflow: preserve what was found, compile it
+into small reviewable records, validate it, then project and retrieve it. The
+default answer is `abstain` when a claim is missing, stale, conflicting, or not
+locatable.
 
-## Cross-runtime project instructions
+## Final eight-stage workflow
 
-This skill is shared by Codex and Claude Code, but host instruction files are
-platform-specific. Read the instruction file that exists in the host project:
+1. Scope — define the question, domain, date, answer state, and acceptance criteria.
+2. Collect — capture documents, datasets, images, video, audio, or URLs with identity, rights, access date, hash, and immutable revision.
+3. Normalize — create stable `Source`, `Evidence`, `Claim`, `Media`, `Question`, and `ProvenanceActivity` records.
+4. Model — represent typed entities, relations, temporal scope, provenance, and media derivatives; use RDF/OWL/SHACL where the project requires it.
+5. Validate — run schema, SHACL, reasoning, hash, locator-replay, freshness, conflict, competency-question, and sealed-evaluator-gold checks.
+6. Review — compare support and counter-evidence; keep conflicts visible; choose accept, revise, hold, or reject.
+7. Project — rebuild HTML-first knowledge pages, graph JSON, search indexes, reports, Context Packs, memory pointers, and optional Archify diagrams from the approved snapshot.
+8. Measure — compare baseline and ontology-assisted retrieval/generation on the same snapshot and question order; label fixture results as local measurements, not production guarantees.
 
-- Codex commonly uses `AGENTS.md`.
-- Claude Code commonly uses `CLAUDE.md`; it does not automatically load `AGENTS.md`.
+## Role boundaries
 
-Do not require either file merely because the other platform uses it. Update the
-host's instruction file only when the shared project rules actually changed;
-otherwise keep durable state in `knowledge-base/_ops/memory/index.json`.
+### analysis/proposal role
 
-Run the quick commands from the project root. In a Claude Code plugin checkout,
-use the plugin-root paths shown by the plugin README; in a Codex Skill upload,
-use paths relative to the project being worked on. Never assume that a
-platform-specific environment variable exists in the other runtime.
+Reason over the current graph and sources, distinguish `FACT`, `INFERENCE`,
+`GAP`, `CONFLICT`, and `PROPOSAL`, and return exact evidence locators,
+counter-evidence, target files, and expected effects. Keep proposals as
+`proposed`; do not edit files or promote claims.
 
-## Scope
+### modification role
 
-- Collect and normalize material; create Claim, Evidence, Source, and Media records
-- Write analyses, proposals, and modifications
-- Manage approvals and revisions through Review and Decision records
-- Update project-state pointers in `AGENTS.md` and `knowledge-base/_ops/memory/index.json`
-- Rebuild HTML, search indexes, relationship graphs, and Archify diagrams
+Apply only an explicit user request or an approved proposal. Preserve originals,
+provenance, prior decisions, and unrelated work. For a meaning change, append a
+new revision with `supersedes` instead of overwriting history. Rebuild projections,
+update state pointers, and report verification after editing.
 
-## Execution contract
+### Coordination boundary
 
-1. Before starting, read `references/record-schema.md` and the relevant `references/evidence-rules.md`.
-2. Preserve originals as immutable inputs and assign stable IDs, revisions, and provenance to canonical records.
-3. Keep analysis results as `proposed`; do not promote them to `accepted` without the user's request.
-4. Edit only canonical JSON or explicitly named Markdown/HTML originals. Do not edit generated HTML, graphs, or indexes directly.
-5. After review and approval, update project-state pointers using `references/memory-update.md`. Change `AGENTS.md` only when shared rules change.
-6. Rebuild projections and Archify artifacts from the approved snapshot, then run `references/validation-gates.md` checks.
-7. Reports must state changed files, evidence, tests, failures, unverified items, and the next role.
+When delegated reasoning is needed and the project exposes a cmux session, inspect
+it first and reuse its configured knowledge-engineer subagent. Create a
+project-scoped one only if none exists. If cmux is unavailable, use the host's
+documented coordination mechanism or report the limitation; do not silently
+replace an explicitly configured project coordinator.
 
-## Analysis and proposal role
+## Storage and host compatibility
 
-Break questions into scope, reference date, and decision criteria. Separate direct evidence from interpretation and state evidence, trade-offs, and verification methods for each alternative. Search scores are candidate-selection signals, not evidence.
+- Keep immutable originals and canonical JSON separate from generated HTML, graphs, indexes, and reports. Explicitly named authored HTML in `knowledge/` is an input; generated HTML under `_ops/rebuild/` is a projection and must not be hand-edited.
+- HTML is the human-readable knowledge projection; it must point to the Claim → Evidence → Source revision chain and media locators, not copy sealed evaluator gold or raw source indiscriminately. Metadata-only observations cannot support content claims.
+- Update `knowledge-base/_ops/memory/index.json` with pointers, not source text, only after an approved review/decision, verified snapshot, or goal-state transition. Update `AGENTS.md` or `CLAUDE.md` only when an accepted shared rule changes.
+- Codex reads `AGENTS.md`; Claude Code reads `CLAUDE.md` when present. Neither host file is required merely because the other exists.
+- Host instruction files are platform-specific; do not require one runtime's host file in the other runtime.
+- Use project-root paths and do not assume host-specific environment variables.
 
-## Modification role
+## Required checks
 
-Apply only approved proposals. When meaning changes, create a new revision with a `supersedes` relationship instead of overwriting the old record. Rebuild affected projections and update project-state pointers after the change.
-
-## Answer states
-
-- `answer`: an accepted Claim, reproducible Evidence, and matching Source revision exist
-- `conflict`: incompatible evidence exists within the same scope and no decision criterion resolves it
-- `abstain`: evidence is missing, stale, unknown, or unlocatable
-
-## Quick commands
+Before work, read `references/record-schema.md` and the relevant sections of
+`references/evidence-rules.md`. After work, run the workspace validator, the
+knowledge-cycle gates, and focused tests. Never hand-edit generated projections.
 
 ```bash
-python context-graph/skills/knowledge-engineering/scripts/update_memory.py --help
-python context-graph/skills/knowledge-engineering/scripts/validate_workspace.py --root .
+python context-graph/skills/knowledge-engineering/scripts/validate_workspace.py --root . --profile project
 python knowledge-base/_ops/rebuild/validate_knowledge_cycle.py --scope all
+pytest -q context-graph/tests/test_knowledge_engineering_skill.py
 ```
 
-Use the references for detailed fields and exception rules. Do not place secrets, source copies, evaluation answers, or transient model output in memory, reports, or Context Packs.
+Reports must state changed files, evidence, checks and results, failures,
+unverified items, unresolved conflicts, and the next role. Read
+`references/memory-update.md` and `references/validation-gates.md` when those
+boundaries apply.
+
+Answer states are `answer` (accepted claim with replayable evidence), `conflict`
+(incompatible supported claims), and `abstain` (missing, stale, unknown, or
+unlocatable support).

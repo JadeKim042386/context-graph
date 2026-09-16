@@ -16,10 +16,12 @@ def main():
     parser.add_argument("--snapshot-source")
     parser.add_argument("--snapshot-id")
     args = parser.parse_args()
+    if args.goal and not args.status:
+        parser.error("--status is required when --goal is provided")
     data = json.loads(args.memory.read_text(encoding="utf-8")) if args.memory.exists() else {"schema_version": 1}
     now = datetime.now(timezone.utc).isoformat()
     if args.goal:
-        data["current_goal"] = {"pointer": args.goal, "status": args.status or "verified", "updated_at": now}
+        data["current_goal"] = {"pointer": args.goal, "status": args.status, "updated_at": now}
     if args.snapshot_hash:
         data["snapshot_hash"] = {"algorithm": "sha256", "value": args.snapshot_hash, "status": "verified", "updated_at": now}
         if args.snapshot_source:
