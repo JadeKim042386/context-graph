@@ -74,6 +74,41 @@ python context-graph/scripts/ask.py "question"
 python context-graph/scripts/ask.py --conflicts
 ```
 
+### Optional retrieval and backend components
+
+The skill installs and runs with the local lexical index and graph workflow by
+default. It does not automatically install an embedding model or a separate
+backend.
+
+During use, the skill may measure retrieval quality and operational limits. An
+embedding model is proposed only when held-out retrieval or locator recall is
+below the configured gate, semantic misses remain after lexical and graph
+improvements, and a paired comparison shows a meaningful quality gain within
+the latency and cost budget. A separate backend is proposed only when local
+execution cannot meet an actual multi-user, API, continuous-ingestion,
+concurrency, or service-level requirement.
+
+```text
+Install the skill
+        |
+Use the default local workflow
+        |
+Measure quality and operating limits
+        |
+Does the evidence meet an adoption gate?
+   |                         |
+  No                        Yes
+   |                         |
+Keep the local workflow   Propose and compare the optional component
+                             |
+                        User approval
+                             |
+                    Add embedding or backend configuration
+```
+
+Optional components are therefore opt-in and evidence-driven. They are never
+downloaded, started, or added silently merely because a query is difficult.
+
 For Codex package validation, run the `quick_validate.py` script provided by the
 installed `skill-creator` skill. Do not hard-code a machine-specific path.
 
