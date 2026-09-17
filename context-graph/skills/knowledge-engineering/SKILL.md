@@ -45,6 +45,25 @@ project-scoped one only if none exists. If cmux is unavailable, use the host's
 documented coordination mechanism or report the limitation; do not silently
 replace an explicitly configured project coordinator.
 
+## Code work mode
+
+For repository analysis, bugs, features, refactors, compatibility work, and
+test review, read [`references/code-workflow.md`](references/code-workflow.md).
+Code uses the same evidence-first boundary: Git and reviewed JSON records are
+canonical; symbol graphs, SCIP, Tree-sitter, RDF, SQLite, HTML, and Context
+Packs are replaceable projections. A branch, line number, symbol name, search
+result, passing test, or generated graph is not proof by itself.
+
+### Current final code design
+
+Use Git plus reviewed JSON/JSONL as the canonical layer. For Python code, use
+the commit-bound AST projection with duplicate-safe symbols and bounded
+`contains`/`imports` one-hop expansion as the default derived path, while
+keeping lexical retrieval as a fallback. Do not make SCIP, RDF, a graph
+database, embeddings, or a runtime backend mandatory unless a paired held-out
+evaluation proves a material gain without locator, false-answer, latency, or
+Context Pack regressions.
+
 ## Storage and host compatibility
 
 - Keep immutable originals and canonical JSON separate from generated HTML, graphs, indexes, and reports. Explicitly named authored HTML in `knowledge/` is an input; generated HTML under `_ops/rebuild/` is a projection and must not be hand-edited.
@@ -53,6 +72,25 @@ replace an explicitly configured project coordinator.
 - Codex reads `AGENTS.md`; Claude Code reads `CLAUDE.md` when present. Neither host file is required merely because the other exists.
 - Host instruction files are platform-specific; do not require one runtime's host file in the other runtime.
 - Use project-root paths and do not assume host-specific environment variables.
+
+## Session and compaction continuity
+
+When the Claude Code plugin receives `SessionStart`, `PreCompact`,
+`PostCompact`, or `SessionEnd`, it records a privacy-filtered operational event
+in `knowledge-base/_ops/session-events.jsonl`. The event journal preserves the
+session boundary, changed artifact pointers, hashes, and verification state so
+the next session can recover work without copying the conversation.
+
+Treat these events as provisional or unverified operational history. Never copy
+raw prompts, transcripts, model reasoning, secrets, absolute paths, or diff
+contents into the journal. Never update canonical Claim, Evidence, Decision,
+`AGENTS.md`, `CLAUDE.md`, or `memory/index.json` directly from a lifecycle hook.
+Promote durable knowledge only after a reviewed handoff, decision, verified
+snapshot, or explicit goal transition. A missing `SessionEnd` event is not
+completion evidence.
+
+Read [`references/memory-update.md`](references/memory-update.md) for the
+journal schema, privacy boundary, deduplication, and promotion rules.
 
 ## Post-install integration verification
 

@@ -30,6 +30,7 @@ def test_skill_references_the_project_contracts():
         "memory-update.md",
         "validation-gates.md",
         "post-install-verification.md",
+        "code-workflow.md",
     ):
         assert (SKILL / "references" / name).exists()
 
@@ -40,6 +41,15 @@ def test_skill_documents_post_install_integration_verification():
     for marker in ("Post-install integration verification", "host-specific discovery", "portable", "workspace validator"):
         assert marker in text
     for marker in ("Codex", "Claude Code", "smoke request", "git status --short", "--profile portable"):
+        assert marker in reference
+
+
+def test_skill_defines_code_work_boundaries():
+    text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+    reference = (SKILL / "references" / "code-workflow.md").read_text(encoding="utf-8")
+    for marker in ("Code work mode", "Git", "canonical", "replaceable projections", "Current final code design"):
+        assert marker in text
+    for marker in ("full commit SHA", "TestRun", "derived projections", "held-out evaluation", "duplicate-safe symbols"):
         assert marker in reference
 
 

@@ -11,4 +11,12 @@ Agreement does not mean that words overlap. The question scope and evidence mean
 7. If evidence within the same scope is incompatible, return `conflict` instead of averaging it.
 8. Do not turn unverified body content, stale, unknown, or unconfirmed rights/location into a definitive answer; return `abstain`.
 
+For code-specific evidence:
+
+9. Resolve every accepted code claim to a full commit SHA, repository ID, path, line or byte range, blob/content hash, and Evidence ID.
+10. Keep issue evidence, implementation evidence, and test-run evidence as separate records.
+11. Re-run the locator against the pinned commit before accepting it; branch movement, renamed paths, missing commits, or blob drift make it unlocatable.
+12. Do not infer runtime behavior, complete coverage, or general correctness from a static index or a passing partial test run.
+13. Treat generated code graphs and semantic projections as evidence-producing tools with provenance, not canonical records.
+
 Answer records must retain the question key, scope, as-of date, Claim ID, Evidence ID, Source revision, locator, and snapshot hash.

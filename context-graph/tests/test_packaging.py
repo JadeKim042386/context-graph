@@ -58,7 +58,16 @@ def test_the_plugin_packages_a_knowledge_engineer_agent():
 
 def test_all_four_refresh_points_are_hooked():
     hooks = _read_json("context-graph", "hooks", "hooks.json")["hooks"]
-    assert set(hooks) == {"SessionStart", "SubagentStop", "PreCompact", "PostCompact"}
+    assert set(hooks) == {"SessionStart", "SubagentStop", "PreCompact", "PostCompact", "SessionEnd"}
+
+
+def test_session_lifecycle_hooks_record_only_through_the_portable_script():
+    hooks_text = _read_text("context-graph", "hooks", "hooks.json")
+    assert "record_session_event.py" in hooks_text
+    assert "--event pre_compact" in hooks_text
+    assert "--event post_compact" in hooks_text
+    assert "--event session_end" in hooks_text
+    assert "transcript" not in hooks_text
 
 
 def test_no_machine_specific_path_is_baked_into_the_hooks():

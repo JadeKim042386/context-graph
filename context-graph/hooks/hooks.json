@@ -6,6 +6,13 @@
           {
             "type": "command",
             "shell": "bash",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/skills/knowledge-engineering/scripts/record_session_event.py\" --event session_start",
+            "timeout": 10,
+            "statusMessage": "Recording session state..."
+          },
+          {
+            "type": "command",
+            "shell": "bash",
             "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\" --quiet",
             "timeout": 60,
             "statusMessage": "Refreshing the knowledge map..."
@@ -33,9 +40,9 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "echo '[context-graph] The map is about to lose this session. Anything worth keeping has to be written into the knowledge documents first - the map only carries what the documents say.'",
-            "timeout": 600,
-            "statusMessage": "Reminder: write the session into the knowledge documents"
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/skills/knowledge-engineering/scripts/record_session_event.py\" --event pre_compact",
+            "timeout": 10,
+            "statusMessage": "Recording session state before compaction..."
           }
         ]
       }
@@ -46,9 +53,29 @@
           {
             "type": "command",
             "shell": "bash",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/skills/knowledge-engineering/scripts/record_session_event.py\" --event post_compact",
+            "timeout": 10,
+            "statusMessage": "Recording session state after compaction..."
+          },
+          {
+            "type": "command",
+            "shell": "bash",
             "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\" --quiet",
             "timeout": 60,
             "statusMessage": "Refreshing the knowledge map (after compaction)..."
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/skills/knowledge-engineering/scripts/record_session_event.py\" --event session_end",
+            "timeout": 10,
+            "statusMessage": "Recording final session state..."
           }
         ]
       }

@@ -25,3 +25,23 @@ Do not store source text, long summaries, credentials, personal data, or transie
 `scripts/update_memory.py` preserves the existing JSON and updates pointers only.
 Pass an explicit `--status`; the updater refuses to silently mark a goal as
 verified. After an automatic update, check the diff and parse the JSON.
+
+## Session lifecycle journal
+
+The Claude Code plugin records `session_start`, `pre_compact`, `post_compact`,
+and `session_end` events in the consuming project's
+`knowledge-base/_ops/session-events.jsonl`. This is an operational journal, not
+canonical knowledge and not the memory index.
+
+The journal stores only privacy-filtered metadata: an opaque session ID, event
+type, timestamp, trigger, repository-relative artifact pointers and hashes,
+working-tree digest, and review state. It must not contain prompts,
+transcripts, model reasoning, command output, secrets, absolute paths, or diff
+contents. Replaying a hook with the same event identity is a no-op.
+
+Compaction and session exit may record provisional or unverified operational
+state automatically. They must never promote a Claim, Evidence, Decision,
+`AGENTS.md`, `CLAUDE.md`, or memory pointer. Promotion requires a later
+reviewed handoff, decision, verified snapshot, or explicit goal transition.
+If no close event is delivered, the absence remains unverified; it must not be
+interpreted as completion.

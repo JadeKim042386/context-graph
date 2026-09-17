@@ -20,8 +20,13 @@ Canonical records are JSON originals reviewed and modified by people. Keep one r
 - `Axiom`: a logical rule or restriction that may be checked by a selected OWL profile or reasoner
 - `Module`: a bounded, cohesive ontology slice with its dependencies and extraction rationale
 - `EvaluationRun`: a reproducible ontology or retrieval evaluation with fixed inputs, metrics, and results
+- `Code Source`: a repository snapshot with `repository_id`, full `commit_sha`, `tree_sha`, observed branch/ref, capture time, and access/rights state
+- `Code Evidence`: a Git-pinned selector with `source_id`, `commit_sha`, `blob_sha`, `path_at_commit`, line or byte range, content hash, and reproducible locator command
+- `TestRun Evidence`: an executed command and selected tests tied to a commit, environment/toolchain digest, exit code, immutable report path/hash, and time range
 
 The default state flow is `proposed → verified → accepted`. Do not automatically include `deprecated`, `retracted`, or `unknown` records in answers.
+
+For code, a branch is mutable context and never an immutable revision. An issue establishes a requirement or report; it does not prove implementation correctness. A passing test supports only the behavior, inputs, environment, and commit it actually exercised.
 
 ## Ontology record minimums
 

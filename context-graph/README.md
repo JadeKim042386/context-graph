@@ -32,6 +32,13 @@ The analysis/proposal role is read-only and returns an evidence-backed handoff.
 The modification role applies only an approved request, preserves provenance,
 creates revisions, rebuilds projections, and verifies the result.
 
+Session continuity is handled separately from canonical knowledge. At session
+start, before and after compaction, and at session end, the Claude Code plugin
+can append privacy-filtered operational events to
+`knowledge-base/_ops/session-events.jsonl`. These events preserve artifact
+pointers, hashes, and verification state for the next session; they do not copy
+prompts or transcripts and do not promote memory or canonical records.
+
 ## 3. Installation and use
 
 ### Codex
@@ -91,6 +98,31 @@ Keep the local workflow   Propose and compare the optional component
 
 Optional components are therefore opt-in and evidence-driven. They are never
 downloaded, started, or added silently merely because a query is difficult.
+
+### Code work design
+
+Code work uses the same evidence-first workflow. Git and reviewed JSON/JSONL
+records are canonical; the current derived retrieval path is a commit-bound
+Python AST index with duplicate-safe symbols and bounded `contains`/`imports`
+one-hop expansion. Existing lexical retrieval remains the fallback.
+
+The code index records commit, tree, blob, path, line, content hash, replay
+locator, and provenance. It does not replace the repository or claim runtime
+behavior from static analysis alone. SCIP, RDF, graph databases, embeddings,
+and runtime backends are optional and require a paired held-out evaluation
+before adoption.
+
+Run the code projection and its current comparison with:
+
+```bash
+python scripts/code_index.py collect --repo . --commit HEAD
+python scripts/code_index.py index --repo . --commit HEAD
+python scripts/evaluate_code_index.py --repo . --query build_map --query ask --query parse_html
+```
+
+The current benchmark retained recall `1.0` while reducing the candidate set
+from `12` lexical candidates to `3` structure-index candidates. This is a
+project baseline, not a general claim about all languages or repositories.
 
 ### Verify the installation and host integration
 
@@ -163,6 +195,7 @@ Detailed contracts are in `skills/knowledge-engineering/references/`:
 - `evidence-rules.md` — support, conflict, freshness, and reproducibility rules
 - `memory-update.md` — pointer-only Second Brain state updates
 - `validation-gates.md` — workspace and projection checks
+- `code-workflow.md` — code evidence, indexing, fallback, and evaluation rules
 
 ```bash
 pytest -q tests/test_final_skill_contract.py
