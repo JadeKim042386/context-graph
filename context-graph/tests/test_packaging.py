@@ -126,3 +126,10 @@ def test_the_skill_quotes_the_default_budget_the_code_actually_uses():
     skill = _read_text("context-graph", "skills", "context-graph", "SKILL.md")
     default = DEFAULT_CONFIG["answer_budget"]
     assert f"{default:,}" in skill or str(default) in skill
+
+
+def test_the_codex_skill_packages_its_runtime_entrypoints():
+    """Codex installs the skill directory, so its scripts must live inside it."""
+    for name in ("ask.py", "build_map.py", "config.py", "parse_markdown.py", "parse_html.py"):
+        path = os.path.join(ROOT, "context-graph", "skills", "context-graph", "scripts", name)
+        assert os.path.isfile(path), f"missing Codex runtime entrypoint: {path}"

@@ -14,15 +14,19 @@ This skill is usable from Codex and Claude Code. Resolve the script path from
 the host runtime instead of copying one platform's path into the other:
 
 - Claude Code plugin: `python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" "<question>"`
-- Codex or repository checkout: `python context-graph/scripts/ask.py "<question>"`
+- Codex installed skill: `python "${CODEX_HOME:-$HOME/.codex}/skills/context-graph/scripts/ask.py" "<question>"`
+- Codex repository checkout: `python context-graph/scripts/ask.py "<question>"`
 
 The same rule applies to `build_map.py`. If the host project exposes neither
-path, locate the checked-out `scripts/` directory before running a command.
+path, reinstall this skill from the GitHub repository; do not fall back to a
+different project's global map.
 
 ## How to use it
 
     # Claude Code plugin
     python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" "<question>"
+    # Codex installed skill
+    python "${CODEX_HOME:-$HOME/.codex}/skills/context-graph/scripts/ask.py" "<question>"
     # Codex or repository checkout
     python context-graph/scripts/ask.py "<question>"
 
