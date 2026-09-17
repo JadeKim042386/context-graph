@@ -67,6 +67,8 @@ def test_session_lifecycle_hooks_record_only_through_the_portable_script():
     assert "--event pre_compact" in hooks_text
     assert "--event post_compact" in hooks_text
     assert "--event session_end" in hooks_text
+    assert "record --runtime claude-code" in hooks_text
+    assert "--compile-proposal" in hooks_text
     assert "transcript" not in hooks_text
 
 

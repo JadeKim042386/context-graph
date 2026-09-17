@@ -35,9 +35,19 @@ creates revisions, rebuilds projections, and verifies the result.
 Session continuity is handled separately from canonical knowledge. At session
 start, before and after compaction, and at session end, the Claude Code plugin
 can append privacy-filtered operational events to
-`knowledge-base/_ops/session-events.jsonl`. These events preserve artifact
-pointers, hashes, and verification state for the next session; they do not copy
-prompts or transcripts and do not promote memory or canonical records.
+`knowledge-base/_ops/session-events.jsonl` and generate provisional session
+proposals under `knowledge-base/_ops/session-proposals/`. Activate this once per
+consuming project after installation:
+
+```bash
+python context-graph/skills/knowledge-engineering/scripts/record_session_event.py init \
+  --root . --runtime claude-code --include 'knowledge/**' --include 'design/**'
+```
+
+The generated records preserve artifact pointers, hashes, and verification
+state; they do not copy prompts or transcripts and never promote memory or
+canonical records automatically. Without activation, hooks are a successful
+no-op. Codex has no verified universal lifecycle hook surface.
 
 ## 3. Installation and use
 
@@ -53,7 +63,7 @@ For a project-local installation, clone the repository and keep that directory
 available from the project root:
 
 ```bash
-git clone --branch v0.5.0 https://github.com/JadeKim042386/context-graph.git
+git clone --branch v0.6.0 https://github.com/JadeKim042386/context-graph.git
 ```
 
 ### Claude Code

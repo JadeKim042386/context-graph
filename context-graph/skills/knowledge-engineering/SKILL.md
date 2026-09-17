@@ -77,9 +77,13 @@ Context Pack regressions.
 
 When the Claude Code plugin receives `SessionStart`, `PreCompact`,
 `PostCompact`, or `SessionEnd`, it records a privacy-filtered operational event
-in `knowledge-base/_ops/session-events.jsonl`. The event journal preserves the
-session boundary, changed artifact pointers, hashes, and verification state so
-the next session can recover work without copying the conversation.
+in `knowledge-base/_ops/session-events.jsonl` and regenerates a provisional
+proposal under `knowledge-base/_ops/session-proposals/`. This occurs only after
+the consuming project creates `knowledge-base/_ops/session-capture.json` with
+the activation CLI in `references/post-install-verification.md`; otherwise
+hooks are a successful no-op. The journal preserves the session boundary,
+changed artifact pointers, hashes, and verification state so the next session
+can recover work without copying the conversation.
 
 Treat these events as provisional or unverified operational history. Never copy
 raw prompts, transcripts, model reasoning, secrets, absolute paths, or diff
@@ -88,6 +92,10 @@ contents into the journal. Never update canonical Claim, Evidence, Decision,
 Promote durable knowledge only after a reviewed handoff, decision, verified
 snapshot, or explicit goal transition. A missing `SessionEnd` event is not
 completion evidence.
+
+Codex has no verified universal lifecycle-hook surface. Do not claim automatic
+Codex compaction or exit capture; use the CLI from an explicitly configured
+automation when needed.
 
 Read [`references/memory-update.md`](references/memory-update.md) for the
 journal schema, privacy boundary, deduplication, and promotion rules.

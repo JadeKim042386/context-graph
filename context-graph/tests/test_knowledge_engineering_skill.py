@@ -33,6 +33,8 @@ def test_skill_references_the_project_contracts():
         "code-workflow.md",
     ):
         assert (SKILL / "references" / name).exists()
+    for name in ("session-capture.schema.json", "session-event.schema.json", "session-proposal.schema.json"):
+        assert (SKILL / "schemas" / name).exists()
 
 
 def test_skill_documents_post_install_integration_verification():
@@ -50,6 +52,15 @@ def test_skill_defines_code_work_boundaries():
     for marker in ("Code work mode", "Git", "canonical", "replaceable projections", "Current final code design"):
         assert marker in text
     for marker in ("full commit SHA", "TestRun", "derived projections", "held-out evaluation", "duplicate-safe symbols"):
+        assert marker in reference
+
+
+def test_session_capture_is_opt_in_and_provisional():
+    text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+    reference = (SKILL / "references" / "post-install-verification.md").read_text(encoding="utf-8")
+    for marker in ("session-capture.json", "session-proposals", "successful no-op", "Codex has no verified"):
+        assert marker in text
+    for marker in ("Project-local session capture", "provisional", "prompts", "secrets"):
         assert marker in reference
 
 

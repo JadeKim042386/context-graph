@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "record_type", "event_id", "project_id", "session_id", "event_type", "occurred_at", "knowledge_state", "review_state", "artifact_pointers", "privacy_filter_version", "producer"],
+  "properties": {
+    "schema_version": {"const": 2},
+    "record_type": {"const": "SessionLifecycleEvent"},
+    "event_id": {"type": "string", "pattern": "^SEV-"},
+    "project_id": {"type": "string", "pattern": "^PRJ-"},
+    "event_type": {"enum": ["session_start", "pre_compact", "post_compact", "session_end"]},
+    "knowledge_state": {"const": "provisional"},
+    "review_state": {"const": "not_reviewed"},
+    "artifact_pointers": {"type": "array"},
+    "privacy_filter_version": {"const": "session-event-v2"},
+    "producer": {"type": "object"}
+  },
+  "additionalProperties": true
+}

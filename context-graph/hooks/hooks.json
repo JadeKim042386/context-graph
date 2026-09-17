@@ -6,7 +6,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "python \"${CLAUDE_PLUGIN_ROOT}/skills/knowledge-engineering/scripts/record_session_event.py\" --event session_start",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/skills/knowledge-engineering/scripts/record_session_event.py\" record --runtime claude-code --event session_start --compile-proposal",
             "timeout": 10,
             "statusMessage": "Recording session state..."
           },
@@ -40,7 +40,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "python \"${CLAUDE_PLUGIN_ROOT}/skills/knowledge-engineering/scripts/record_session_event.py\" --event pre_compact",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/skills/knowledge-engineering/scripts/record_session_event.py\" record --runtime claude-code --event pre_compact --compile-proposal",
             "timeout": 10,
             "statusMessage": "Recording session state before compaction..."
           }
@@ -53,7 +53,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "python \"${CLAUDE_PLUGIN_ROOT}/skills/knowledge-engineering/scripts/record_session_event.py\" --event post_compact",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/skills/knowledge-engineering/scripts/record_session_event.py\" record --runtime claude-code --event post_compact --compile-proposal",
             "timeout": 10,
             "statusMessage": "Recording session state after compaction..."
           },
@@ -73,7 +73,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "python \"${CLAUDE_PLUGIN_ROOT}/skills/knowledge-engineering/scripts/record_session_event.py\" --event session_end",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/skills/knowledge-engineering/scripts/record_session_event.py\" record --runtime claude-code --event session_end --compile-proposal",
             "timeout": 10,
             "statusMessage": "Recording final session state..."
           }

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "record_type", "id", "session_id", "knowledge_state", "promotion_state", "event_ids", "checkpoints", "candidate_claim_ids"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "record_type": {"const": "SessionKnowledgeProposal"},
+    "id": {"type": "string", "pattern": "^SKP-"},
+    "knowledge_state": {"const": "provisional"},
+    "promotion_state": {"const": "review_required"},
+    "candidate_claim_ids": {"const": []},
+    "event_ids": {"type": "array", "items": {"type": "string"}},
+    "checkpoints": {"type": "array"}
+  },
+  "additionalProperties": true
+}

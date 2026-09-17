@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "enabled", "project_id", "journal_path", "proposal_dir", "include_globs", "tracked_paths_only", "capture_content", "capture_commands", "capture_untracked"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "enabled": {"type": "boolean"},
+    "project_id": {"type": "string", "pattern": "^PRJ-"},
+    "journal_path": {"const": "knowledge-base/_ops/session-events.jsonl"},
+    "proposal_dir": {"const": "knowledge-base/_ops/session-proposals"},
+    "include_globs": {"type": "array", "items": {"type": "string"}},
+    "tracked_paths_only": {"const": true},
+    "capture_content": {"const": false},
+    "capture_commands": {"const": false},
+    "capture_untracked": {"const": false}
+  },
+  "additionalProperties": true
+}

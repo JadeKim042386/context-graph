@@ -1,7 +1,7 @@
 {
   "name": "context-graph",
   "description": "An evidence-first knowledge map for documents and code, with reviewable records, commit-bound Python structure indexing, and reproducible locators",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "author": {
     "name": "KimJooYoung",
     "url": "https://github.com/JadeKim042386"

@@ -41,6 +41,27 @@ discovery, and an actual harmless response separately.
    Use `--profile project` only when the consuming project intentionally
    provides the required knowledge, memory, and design artifacts.
 
+## Project-local session capture
+
+After the read-only smoke test passes, explicitly activate privacy-filtered
+session capture for the consuming project:
+
+```bash
+python skills/knowledge-engineering/scripts/record_session_event.py init \
+  --root . \
+  --runtime claude-code \
+  --include 'knowledge/**' \
+  --include 'design/**'
+```
+
+Then simulate lifecycle events with fake prompt, transcript, token, and secret
+fields. Confirm that only whitelisted metadata appears in
+`knowledge-base/_ops/session-events.jsonl` and that provisional proposals are
+written under `knowledge-base/_ops/session-proposals/`. No canonical records,
+memory pointers, prompts, transcripts, commands, secrets, or absolute paths may
+be created. Codex has no verified universal lifecycle-hook surface; do not
+claim automatic Codex compaction or exit capture.
+
 ## Acceptance and failure handling
 
 Integration is verified only when all package, host-discovery, smoke-response,
