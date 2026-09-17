@@ -24,8 +24,23 @@ def test_skill_explains_cross_runtime_instruction_and_script_paths():
 
 
 def test_skill_references_the_project_contracts():
-    for name in ("record-schema.md", "evidence-rules.md", "memory-update.md", "validation-gates.md"):
+    for name in (
+        "record-schema.md",
+        "evidence-rules.md",
+        "memory-update.md",
+        "validation-gates.md",
+        "post-install-verification.md",
+    ):
         assert (SKILL / "references" / name).exists()
+
+
+def test_skill_documents_post_install_integration_verification():
+    text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+    reference = (SKILL / "references" / "post-install-verification.md").read_text(encoding="utf-8")
+    for marker in ("Post-install integration verification", "host-specific discovery", "portable", "workspace validator"):
+        assert marker in text
+    for marker in ("Codex", "Claude Code", "smoke request", "git status --short", "--profile portable"):
+        assert marker in reference
 
 
 def test_memory_updater_is_safe_and_pointer_only(tmp_path):

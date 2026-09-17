@@ -109,6 +109,15 @@ Keep the local workflow   Propose and compare the optional component
 Optional components are therefore opt-in and evidence-driven. They are never
 downloaded, started, or added silently merely because a query is difficult.
 
+### Verify the installation and host integration
+
+After installation, verify the installed skill before using it for project
+changes. Confirm the package files, test Codex and Claude Code independently
+for actual skill discovery, run one read-only smoke request, compare the
+working-tree status before and after, and run the portable validator. The full
+procedure and acceptance criteria are in
+`context-graph/skills/knowledge-engineering/references/post-install-verification.md`.
+
 For Codex package validation, run the `quick_validate.py` script provided by the
 installed `skill-creator` skill. Do not hard-code a machine-specific path.
 

@@ -54,6 +54,16 @@ replace an explicitly configured project coordinator.
 - Host instruction files are platform-specific; do not require one runtime's host file in the other runtime.
 - Use project-root paths and do not assume host-specific environment variables.
 
+## Post-install integration verification
+
+After installation, verify the skill separately from package presence. Follow
+[`references/post-install-verification.md`](references/post-install-verification.md)
+to confirm readable package files, host-specific discovery, one harmless
+read-only smoke response, unchanged working-tree state, and the portable
+workspace validator. Test Codex and Claude Code independently; success in one
+host does not prove the other. Do not claim integration from a file listing,
+prompt, spinner, or generic response alone.
+
 ## Required checks
 
 Before work, read `references/record-schema.md` and the relevant sections of
