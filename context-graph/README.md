@@ -113,8 +113,9 @@ downloaded, started, or added silently merely because a query is difficult.
 
 Code work uses the same evidence-first workflow. Git and reviewed JSON/JSONL
 records are canonical; the current derived retrieval path is a commit-bound
-Python AST index with duplicate-safe symbols and bounded `contains`/`imports`
-one-hop expansion. Existing lexical retrieval remains the fallback.
+multi-language index. Python uses duplicate-safe AST symbols and bounded
+`contains`/`imports` expansion, while other registered languages use
+low-confidence lexical candidates without structural relationship claims.
 
 The code index records commit, tree, blob, path, line, content hash, replay
 locator, and provenance. It does not replace the repository or claim runtime

@@ -63,7 +63,7 @@ For a project-local installation, clone the repository and keep that directory
 available from the project root:
 
 ```bash
-git clone --branch v0.6.1 https://github.com/JadeKim042386/context-graph.git
+git clone --branch v0.7.0 https://github.com/JadeKim042386/context-graph.git
 ```
 
 ### Claude Code
@@ -130,8 +130,11 @@ downloaded, started, or added silently merely because a query is difficult.
 
 Code work uses the same evidence-first workflow. Git and reviewed JSON/JSONL
 records are canonical; the current derived retrieval path is a commit-bound
-Python AST index with duplicate-safe symbols and bounded `contains`/`imports`
-one-hop expansion. Existing lexical retrieval remains the fallback.
+multi-language index. Python uses duplicate-safe AST symbols and bounded
+`contains`/`imports` one-hop expansion. Other registered languages use
+low-confidence lexical candidates with commit-pinned line locators and no
+structural relationship claims. Explicitly selected unknown code extensions
+also use the lexical fallback.
 
 The code index records commit, tree, blob, path, line, content hash, replay
 locator, and provenance. It does not replace the repository or claim runtime

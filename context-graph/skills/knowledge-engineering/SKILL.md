@@ -57,12 +57,14 @@ result, passing test, or generated graph is not proof by itself.
 ### Current final code design
 
 Use Git plus reviewed JSON/JSONL as the canonical layer. For Python code, use
-the commit-bound AST projection with duplicate-safe symbols and bounded
-`contains`/`imports` one-hop expansion as the default derived path, while
-keeping lexical retrieval as a fallback. Do not make SCIP, RDF, a graph
-database, embeddings, or a runtime backend mandatory unless a paired held-out
-evaluation proves a material gain without locator, false-answer, latency, or
-Context Pack regressions.
+the commit-bound AST adapter; recognized non-Python languages use a
+deterministic lexical fallback. Preserve duplicate-safe symbols, bounded
+`contains`/`imports` one-hop expansion for AST-backed Python nodes,
+language/parser/confidence metadata, and replayable locators. Lexical fallback is low-confidence discovery evidence
+and must not claim type resolution, control-flow certainty, or runtime binding.
+Do not make SCIP, RDF, a graph database, embeddings, or a runtime backend
+mandatory unless a paired held-out evaluation proves a material gain without
+locator, false-answer, latency, or Context Pack regressions.
 
 ## Storage and host compatibility
 

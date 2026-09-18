@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare exact-name lexical lookup with the commit-bound Python structure index."""
+"""Compare exact-name lexical lookup with the commit-bound multi-language index."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import subprocess
 import time
 from pathlib import Path
 
-from code_index import build_index
+from code_index import build_index, is_code_path
 
 
 def _git(repo: Path, *args: str) -> str:
@@ -30,7 +30,7 @@ def evaluate(repo: Path, queries: list[str], commit: str = "HEAD") -> dict:
         started = time.perf_counter()
         hits = []
         for path in _git(repo, "ls-tree", "-r", "--name-only", pinned).splitlines():
-            if not path.endswith(".py"):
+            if not is_code_path(path):
                 continue
             text = subprocess.run(["git", "-C", str(repo), "show", f"{pinned}:{path}"], check=True, text=True, stdout=subprocess.PIPE).stdout
             if query in text:

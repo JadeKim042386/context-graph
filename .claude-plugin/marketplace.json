@@ -6,7 +6,7 @@
       "name": "context-graph",
       "source": "./context-graph",
       "description": "Builds an evidence-first map for knowledge documents and code, answering with values, connections, lineage, and reproducible locators.",
-      "version": "0.6.1"
+      "version": "0.7.0"
     }
   ]
 }
