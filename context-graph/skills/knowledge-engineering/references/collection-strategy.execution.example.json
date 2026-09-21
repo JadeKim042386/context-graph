@@ -1,0 +1,207 @@
+{
+  "schema_version": "1.0",
+  "artifact_type": "CollectionStrategy",
+  "plan_id": "COLLECTION-synthetic-execution-001",
+  "revision": 1,
+  "mode": "execution",
+  "inputs": {
+    "question": "Can two bounded metadata review batches close the remaining rights and locator gaps?",
+    "out_of_scope": [
+      "live network acquisition",
+      "source body collection",
+      "OCR or transcription",
+      "canonical promotion"
+    ],
+    "scope_axes": {
+      "core_topics": ["knowledge engineering collection strategy"],
+      "adjacent_topics": ["rights verification", "locator replay"],
+      "source_types": ["synthetic official-source metadata fixture"],
+      "media_kinds": ["html", "pdf", "image", "video"],
+      "date_range": null,
+      "languages": ["en"],
+      "geographies": [],
+      "evidence_strength": "metadata",
+      "source_independence_required": true,
+      "coverage_cells": [
+        {
+          "cell_id": "identity-and-revision",
+          "target_count": 4,
+          "current_count": 4,
+          "status": "met"
+        },
+        {
+          "cell_id": "rights-and-replayable-locator",
+          "target_count": 2,
+          "current_count": 0,
+          "status": "gap"
+        }
+      ]
+    },
+    "source_priority_tiers": [
+      {"tier": 1, "name": "synthetic official and primary records", "allowed_use": "identity"}
+    ],
+    "query_families": [
+      {
+        "family_id": "rights-and-licensing",
+        "queries": ["synthetic rights locator replay"],
+        "max_hops": 0
+      }
+    ],
+    "allowed_access_states": ["metadata_fetched"],
+    "allowed_rights_states": ["rights_verified", "unverified"],
+    "budgets": {
+      "max_batches": 2,
+      "max_items": 4,
+      "max_requests": 0,
+      "max_bytes": 0,
+      "max_elapsed_seconds": 60
+    },
+    "stop_rules": {
+      "saturation_batches": 2,
+      "material_gain_fields": [
+        "identity_verified",
+        "rights_verified",
+        "body_verified",
+        "locator_replayed",
+        "independent_evidence",
+        "coverage_cells_closed"
+      ],
+      "safety_halts": [
+        "network_not_authorized",
+        "private_data",
+        "unsafe_input"
+      ]
+    }
+  },
+  "outputs": {
+    "plan_path": "references/collection-strategy.execution.example.json",
+    "catalog_path": null,
+    "checkpoint_path": "references/collection-strategy.execution.example.json",
+    "metrics_path": "references/collection-strategy.execution.example.json",
+    "report_path": "references/multimedia-collection.md"
+  },
+  "authorized_stages": [
+    "plan",
+    "discover",
+    "verify_identity_rights",
+    "deduplicate_review",
+    "project_measure"
+  ],
+  "batches": [
+    {
+      "batch_id": "batch-001",
+      "status": "completed",
+      "input_count": 4,
+      "metrics_delta": {
+        "identity_verified": 0,
+        "rights_verified": 0,
+        "body_verified": 0,
+        "locator_replayed": 0,
+        "independent_evidence": 0,
+        "coverage_cells_closed": 0
+      },
+      "checkpoint": {
+        "last_completed_batch_id": "batch-001",
+        "resume_stage": "verify_identity_rights",
+        "query_cursor": "rights-family:4",
+        "remaining_query_families": ["rights-and-licensing"],
+        "candidate_snapshot_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "unresolved": [
+          "rights_missing:candidate-003",
+          "rights_missing:candidate-004"
+        ]
+      },
+      "checkpoint_digest": "0909c4fc06d88fb26be54b12b2711dc076eefb6fae131692a1b95dbf8c9b74b6",
+      "errors": []
+    },
+    {
+      "batch_id": "batch-002",
+      "status": "completed",
+      "input_count": 4,
+      "metrics_delta": {
+        "identity_verified": 0,
+        "rights_verified": 0,
+        "body_verified": 0,
+        "locator_replayed": 0,
+        "independent_evidence": 0,
+        "coverage_cells_closed": 0
+      },
+      "checkpoint": {
+        "last_completed_batch_id": "batch-002",
+        "resume_stage": "verify_identity_rights",
+        "query_cursor": "rights-family:4",
+        "remaining_query_families": ["rights-and-licensing"],
+        "candidate_snapshot_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "unresolved": [
+          "rights_missing:candidate-003",
+          "rights_missing:candidate-004"
+        ]
+      },
+      "checkpoint_digest": "871155ab15824b6c67761d886a83bc80d36711bab3869992287190d41facdb82",
+      "errors": []
+    }
+  ],
+  "checkpoint": {
+    "last_completed_batch_id": "batch-002",
+    "resume_stage": "verify_identity_rights",
+    "query_cursor": "rights-family:4",
+    "remaining_query_families": ["rights-and-licensing"],
+    "candidate_snapshot_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+    "unresolved": [
+      "rights_missing:candidate-003",
+      "rights_missing:candidate-004"
+    ]
+  },
+  "decision": {
+    "state": "partial",
+    "reason": "saturation_after_2_non_improving_batches",
+    "resume_required": true
+  },
+  "metrics": {
+    "denominators": {
+      "required_candidates": 4,
+      "required_coverage_cells": 2,
+      "locator_eligible": 2
+    },
+    "counts": {
+      "discovered": 4,
+      "identity_verified": 4,
+      "revision_verified": 2,
+      "body_verified": 2,
+      "rights_verified": 0,
+      "locator_replayed": 2,
+      "independent_sources": 2,
+      "exact_duplicates": 1,
+      "near_duplicate_groups": 0,
+      "conflicts": 0,
+      "abstentions": 2,
+      "failures": 0,
+      "coverage_cells_met": 1
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      {
+        "name": "synthetic_no_network",
+        "status": "passed",
+        "evidence": "max_requests=0, max_bytes=0, acquire stage not authorized"
+      },
+      {
+        "name": "two_batch_saturation",
+        "status": "passed",
+        "evidence": "two trailing batches have zero values for every material_gain_field"
+      },
+      {
+        "name": "checkpoint_resume",
+        "status": "passed",
+        "evidence": "top-level checkpoint equals batch-002 checkpoint and retains unresolved rights items"
+      },
+      {
+        "name": "metric_bounds",
+        "status": "passed",
+        "evidence": "coverage and locator counts do not exceed their frozen denominators"
+      }
+    ]
+  }
+}

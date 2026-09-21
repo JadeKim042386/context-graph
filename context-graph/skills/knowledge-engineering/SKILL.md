@@ -21,6 +21,39 @@ locatable.
 7. Project — rebuild HTML-first knowledge pages, graph JSON, search indexes, reports, Context Packs, memory pointers, and optional Archify diagrams from the approved snapshot.
 8. Measure — compare baseline and ontology-assisted retrieval/generation on the same snapshot and question order; label fixture results as local measurements, not production guarantees.
 
+## Multimedia collection mode
+
+When collecting project-related or adjacent knowledge, search broadly across
+papers, standards, datasets, code, text, images, video, audio, and other media,
+but keep discovery, acquisition, evidence, and promotion as separate states.
+Use official or primary sources first, bounded public retrieval, robots and
+rate-limit compliance, immutable quarantine bytes, content hashes, explicit
+rights status, and format-specific replayable locators. Metadata-only results
+cannot support content claims. OCR, transcripts, captions, frames, thumbnails,
+translations, and summaries are derivatives of their source, not independent
+corroboration. Unknown rights remain `unverified`; public playback does not
+imply download or redistribution permission. Never bypass authentication,
+paywalls, robots, access controls, or rate limits, and never collect secrets,
+private data, or raw session content.
+
+Read [`references/multimedia-collection.md`](references/multimedia-collection.md)
+for source discovery, bounded acquisition, media records, deduplication,
+extraction, rights, locator, stop, and validation contracts.
+
+Start with a collection plan that fixes scope axes, source priorities, query
+families, budgets, metrics, and termination rules. For a strategy-only request,
+return that plan and its validation contract; do not acquire, download, OCR,
+transcribe, or promote sources. Execute a stage only when the request authorizes
+that stage, and preserve a resumable checkpoint when a safety or budget gate
+stops the work. Use `schemas/collection-strategy.schema.json` for machine-readable
+plans, batches, checkpoints, decisions, and metrics; start from
+`references/collection-strategy.example.json` for a no-acquisition plan.
+Validate either strategy or execution artifacts without installing dependencies:
+
+```bash
+python context-graph/skills/knowledge-engineering/scripts/validate_collection_strategy.py <artifact.json>
+```
+
 ## Role boundaries
 
 ### analysis/proposal role

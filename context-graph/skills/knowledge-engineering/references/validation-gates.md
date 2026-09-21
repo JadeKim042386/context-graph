@@ -10,5 +10,11 @@ Run the following before the final report.
 6. Run relevant benchmarks and regression tests.
 7. If Archify is configured, its diagram must pass 9 artifact checks with zero errors and warnings using `validate ... --quality showcase --json`.
 8. Run `git diff --check`.
+9. For media, verify canonical identity and revision, raw-byte hash and length,
+   access state, explicit rights evidence, format-specific locator replay,
+   derivative provenance, duplicate independence, and projection redaction.
+10. Keep discovery, metadata-only, body-verified, rights-verified, and review
+    states distinct; reject content claims from metadata-only or unlocatable
+    media.
 
 Do not report a failed gate as successful. Distinguish pre-existing snapshot mismatches from failures caused by the current change.

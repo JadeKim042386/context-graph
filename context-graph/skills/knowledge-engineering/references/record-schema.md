@@ -6,7 +6,7 @@ Canonical records are JSON originals reviewed and modified by people. Keep one r
 - `Claim`: a reviewable assertion; it cannot be accepted without `evidence_ids`
 - `Source`: original identity, canonical URL/path, access date, revision, hash, and rights state
 - `Evidence`: a reproducible selector, page, row, bbox, timecode, and quote inside a Source
-- `Media`: location, format, time, hash, rights, and derivative relationships for image, video, or audio
+- `Media`: immutable source location, media kind, source revision, access state, content hash, rights state, technical metadata, replayable locators, deduplication state, provenance, and derivative relationships for image, video, audio, PDF, dataset, HTML, text, or structured media
 - `Review`: the target revision, finding, issue, and proposal
 - `Decision`: the accepted, held, or rejected decision and its rationale
 - `Question`: a standard question, scope, reference date, and answer state
@@ -25,6 +25,25 @@ Canonical records are JSON originals reviewed and modified by people. Keep one r
 - `TestRun Evidence`: an executed command and selected tests tied to a commit, environment/toolchain digest, exit code, immutable report path/hash, and time range
 
 The default state flow is `proposed → verified → accepted`. Do not automatically include `deprecated`, `retracted`, or `unknown` records in answers.
+
+## Media record minimums
+
+Media records must keep these three state axes separate:
+
+- `access_status`: `not_started`, `metadata_fetched`, `body_verified`,
+  `failed`, `rate_limited`, `robots_disallowed`, `access_restricted`, or
+  `unavailable`;
+- `rights.status`: `rights_verified`, `restricted`, `unverified`, or `unknown`;
+- `review_status`: `proposed`, `verified`, `accepted`, `held`, `rejected`,
+  `superseded`, `stale`, or `abstain`.
+
+HTTP success does not imply body or rights verification. A Media record should
+include `canonical_url`, `final_url`, `source_revision`, `accessed_at`,
+`content_sha256`, `byte_length`, `mime_type`, technical dimensions/duration or
+page count when applicable, rights evidence and scope, acquisition activity and
+tool version, format-specific locators, derivative links, and exact/near-duplicate
+review state. A derivative must retain `derived_from`, extractor/version, hash,
+and the source locator; it must not be counted as an independent source.
 
 For code, a branch is mutable context and never an immutable revision. An issue establishes a requirement or report; it does not prove implementation correctness. A passing test supports only the behavior, inputs, environment, and commit it actually exercised.
 

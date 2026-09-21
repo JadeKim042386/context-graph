@@ -1,0 +1,390 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://context-graph.local/schemas/collection-strategy.schema.json",
+  "title": "Knowledge Engineering Collection Strategy",
+  "type": "object",
+  "additionalProperties": false,
+  "$defs": {
+    "projectRelativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!~)(?!.*\\\\)(?!.*\\$)(?!.*%)(?!\\.\\.(/|$))(?!.*(/)\\.\\.(/|$))[^\\r\\n]+$"
+    }
+  },
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "plan_id",
+    "revision",
+    "mode",
+    "inputs",
+    "outputs",
+    "authorized_stages",
+    "batches",
+    "checkpoint",
+    "decision",
+    "metrics",
+    "validation"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_type": {"const": "CollectionStrategy"},
+    "plan_id": {"type": "string", "minLength": 1},
+    "revision": {"type": "integer", "minimum": 1},
+    "mode": {"enum": ["strategy_only", "execution"]},
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "question",
+        "out_of_scope",
+        "scope_axes",
+        "source_priority_tiers",
+        "query_families",
+        "allowed_access_states",
+        "allowed_rights_states",
+        "budgets",
+        "stop_rules"
+      ],
+      "properties": {
+        "question": {"type": "string", "minLength": 1},
+        "out_of_scope": {"type": "array", "items": {"type": "string"}},
+        "scope_axes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "core_topics",
+            "adjacent_topics",
+            "source_types",
+            "media_kinds",
+            "date_range",
+            "languages",
+            "geographies",
+            "evidence_strength",
+            "source_independence_required",
+            "coverage_cells"
+          ],
+          "properties": {
+            "core_topics": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+            "adjacent_topics": {"type": "array", "items": {"type": "string"}},
+            "source_types": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+            "media_kinds": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+            "date_range": {"type": ["object", "null"]},
+            "languages": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+            "geographies": {"type": "array", "items": {"type": "string"}},
+            "evidence_strength": {"enum": ["metadata", "body", "reviewed_claim"]},
+            "source_independence_required": {"type": "boolean"},
+            "coverage_cells": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["cell_id", "target_count", "current_count", "status"],
+                "properties": {
+                  "cell_id": {"type": "string", "minLength": 1},
+                  "target_count": {"type": "integer", "minimum": 0},
+                  "current_count": {"type": "integer", "minimum": 0},
+                  "status": {"enum": ["gap", "met", "not_applicable"]}
+                }
+              }
+            }
+          }
+        },
+        "source_priority_tiers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["tier", "name", "allowed_use"],
+            "properties": {
+              "tier": {"type": "integer", "minimum": 1},
+              "name": {"type": "string", "minLength": 1},
+              "allowed_use": {"enum": ["evidence", "identity", "discovery_only"]}
+            }
+          }
+        },
+        "query_families": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["family_id", "queries", "max_hops"],
+            "properties": {
+              "family_id": {"type": "string", "minLength": 1},
+              "queries": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+              "max_hops": {"type": "integer", "minimum": 0, "maximum": 2}
+            }
+          }
+        },
+        "allowed_access_states": {"type": "array", "items": {"type": "string"}},
+        "allowed_rights_states": {"type": "array", "items": {"type": "string"}},
+        "budgets": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["max_batches", "max_items", "max_requests", "max_bytes", "max_elapsed_seconds"],
+          "properties": {
+            "max_batches": {"type": "integer", "minimum": 0},
+            "max_items": {"type": "integer", "minimum": 0},
+            "max_requests": {"type": "integer", "minimum": 0},
+            "max_bytes": {"type": "integer", "minimum": 0},
+            "max_elapsed_seconds": {"type": "integer", "minimum": 0}
+          }
+        },
+        "stop_rules": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["saturation_batches", "material_gain_fields", "safety_halts"],
+          "properties": {
+            "saturation_batches": {"type": "integer", "minimum": 2},
+            "material_gain_fields": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "identity_verified",
+                  "rights_verified",
+                  "body_verified",
+                  "locator_replayed",
+                  "independent_evidence",
+                  "coverage_cells_closed"
+                ]
+              }
+            },
+            "safety_halts": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+          }
+        }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["plan_path", "catalog_path", "checkpoint_path", "metrics_path", "report_path"],
+      "properties": {
+        "plan_path": {"$ref": "#/$defs/projectRelativePath"},
+        "catalog_path": {"anyOf": [{"$ref": "#/$defs/projectRelativePath"}, {"type": "null"}]},
+        "checkpoint_path": {"anyOf": [{"$ref": "#/$defs/projectRelativePath"}, {"type": "null"}]},
+        "metrics_path": {"anyOf": [{"$ref": "#/$defs/projectRelativePath"}, {"type": "null"}]},
+        "report_path": {"$ref": "#/$defs/projectRelativePath"}
+      }
+    },
+    "authorized_stages": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "plan",
+          "discover",
+          "verify_identity_rights",
+          "acquire",
+          "extract_normalize",
+          "deduplicate_review",
+          "project_measure"
+        ]
+      }
+    },
+    "batches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["batch_id", "status", "input_count", "metrics_delta", "checkpoint", "checkpoint_digest", "errors"],
+        "properties": {
+          "batch_id": {"type": "string", "minLength": 1},
+          "status": {"enum": ["completed", "partial", "blocked"]},
+          "input_count": {"type": "integer", "minimum": 0},
+          "metrics_delta": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "identity_verified",
+              "rights_verified",
+              "body_verified",
+              "locator_replayed",
+              "independent_evidence",
+              "coverage_cells_closed"
+            ],
+            "properties": {
+              "identity_verified": {"type": "integer", "minimum": 0},
+              "rights_verified": {"type": "integer", "minimum": 0},
+              "body_verified": {"type": "integer", "minimum": 0},
+              "locator_replayed": {"type": "integer", "minimum": 0},
+              "independent_evidence": {"type": "integer", "minimum": 0},
+              "coverage_cells_closed": {"type": "integer", "minimum": 0}
+            }
+          },
+          "checkpoint": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "last_completed_batch_id",
+              "resume_stage",
+              "query_cursor",
+              "remaining_query_families",
+              "candidate_snapshot_sha256",
+              "unresolved"
+            ],
+            "properties": {
+              "last_completed_batch_id": {"type": "string", "minLength": 1},
+              "resume_stage": {
+                "enum": [
+                  "plan",
+                  "discover",
+                  "verify_identity_rights",
+                  "acquire",
+                  "extract_normalize",
+                  "deduplicate_review",
+                  "project_measure"
+                ]
+              },
+              "query_cursor": {"type": ["string", "null"]},
+              "remaining_query_families": {"type": "array", "items": {"type": "string"}},
+              "candidate_snapshot_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+              "unresolved": {"type": "array", "items": {"type": "string"}}
+            }
+          },
+          "checkpoint_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "errors": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "checkpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "last_completed_batch_id",
+        "resume_stage",
+        "query_cursor",
+        "remaining_query_families",
+        "candidate_snapshot_sha256",
+        "unresolved"
+      ],
+      "properties": {
+        "last_completed_batch_id": {"type": ["string", "null"]},
+        "resume_stage": {
+          "enum": [
+            null,
+            "plan",
+            "discover",
+            "verify_identity_rights",
+            "acquire",
+            "extract_normalize",
+            "deduplicate_review",
+            "project_measure"
+          ]
+        },
+        "query_cursor": {"type": ["string", "null"]},
+        "remaining_query_families": {"type": "array", "items": {"type": "string"}},
+        "candidate_snapshot_sha256": {
+          "anyOf": [
+            {"type": "null"},
+            {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          ]
+        },
+        "unresolved": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "reason", "resume_required"],
+      "properties": {
+        "state": {"enum": ["continue", "completed", "partial", "blocked"]},
+        "reason": {"type": "string", "minLength": 1},
+        "resume_required": {"type": "boolean"}
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["denominators", "counts"],
+      "properties": {
+        "denominators": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required_candidates", "required_coverage_cells", "locator_eligible"],
+          "properties": {
+            "required_candidates": {"type": "integer", "minimum": 0},
+            "required_coverage_cells": {"type": "integer", "minimum": 0},
+            "locator_eligible": {"type": "integer", "minimum": 0}
+          }
+        },
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "discovered",
+            "identity_verified",
+            "revision_verified",
+            "body_verified",
+            "rights_verified",
+            "locator_replayed",
+            "independent_sources",
+            "exact_duplicates",
+            "near_duplicate_groups",
+            "conflicts",
+            "abstentions",
+            "failures",
+            "coverage_cells_met"
+          ],
+          "properties": {
+            "discovered": {"type": "integer", "minimum": 0},
+            "identity_verified": {"type": "integer", "minimum": 0},
+            "revision_verified": {"type": "integer", "minimum": 0},
+            "body_verified": {"type": "integer", "minimum": 0},
+            "rights_verified": {"type": "integer", "minimum": 0},
+            "locator_replayed": {"type": "integer", "minimum": 0},
+            "independent_sources": {"type": "integer", "minimum": 0},
+            "exact_duplicates": {"type": "integer", "minimum": 0},
+            "near_duplicate_groups": {"type": "integer", "minimum": 0},
+            "conflicts": {"type": "integer", "minimum": 0},
+            "abstentions": {"type": "integer", "minimum": 0},
+            "failures": {"type": "integer", "minimum": 0},
+            "coverage_cells_met": {"type": "integer", "minimum": 0}
+          }
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "checks"],
+      "properties": {
+        "status": {"enum": ["passed", "failed", "unverified"]},
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "status", "evidence"],
+            "properties": {
+              "name": {"type": "string", "minLength": 1},
+              "status": {"enum": ["passed", "failed", "unverified"]},
+              "evidence": {"type": "string"}
+            }
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"mode": {"const": "strategy_only"}}, "required": ["mode"]},
+      "then": {
+        "properties": {
+          "authorized_stages": {"const": ["plan"]},
+          "batches": {"maxItems": 0},
+          "outputs": {
+            "properties": {
+              "catalog_path": {"type": "null"},
+              "checkpoint_path": {"type": "null"},
+              "metrics_path": {"type": "null"}
+            }
+          }
+        }
+      }
+    }
+  ]
+}
