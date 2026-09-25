@@ -248,19 +248,18 @@ def test_session_capture_is_opt_in_and_provisional():
         assert marker in reference
 
 
-def test_memory_updater_is_safe_and_pointer_only(tmp_path):
+def test_memory_updater_rejects_unverified_target_without_mutation(tmp_path):
     memory = tmp_path / "index.json"
     memory.write_text(json.dumps({"schema_version": 1}), encoding="utf-8")
+    before = memory.read_bytes()
     updater = SKILL / "scripts" / "update_memory.py"
     result = subprocess.run(
         [sys.executable, str(updater), "--memory", str(memory), "--goal", "design/example.html", "--status", "verified"],
         capture_output=True,
         text=True,
     )
-    assert result.returncode == 0, result.stderr
-    data = json.loads(memory.read_text(encoding="utf-8"))
-    assert data["current_goal"]["pointer"] == "design/example.html"
-    assert "content" not in data["current_goal"]
+    assert result.returncode != 0
+    assert memory.read_bytes() == before
 
 
 def test_workspace_validator_accepts_the_current_project():

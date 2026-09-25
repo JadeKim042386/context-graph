@@ -236,6 +236,19 @@ def record_project(root: Path, event_type: str, payload: dict[str, Any], compile
 
 
 def main() -> int:
+    # Explicit route has strict errors and never inherits host environment roots.
+    # Keep the legacy best-effort hook interface separate and unchanged.
+    if len(sys.argv) > 1 and sys.argv[1] == "capture":
+        sys.dont_write_bytecode = True
+        from session_events import MAX_INPUT, capture, encode
+        explicit = argparse.ArgumentParser(description="Explicit project-bound provisional capture")
+        explicit.add_argument("--root", type=Path, required=True)
+        explicit.add_argument("--runtime", choices=("codex", "claude-code"), required=True)
+        explicit.add_argument("--event", choices=("pre_compact", "post_compact", "session_end"), required=True)
+        args = explicit.parse_args(sys.argv[2:])
+        result = capture(args.root, args.event, args.runtime, sys.stdin.buffer.read(MAX_INPUT + 1))
+        sys.stdout.write(encode(result).decode())
+        return 2 if result["status"] == "unverified" else 0
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command")
     init_parser = subparsers.add_parser("init")

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Explicit project-bound provisional session event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "record_type", "event_id", "project_id", "session_id", "invocation_id", "event_type", "occurred_at", "runtime", "status", "review_state", "artifact_pointers", "required_constraints", "next_actions", "provenance", "record_sha256"],
+  "properties": {
+    "schema_version": {"const": 3},
+    "record_type": {"const": "SessionLifecycleEvent"},
+    "event_id": {"type": "string", "pattern": "^SEV-[0-9a-f]{64}$"},
+    "project_id": {"type": "string", "pattern": "^PRJ-[0-9a-f]{16}$"},
+    "session_id": {"$ref": "#/$defs/hash"},
+    "invocation_id": {"$ref": "#/$defs/hash"},
+    "event_type": {"enum": ["pre_compact", "post_compact", "session_end"]},
+    "occurred_at": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "runtime": {"enum": ["codex", "claude-code"]},
+    "status": {"const": "provisional"},
+    "review_state": {"const": "not_reviewed"},
+    "record_sha256": {"$ref": "#/$defs/hash"},
+    "provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["method", "config_sha256"],
+      "properties": {
+        "method": {"const": "explicit_capture_v3"},
+        "config_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "artifact_pointers": {
+      "type": "array", "minItems": 1, "maxItems": 8, "uniqueItems": true,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["pointer", "revision_sha256"],
+        "properties": {
+          "pointer": {"type": "string", "minLength": 1, "maxLength": 561},
+          "revision_sha256": {"$ref": "#/$defs/hash"}
+        }
+      }
+    },
+    "required_constraints": {
+      "type": "array", "maxItems": 10, "uniqueItems": true,
+      "items": {"enum": ["no_network", "no_commit", "no_push", "no_deploy", "no_source_edits", "no_memory_edits", "no_generated_edits", "preserve_user_changes", "review_before_promotion", "no_secrets"]}
+    },
+    "next_actions": {
+      "type": "array", "maxItems": 7, "uniqueItems": true,
+      "items": {"enum": ["review_evidence", "replay_locator", "run_focused_tests", "check_snapshot", "request_approval", "resolve_conflict", "review_unresolved"]}
+    }
+  },
+  "$defs": {"hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

@@ -150,9 +150,21 @@ Useful commands:
 python skills/knowledge-engineering/scripts/update_memory.py --help
 python skills/knowledge-engineering/scripts/validate_workspace.py --root .. --profile portable
 python scripts/build_map.py --help
-python scripts/ask.py "question"
-python scripts/ask.py --conflicts
+python scripts/ask.py --project-root . --binding-only
+python scripts/ask.py --project-root . "question"
+python scripts/ask.py --project-root . --conflicts
 ```
+
+`ask.py` and `build_map.py` bind to one project and fail closed: `--project-root`
+is required, the config is `<project-root>/.context-graph/config.json`, and no
+global config or `KNOWLEDGE_MAP_CONFIG` fallback exists. A missing or mismatched
+binding, or a source changed since the last build, returns
+`binding.status=unverified`, `hits=[]`, and exit code 2. Treat that as a stop,
+not as permission to create configuration or rebuild. Legacy setup-generated
+configurations are not migrated automatically; see
+`skills/context-graph/references/project-binding.md` for the local contract.
+The Codex-installed skill ships the same scripts under
+`skills/context-graph/scripts/` and follows the same rule.
 
 For Codex package validation, run the `quick_validate.py` script provided by the
 installed `skill-creator` skill. Do not hard-code a machine-specific path.

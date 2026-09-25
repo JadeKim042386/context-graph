@@ -13,7 +13,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\" --quiet",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\" --project-root \"${CLAUDE_PROJECT_DIR:-$PWD}\" --quiet",
             "timeout": 60,
             "statusMessage": "Refreshing the knowledge map..."
           }
@@ -27,7 +27,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\" --quiet",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\" --project-root \"${CLAUDE_PROJECT_DIR:-$PWD}\" --quiet",
             "timeout": 60,
             "statusMessage": "Refreshing the knowledge map (delegated task ended)..."
           }
@@ -60,7 +60,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\" --quiet",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\" --project-root \"${CLAUDE_PROJECT_DIR:-$PWD}\" --quiet",
             "timeout": 60,
             "statusMessage": "Refreshing the knowledge map (after compaction)..."
           }

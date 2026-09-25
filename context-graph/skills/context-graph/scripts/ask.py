@@ -5,12 +5,13 @@ delegated task ends, and right after compaction. It does, however,
 report how many documents the map is behind.
 """
 import json
+import argparse
 import os
 import re
 import subprocess
 import sys
 
-from config import load_config, default_config_path
+from config import BindingError, binding_failure, load_project_config
 
 # A single character such as an em dash (—) can break the default console encoding
 # on some Windows configurations. Pin UTF-8 here so a completed answer is not lost.
@@ -561,7 +562,7 @@ def document_labels(map_path):
     return labels or None                # a map with no document nodes says nothing either
 
 
-def statements_carrying_the_words(map_path, words, limit=DIRECT_LOOKUP_LIMIT):
+def statements_carrying_the_words(map_path, words, limit=DIRECT_LOOKUP_LIMIT, nodes=None):
     """Statements whose own text carries the asked words, read straight out of the map.
 
     The walk starts from whatever the query tool picked as a seed and spreads outward, so a
@@ -570,13 +571,14 @@ def statements_carrying_the_words(map_path, words, limit=DIRECT_LOOKUP_LIMIT):
     happened to start. Statements that carry more of the words come first; between two that
     carry the same number, the shorter one is the denser answer.
     """
-    if not words or not os.path.exists(map_path):
+    if not words or (nodes is None and not os.path.exists(map_path)):
         return []
-    try:
-        with open(map_path, encoding="utf-8") as handle:
-            nodes = json.load(handle)["nodes"]
-    except (OSError, ValueError, KeyError):
-        return []                                    # a half-written map must not break the answer
+    if nodes is None:
+        try:
+            with open(map_path, encoding="utf-8") as handle:
+                nodes = json.load(handle)["nodes"]
+        except (OSError, ValueError, KeyError):
+            return []                                # a half-written map must not break the answer
     found = []
     for node in nodes:
         if node.get("kind") != "statement" or not node.get("source_location"):
@@ -796,7 +798,7 @@ def run(mode, arguments, source_dirs, map_path, budget):
     if changed:
         preview = ", ".join(changed[:3]) + (" and more" if len(changed) > 3 else "")
         print(f"\n[The map is behind {len(changed)} document(s) — {preview}. "
-              f"It is refreshed at the next compaction]")
+              f"An approved project-bound rebuild is required]")
     return completed.returncode
 
 
@@ -805,9 +807,36 @@ def main(argv):
     if not argv:
         print(USAGE)
         return 1
-    config = load_config(default_config_path())
-    if not config["map_path"]:
-        print("The config has no place for the map. Run the first-time setup flow first.")
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--project-root")
+    parser.add_argument("--config")
+    parser.add_argument("--binding-only", action="store_true")
+    parser.add_argument("--read-only", action="store_true")
+    options, argv = parser.parse_known_args(argv)
+    try:
+        config, _binding, resolved, graph = load_project_config(options.project_root, options.config)
+    except BindingError as exc:
+        print(json.dumps(binding_failure(exc.reason), sort_keys=True))
+        return 2
+    if options.binding_only:
+        print(json.dumps({"binding": resolved, "hits": []}, sort_keys=True))
+        return 0
+    if options.read_only:
+        if not argv or any(arg.startswith("--") for arg in argv):
+            print(json.dumps(binding_failure("read_only_requires_plain_query")))
+            return 2
+        matches = statements_carrying_the_words(config["map_path"], asked_words(" ".join(argv)), nodes=graph["nodes"])
+        hits, spent = [], 0
+        for _rank, _length, label, source, locator in matches:
+            if spent + len(label) > config["answer_budget"]:
+                break
+            hits.append({"label": label, "source_file": source, "source_location": locator})
+            spent += len(label)
+        print(json.dumps({"binding": resolved, "retrieval": "lexical_read_only", "hits": hits}, sort_keys=True))
+        return 0
+    print(json.dumps({"binding": resolved}, sort_keys=True))
+    if not argv:
+        print(USAGE)
         return 1
 
     if argv[0] == "--chain":

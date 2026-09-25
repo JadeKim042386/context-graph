@@ -63,7 +63,7 @@ For a project-local installation, clone the repository and keep that directory
 available from the project root:
 
 ```bash
-git clone --branch v0.7.0 https://github.com/JadeKim042386/context-graph.git
+git clone --branch v0.8.0 https://github.com/JadeKim042386/context-graph.git
 ```
 
 ### Claude Code
@@ -87,9 +87,21 @@ modification, or evidence-backed answer. Useful commands are:
 python context-graph/skills/knowledge-engineering/scripts/update_memory.py --help
 python context-graph/skills/knowledge-engineering/scripts/validate_workspace.py --root . --profile project
 python context-graph/scripts/build_map.py --help
-python context-graph/scripts/ask.py "question"
-python context-graph/scripts/ask.py --conflicts
+python context-graph/scripts/ask.py --project-root . --binding-only
+python context-graph/scripts/ask.py --project-root . "question"
+python context-graph/scripts/ask.py --project-root . --conflicts
 ```
+
+Retrieval and map builds are project-bound and fail closed. `ask.py` and
+`build_map.py` require `--project-root` and read only
+`<project-root>/.context-graph/config.json` (or a `--config` inside that root).
+They never fall back to `~/.claude/context-graph/config.json` or
+`KNOWLEDGE_MAP_CONFIG`. A missing, mismatched, or stale binding prints
+`binding.status=unverified` with a reason, `hits=[]`, and exits with code 2. That
+result is not permission to create or edit configuration: setup-generated global
+configurations are not migrated automatically. Create the local binding
+deliberately, then run an approved bound rebuild, following
+`context-graph/skills/context-graph/references/project-binding.md`.
 
 ### Optional retrieval and backend components
 

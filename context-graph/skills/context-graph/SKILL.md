@@ -13,9 +13,9 @@ you open a file.**
 This skill is usable from Codex and Claude Code. Resolve the script path from
 the host runtime instead of copying one platform's path into the other:
 
-- Claude Code plugin: `python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" "<question>"`
-- Codex installed skill: `python "${CODEX_HOME:-$HOME/.codex}/skills/context-graph/scripts/ask.py" "<question>"`
-- Codex repository checkout: `python context-graph/scripts/ask.py "<question>"`
+- Claude Code plugin: `python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" --project-root . "<question>"`
+- Codex installed skill: `python "${CODEX_HOME:-$HOME/.codex}/skills/context-graph/scripts/ask.py" --project-root . "<question>"`
+- Codex repository checkout: `python context-graph/scripts/ask.py --project-root . "<question>"`
 
 The same rule applies to `build_map.py`. If the host project exposes neither
 path, reinstall this skill from the GitHub repository; do not fall back to a
@@ -24,14 +24,21 @@ different project's global map.
 ## How to use it
 
     # Claude Code plugin
-    python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" "<question>"
+    python "${CLAUDE_PLUGIN_ROOT}/scripts/ask.py" --project-root . "<question>"
     # Codex installed skill
-    python "${CODEX_HOME:-$HOME/.codex}/skills/context-graph/scripts/ask.py" "<question>"
+    python "${CODEX_HOME:-$HOME/.codex}/skills/context-graph/scripts/ask.py" --project-root . "<question>"
     # Codex or repository checkout
-    python context-graph/scripts/ask.py "<question>"
+    python context-graph/scripts/ask.py --project-root . "<question>"
 
 Use the same runtime-specific prefix for `--path`, `--explain`, `--chain`,
 and `--conflicts`.
+
+Before retrieval, inspect `--project-root . --binding-only`. Missing or mismatched
+binding means stop and report `unverified`, not use the global config. For a
+non-mutating lexical probe, use `--project-root . --read-only "<question>"`.
+Read [project-binding.md](references/project-binding.md) for the required local
+config/map contract and migration boundaries. Creating config or rebuilding a map
+is a separate authorized operation; do not do it merely to make a probe pass.
 
 ## Order of work
 
@@ -60,5 +67,7 @@ and `--conflicts`.
 
 ## Refreshing
 
-Asking does not refresh anything. Refreshes run at session start, when a delegated task ends,
-and after compaction. If the map lags the documents, the answer says so and names what changed.
+Asking does not refresh anything. A configured refresh must pass `--project-root`
+and a valid binding. Legacy hooks without these now stop as unverified; their
+migration and actual host delivery require separate validation. If the map lags
+the documents, the answer says so and names what changed.

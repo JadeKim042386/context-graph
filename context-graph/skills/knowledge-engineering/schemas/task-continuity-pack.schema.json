@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Read-only task continuity pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["safety", "binding", "schema_version", "read_only", "promotion_performed", "pack_status", "memory_sha256", "items", "total_count", "included_count", "omitted_count", "bytes_read", "limits", "assessed_count", "relation_scan_complete", "conflict_count", "duplicate_count", "query", "dependency_sha256", "cache_state", "cache_reusable"],
+  "properties": {
+    "safety": {
+      "type": "object", "additionalProperties": false,
+      "required": ["memory_complete", "constraints"],
+      "properties": {
+        "memory_complete": {"type": "boolean"},
+        "constraints": {"const": ["do_not_assume_complete_memory", "review_unresolved_before_dependent_action", "applicability_is_not_approval"]}
+      }
+    },
+    "assessed_count": {"type": "integer", "minimum": 0, "maximum": 128},
+    "relation_scan_complete": {"type": "boolean"},
+    "conflict_count": {"type": "integer", "minimum": 0, "maximum": 128},
+    "duplicate_count": {"type": "integer", "minimum": 0, "maximum": 128},
+    "dependency_sha256": {"$ref": "#/$defs/hash"},
+    "cache_state": {"enum": ["not_requested", "match", "mismatch", "unverified"]},
+    "cache_reusable": {"type": "boolean"},
+    "query": {
+      "type": ["object", "null"], "additionalProperties": false,
+      "required": ["question_key", "scope", "as_of"],
+      "properties": {
+        "question_key": {"type": "string", "maxLength": 80},
+        "scope": {"type": "string", "maxLength": 80},
+        "as_of": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"}
+      }
+    },
+    "binding": {
+      "type": "object", "additionalProperties": false,
+      "required": ["scope", "status", "reason", "root_id", "root", "memory_path", "allowed_source_roots", "config_map_state"],
+      "properties": {
+        "scope": {"const": "memory"},
+        "status": {"enum": ["verified", "unverified"]},
+        "reason": {"enum": ["bound_root", "cwd_mismatch", "invalid_memory_path"]},
+        "root_id": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "root": {"const": "."},
+        "memory_path": {"type": ["string", "null"]},
+        "allowed_source_roots": {"const": ["."]},
+        "config_map_state": {"const": "not_used"}
+      }
+    },
+    "schema_version": {"const": 1},
+    "read_only": {"const": true},
+    "promotion_performed": {"const": false},
+    "pack_status": {"enum": ["ready", "partial", "conflict", "empty", "missing_memory", "invalid_memory"]},
+    "memory_sha256": {"$ref": "#/$defs/hash"},
+    "total_count": {"type": "integer", "minimum": 0},
+    "included_count": {"type": "integer", "minimum": 0, "maximum": 128},
+    "omitted_count": {"type": "integer", "minimum": 0},
+    "bytes_read": {"type": "integer", "minimum": 0},
+    "limits": {
+      "type": "object", "additionalProperties": false,
+      "required": ["max_entries", "max_file_bytes", "max_total_bytes", "max_pack_bytes"],
+      "properties": {
+        "max_entries": {"type": "integer", "minimum": 1, "maximum": 128},
+        "max_file_bytes": {"type": "integer", "minimum": 1, "maximum": 1048576},
+        "max_total_bytes": {"type": "integer", "minimum": 1024, "maximum": 8388608},
+        "max_pack_bytes": {"type": "integer", "minimum": 1024, "maximum": 131072}
+      }
+    },
+    "items": {"type": "array", "maxItems": 128, "items": {"$ref": "#/$defs/item"}}
+  },
+  "$defs": {
+    "hash": {"anyOf": [{"type": "null"}, {"type": "string", "pattern": "^[0-9a-f]{64}$"}]},
+    "pointer": {"type": ["string", "null"], "maxLength": 561},
+    "ids": {"type": "array", "uniqueItems": true, "maxItems": 128, "items": {"type": "string", "maxLength": 80}},
+    "item": {
+      "type": "object", "additionalProperties": false,
+      "required": ["group", "slot", "pointer", "recorded_status", "integrity_status", "reason", "lifecycle_status", "continuity_state", "applicable", "record_id", "record_revision", "revision_sha256", "review_pointer", "review_sha256", "supersedes", "superseded_by", "required_constraints", "next_actions", "proof_type", "proof_status", "decision_context", "context_status", "conflicts_with", "conflict_criteria", "duplicate_of"],
+      "properties": {
+        "proof_type": {"enum": [null, "Review", "Decision"]},
+        "proof_status": {"enum": [null, "verified", "accepted"]},
+        "decision_context": {
+          "type": ["object", "null"], "additionalProperties": false,
+          "required": ["question_key", "scope", "as_of", "outcome_id"],
+          "properties": {
+            "question_key": {"type": "string", "maxLength": 80},
+            "scope": {"type": "string", "maxLength": 80},
+            "as_of": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+            "outcome_id": {"type": "string", "maxLength": 80}
+          }
+        },
+        "context_status": {"enum": ["unknown", "inventory", "match", "mismatch"]},
+        "conflicts_with": {"$ref": "#/$defs/ids"},
+        "conflict_criteria": {"type": "array", "uniqueItems": true, "maxItems": 6, "items": {"enum": ["duplicate_record_id", "supersedes_cycle", "same_context_different_outcome", "declared_conflict", "recorded_conflict_unverified", "target_conflict"]}},
+        "duplicate_of": {"type": ["string", "null"], "maxLength": 80},
+        "group": {"enum": ["current_goal", "snapshot_hash", "approved_decision_pointers", "unresolved_pointers"]},
+        "slot": {"type": "integer", "minimum": 0},
+        "pointer": {"$ref": "#/$defs/pointer"},
+        "recorded_status": {"enum": ["proposed", "verified", "accepted", "open", "blocked", "complete", "superseded", "deprecated", "retracted", "conflict", "unknown"]},
+        "integrity_status": {"enum": ["valid", "stale", "unlocatable", "unverified", "unknown"]},
+        "reason": {"type": "string", "maxLength": 80},
+        "lifecycle_status": {"enum": ["active", "superseded", "deprecated", "retracted", "unknown", "conflict", "duplicate"]},
+        "continuity_state": {"enum": ["known", "unknown"]},
+        "applicable": {"type": "boolean"},
+        "record_id": {"type": ["string", "null"], "maxLength": 80},
+        "record_revision": {"type": ["integer", "null"], "minimum": 1},
+        "revision_sha256": {"$ref": "#/$defs/hash"},
+        "review_pointer": {"$ref": "#/$defs/pointer"},
+        "review_sha256": {"$ref": "#/$defs/hash"},
+        "supersedes": {"$ref": "#/$defs/ids"},
+        "superseded_by": {"$ref": "#/$defs/ids"},
+        "required_constraints": {"type": "array", "uniqueItems": true, "maxItems": 10, "items": {"enum": ["no_network", "no_commit", "no_push", "no_deploy", "no_source_edits", "no_memory_edits", "no_generated_edits", "preserve_user_changes", "review_before_promotion", "no_secrets"]}},
+        "next_actions": {"type": "array", "uniqueItems": true, "maxItems": 7, "items": {"enum": ["review_evidence", "replay_locator", "run_focused_tests", "check_snapshot", "request_approval", "resolve_conflict", "review_unresolved"]}}
+      }
+    }
+  }
+}

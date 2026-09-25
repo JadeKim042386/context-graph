@@ -11,9 +11,15 @@ import os
 import re
 import sys
 import time
+import hashlib
+from pathlib import Path
 
 from parse_html import parse_html
 from parse_markdown import parse_markdown
+from config import (BindingError, binding_failure, load_project_config,
+                    validate_bound_map, validate_source_path)
+from freshness import (FreshnessError, document_files, file_record, make_snapshot,
+                       scan_snapshot, projection_digest)
 
 # The score line contains an em dash. The default console encoding on a Korean
 # Windows box dies on that single character.
@@ -29,14 +35,7 @@ HTML_SUFFIXES = (".html", ".htm")
 
 def _document_files(source_dirs):
     """Return the files to scan, sorted. Sorting is what makes the result repeatable."""
-    found = []
-    for source_dir in sorted(source_dirs):
-        for folder, sub_folders, file_names in os.walk(source_dir):
-            sub_folders.sort()
-            for file_name in sorted(file_names):
-                if file_name.endswith(MARKDOWN_SUFFIXES + HTML_SUFFIXES):
-                    found.append(os.path.join(folder, file_name))
-    return found
+    return document_files(source_dirs)
 
 
 def _title_key(text):
@@ -76,20 +75,16 @@ def _drop_mentions_that_repeat_a_named_relation(links):
             if link["relation"] != "mentions" or (link["source"], link["target"]) not in named_pairs]
 
 
-def _fingerprint(source_dirs):
-    """Summarise what the map is built from: the documents, and the code that reads them.
-
-    The count is part of it because a deleted document leaves the newest time untouched, and
-    the code is part of it because changing how the map is shaped changes the map.
-    """
-    count, newest = 0, 0.0
-    for path in _document_files(source_dirs):
-        count += 1
-        newest = max(newest, os.path.getmtime(path))
-    # The code that builds the map is part of what the map looks like. Without this, changing
-    # how ids are made left the old map in place until somebody happened to edit a document,
-    # so when the change landed was anyone's guess.
-    return {"documents": count, "newest": round(newest, 3), "builder": _builder_stamp()}
+def _fingerprint(source_dirs, snapshot=None):
+    """Versioned path/content identity; source timestamps never authorize a cache hit."""
+    snapshot = scan_snapshot(source_dirs) if snapshot is None else snapshot
+    here = Path(__file__).resolve().parent
+    code = hashlib.sha256()
+    for name in ("build_map.py", "parse_markdown.py", "parse_html.py", "conflicts.py", "config.py", "freshness.py"):
+        code.update(name.encode())
+        code.update((here / name).read_bytes())
+    return {"schema_version": 2, "documents": len(snapshot["files"]), "source_snapshot": snapshot,
+            "builder": _builder_stamp(), "builder_sha256": code.hexdigest()}
 
 
 def _builder_stamp():
@@ -123,9 +118,13 @@ def unchanged_since_last_build(source_dirs, map_path):
     try:
         with open(record, encoding="utf-8") as handle:
             previous = json.load(handle)
-    except (OSError, ValueError):
+        with open(map_path, encoding="utf-8") as handle:
+            graph = json.load(handle)
+        current = _fingerprint(source_dirs)
+        return (previous == current and graph.get("source_snapshot") == current["source_snapshot"]
+                and graph.get("projection_sha256") == projection_digest(graph))
+    except (OSError, ValueError, AttributeError):
         return False
-    return previous == _fingerprint(source_dirs)
 
 
 def _document_ids(paths_and_names):
@@ -269,7 +268,7 @@ def _section_index_for(statement, section_lines):
     return found
 
 
-def build_map(source_dirs, map_path):
+def build_map(source_dirs, map_path, project_binding=None):
     """Scan the knowledge documents, build the map, return a summary. Sources are read only."""
     started_at = time.time()
     nodes, links = [], []
@@ -277,12 +276,16 @@ def build_map(source_dirs, map_path):
 
     files = [(path, os.path.splitext(os.path.basename(path))[0])
              for path in _document_files(source_dirs)]
+    if project_binding is not None:
+        for path, _name in files:
+            validate_source_path(path, project_binding)
     document_ids = _document_ids(files)
 
-    parsed_documents = []
+    parsed_documents, captured_files = [], []
     for path, document_name in files:      # the same list the ids came from, not a second scan
-        with open(path, encoding="utf-8-sig", errors="replace") as handle:
-            text = handle.read()
+        raw = Path(path).read_bytes()
+        captured_files.append(file_record(path, raw))
+        text = raw.decode("utf-8-sig", errors="replace").replace("\r\n", "\n").replace("\r", "\n")
         parsed = parse_html(text) if path.endswith(HTML_SUFFIXES) else parse_markdown(text)
         document_id = document_ids[path]
         parsed_documents.append((path, document_id, document_name, parsed))
@@ -327,16 +330,25 @@ def build_map(source_dirs, map_path):
     nodes.sort(key=lambda node: node["id"])
     links.sort(key=lambda link: (link["source"], link["target"], link["relation"]))
 
+    snapshot = make_snapshot(captured_files)
+    validate = (lambda path: validate_source_path(path, project_binding)) if project_binding is not None else None
+    if scan_snapshot(source_dirs, validate) != snapshot:
+        raise FreshnessError("source_changed_during_build")
+    fingerprint = _fingerprint(source_dirs, snapshot)
+    graph = {"nodes": nodes, "links": links, "source_snapshot": snapshot}
+    graph["projection_sha256"] = projection_digest(graph)
+    if project_binding is not None:
+        graph["project_binding"] = project_binding
     os.makedirs(os.path.dirname(map_path) or ".", exist_ok=True)
     temporary_path = map_path + ".tmp"
     with open(temporary_path, "w", encoding="utf-8") as handle:
-        json.dump({"nodes": nodes, "links": links}, handle,
+        json.dump(graph, handle,
                   ensure_ascii=False, indent=1, sort_keys=True)
     os.replace(temporary_path, map_path)   # swap the whole file, so nobody reads a half-written map
     # Remember what the documents looked like, so the next run can skip an unchanged scan.
     record = _fingerprint_path(map_path)
     with open(record + ".tmp", "w", encoding="utf-8") as handle:
-        json.dump(_fingerprint(source_dirs), handle, ensure_ascii=False)
+        json.dump(fingerprint, handle, ensure_ascii=False)
     os.replace(record + ".tmp", record)
 
     return {"documents": len(parsed_documents), "nodes": len(nodes), "links": len(links),
@@ -385,27 +397,44 @@ def main(argv):
     parser.add_argument("--out", default="",
                         help="where to put the map. Read from the config if absent")
     parser.add_argument("--quiet", action="store_true", help="do not print the score")
+    parser.add_argument("--project-root")
+    parser.add_argument("--config")
     options = parser.parse_args(argv)
 
     source_dirs, map_path = options.source, options.out
-    if not source_dirs or not map_path:
-        from config import default_config_path, load_config
-        config = load_config(default_config_path())
-        source_dirs = source_dirs or config["source_dirs"]
-        map_path = map_path or config["map_path"]
-    if not source_dirs or not map_path:
-        if not options.quiet:
-            print("The config has no document folder or no place for the map. "
-                  "Run the first-time setup flow first.")
-        return 0   # this runs from a hook, so stay quiet until the setup flow has run
+    binding, watched = None, None
+    if options.project_root is not None or not source_dirs or not map_path or options.config:
+        try:
+            config, binding, _resolved, _graph = load_project_config(options.project_root, options.config, require_map=False)
+            if source_dirs or map_path:
+                raise BindingError("bound_build_disallows_path_overrides")
+            source_dirs, map_path = config["source_dirs"], config["map_path"]
+            watched = config.get("watched_names")
+        except BindingError as exc:
+            print(json.dumps(binding_failure(exc.reason), sort_keys=True))
+            return 2
 
-    if unchanged_since_last_build(source_dirs, map_path):
+    binding_matches = binding is None
+    if binding is not None and os.path.exists(map_path):
+        try:
+            with open(map_path, encoding="utf-8") as handle:
+                validate_bound_map(json.load(handle), binding)
+            binding_matches = True
+        except (OSError, ValueError):
+            binding_matches = False
+
+    if binding_matches and unchanged_since_last_build(source_dirs, map_path):
         if not options.quiet:
             print("No document changed, so the map was left as it is.")
         return 0   # the refresh points fire often; an unchanged scan is pure cost
 
-    summary = build_map(source_dirs, map_path)
-    conflict_line = write_conflict_report(map_path, config_watched_names())
+    try:
+        summary = build_map(source_dirs, map_path, project_binding=binding)
+    except (BindingError, FreshnessError, OSError) as exc:
+        reason = exc.reason if isinstance(exc, BindingError) else (str(exc) if isinstance(exc, FreshnessError) else "source_unreadable")
+        print(json.dumps(binding_failure(reason), sort_keys=True))
+        return 2
+    conflict_line = write_conflict_report(map_path, watched)
     for note in folder_notes(source_dirs, summary["documents"]):
         print(note)          # printed even when quiet: a wrong path is the thing worth saying
     if not options.quiet:
