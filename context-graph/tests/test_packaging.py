@@ -2,6 +2,7 @@ import ast
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -349,3 +350,22 @@ def test_hooked_map_builds_pass_the_project_root():
             for hook in group["hooks"]:
                 if "build_map.py" in hook["command"]:
                     assert "--project-root" in hook["command"], hook["command"]
+
+
+def test_release_versions_are_aligned_and_the_knowledge_engineering_payload_is_present():
+    """Release gate: plugin, marketplace and README must name one version; the shipped skill must be whole."""
+    plugin = _read_json("context-graph", ".claude-plugin", "plugin.json")
+    marketplace = _read_json(".claude-plugin", "marketplace.json")
+    version = plugin["version"]
+    assert re.fullmatch(r"\d+\.\d+\.\d+", version), version
+    assert marketplace["plugins"][0]["version"] == version
+    assert marketplace["plugins"][0]["source"] == "./context-graph"
+    assert f"--branch v{version} " in _read_text("README.md")
+    skill = Path(ROOT).resolve() / "context-graph" / "skills" / "knowledge-engineering"
+    for rel in ("SKILL.md", "scripts/audit_memory_support.py", "scripts/build_task_continuity.py",
+                "scripts/update_memory.py", "references/memory-support-audit.md", "references/task-continuity.md"):
+        assert (skill / rel).is_file(), rel
+    text = (skill / "SKILL.md").read_text(encoding="utf-8")
+    assert "audit_memory_support.py" in text
+    for link in sorted(set(re.findall(r"\]\((references/[^)]+)\)", text))):
+        assert (skill / link).is_file(), link

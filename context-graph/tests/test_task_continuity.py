@@ -343,3 +343,20 @@ def test_growing_file_cannot_exceed_total_read_budget(tmp_path, monkeypatch):
     with pytest.raises(module.ReadLimit):
         reader.read(target)
     assert reader.bytes_read <= 64
+
+
+def test_cli_runs_under_isolated_interpreter_without_implicit_script_path(tmp_path):
+    """python -I drops the script directory from sys.path; the sibling import must not depend on it."""
+    import os
+    import shutil
+
+    write_memory(tmp_path, current_goal=pointer(tmp_path))
+    installed = tmp_path.parent / "installed-scripts"
+    shutil.copytree(SCRIPTS, installed, ignore=shutil.ignore_patterns("__pycache__"))
+    env = {"PATH": os.environ.get("PATH", ""), "PYTHONDONTWRITEBYTECODE": "1"}
+    argv = [str(installed / "build_task_continuity.py"), "--root", str(tmp_path), "--memory", "memory.json"]
+    isolated = subprocess.run([sys.executable, "-I", "-B", *argv], cwd=tmp_path, env=env, capture_output=True, text=True)
+    normal = subprocess.run([sys.executable, "-B", *argv], cwd=tmp_path, env=env, capture_output=True, text=True)
+    assert isolated.returncode == 0, isolated.stderr
+    assert isolated.stdout == normal.stdout and json.loads(isolated.stdout)["pack_status"] == "ready"
+    assert not list(installed.rglob("__pycache__")) and not list(tmp_path.rglob("__pycache__"))

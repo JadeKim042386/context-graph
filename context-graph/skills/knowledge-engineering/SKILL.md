@@ -135,6 +135,27 @@ automation when needed.
 Read [`references/memory-update.md`](references/memory-update.md) for the
 journal schema, privacy boundary, deduplication, and promotion rules.
 
+## Session preflight (start and resume)
+
+Before evidence-backed work in a new or resumed session, run these read-only
+commands in this order from the selected installed skill roots and report their
+states separately. Never reuse or cache a previous session's output.
+
+```bash
+python -B <context-graph skill root>/scripts/ask.py --project-root <project> --binding-only
+python -B <knowledge-engineering skill root>/scripts/build_task_continuity.py --root <project>
+python -B <knowledge-engineering skill root>/scripts/audit_memory_support.py --root <project>
+```
+
+If `scripts/audit_memory_support.py` is absent from the selected root, report
+`supporting_evidence_audit=unavailable` and make no evidence-replay claim; do
+not substitute a checkout copy or another installation. Report binding
+`status`, continuity `pack_status` / applicable / unresolved / `memory_complete`,
+and audit `support_replay_complete` plus valid / stale / unlocatable /
+unverified and omission counts as distinct facts. Exit 0 means the audit ran,
+not that support is complete; `inputs_sha256` is not a cache key. Read
+[`references/memory-support-audit.md`](references/memory-support-audit.md).
+
 ## Post-install integration verification
 
 After installation, verify the skill separately from package presence. Follow

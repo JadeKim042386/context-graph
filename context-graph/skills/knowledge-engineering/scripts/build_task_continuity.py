@@ -11,8 +11,11 @@ from datetime import date
 from pathlib import Path
 
 # Importing this sibling must not create a projection or __pycache__ on resume.
+# Isolated mode (python -I) drops the script directory from sys.path, so bind the sibling
+# import to this file's own directory explicitly instead of relying on the implicit entry.
 sys.dont_write_bytecode = True
-import update_memory as integrity
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import update_memory as integrity  # noqa: E402
 
 
 CONSTRAINTS = frozenset({

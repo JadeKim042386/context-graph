@@ -43,6 +43,9 @@ item carries the source pointer and digest. The memory bytes are bound separatel
 by `memory_sha256`. These are evidence bindings, not freshness guarantees after
 the invocation has ended.
 
+The pack does not replay the `evidence[]` entries a proof declares; for that one
+extra read-only hop see [`memory-support-audit.md`](memory-support-audit.md).
+
 Do not infer permission from a field named `approved_decision_pointers`. The
 cycle-01 `update_memory.classify` contract is recomputed with bounded reads.
 Historical `accepted`/`verified` status alone cannot enable an item.

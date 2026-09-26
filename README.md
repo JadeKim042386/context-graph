@@ -63,7 +63,7 @@ For a project-local installation, clone the repository and keep that directory
 available from the project root:
 
 ```bash
-git clone --branch v0.8.0 https://github.com/JadeKim042386/context-graph.git
+git clone --branch v0.9.0 https://github.com/JadeKim042386/context-graph.git
 ```
 
 ### Claude Code
