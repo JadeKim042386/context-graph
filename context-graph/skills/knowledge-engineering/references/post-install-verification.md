@@ -43,6 +43,22 @@ discovery, and an actual harmless response separately.
 
 ## Project-local session capture
 
+### Automatic map refresh is separately activated
+
+The `SessionStart`, `SubagentStop`, and `PostCompact` map-refresh hooks run
+only when the selected project's `.context-graph/config.json` exists. Without
+that activation they return exit 0 and `status=skipped`,
+`reason=project_not_activated`, creating no config, map, or journal. Config-file
+or config-directory symlinks are still sent to the bound builder for validation,
+including broken symlinks; malformed or foreign bindings remain errors. This
+hook-only no-op does not change the explicit `ask.py` / `build_map.py` contract:
+missing or invalid binding still returns exit 2 when those CLIs are requested.
+
+Map activation is independent of `session-capture.json`. A disabled/absent
+capture configuration makes the recording hook a no-op, but does not disable
+map refresh in a bound project. Do not initialize either configuration merely
+to suppress a hook error; verify no-op and active-project behavior separately.
+
 After the read-only smoke test passes, explicitly activate privacy-filtered
 session capture for the consuming project:
 

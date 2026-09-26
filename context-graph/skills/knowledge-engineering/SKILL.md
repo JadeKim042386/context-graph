@@ -116,7 +116,11 @@ in `knowledge-base/_ops/session-events.jsonl` and regenerates a provisional
 proposal under `knowledge-base/_ops/session-proposals/`. This occurs only after
 the consuming project creates `knowledge-base/_ops/session-capture.json` with
 the activation CLI in `references/post-install-verification.md`; otherwise
-hooks are a successful no-op. The journal preserves the session boundary,
+hooks are a successful no-op. Likewise the map-refresh hooks (`SessionStart`,
+`SubagentStop`, `PostCompact`) exit 0 with a one-line `status=skipped`,
+`reason=project_not_activated` JSON in a project that has no
+`.context-graph/config.json`; `build_map.py` itself still fails closed when
+invoked directly, and symlinked or malformed config paths are still validated. The journal preserves the session boundary,
 changed artifact pointers, hashes, and verification state so the next session
 can recover work without copying the conversation.
 

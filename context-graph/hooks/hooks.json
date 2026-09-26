@@ -13,7 +13,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\" --project-root \"${CLAUDE_PROJECT_DIR:-$PWD}\" --quiet",
+            "command": "if [ -e \"${CLAUDE_PROJECT_DIR:-$PWD}/.context-graph/config.json\" ] || [ -L \"${CLAUDE_PROJECT_DIR:-$PWD}/.context-graph/config.json\" ] || [ -L \"${CLAUDE_PROJECT_DIR:-$PWD}/.context-graph\" ]; then python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\" --project-root \"${CLAUDE_PROJECT_DIR:-$PWD}\" --quiet; else printf '%s\\n' '{\"hook\":\"knowledge_map_refresh\",\"status\":\"skipped\",\"reason\":\"project_not_activated\"}'; fi",
             "timeout": 60,
             "statusMessage": "Refreshing the knowledge map..."
           }
@@ -27,7 +27,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\" --project-root \"${CLAUDE_PROJECT_DIR:-$PWD}\" --quiet",
+            "command": "if [ -e \"${CLAUDE_PROJECT_DIR:-$PWD}/.context-graph/config.json\" ] || [ -L \"${CLAUDE_PROJECT_DIR:-$PWD}/.context-graph/config.json\" ] || [ -L \"${CLAUDE_PROJECT_DIR:-$PWD}/.context-graph\" ]; then python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\" --project-root \"${CLAUDE_PROJECT_DIR:-$PWD}\" --quiet; else printf '%s\\n' '{\"hook\":\"knowledge_map_refresh\",\"status\":\"skipped\",\"reason\":\"project_not_activated\"}'; fi",
             "timeout": 60,
             "statusMessage": "Refreshing the knowledge map (delegated task ended)..."
           }
@@ -60,7 +60,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\" --project-root \"${CLAUDE_PROJECT_DIR:-$PWD}\" --quiet",
+            "command": "if [ -e \"${CLAUDE_PROJECT_DIR:-$PWD}/.context-graph/config.json\" ] || [ -L \"${CLAUDE_PROJECT_DIR:-$PWD}/.context-graph/config.json\" ] || [ -L \"${CLAUDE_PROJECT_DIR:-$PWD}/.context-graph\" ]; then python \"${CLAUDE_PLUGIN_ROOT}/scripts/build_map.py\" --project-root \"${CLAUDE_PROJECT_DIR:-$PWD}\" --quiet; else printf '%s\\n' '{\"hook\":\"knowledge_map_refresh\",\"status\":\"skipped\",\"reason\":\"project_not_activated\"}'; fi",
             "timeout": 60,
             "statusMessage": "Refreshing the knowledge map (after compaction)..."
           }
