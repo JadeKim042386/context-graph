@@ -1,0 +1,10 @@
+[
+  {"kind":"short","label_prefix":"Short evidence ","repeat":8,"expected_pointer":false},
+  {"kind":"long-leading","label_prefix":"Long leading evidence ","repeat":70,"expected_pointer":true},
+  {"kind":"duplicate","label_prefix":"Repeated evidence ","repeat":35,"expected_pointer":true},
+  {"kind":"negative","label_prefix":"Evidence says not applicable because ","repeat":55,"expected_pointer":true},
+  {"kind":"condition-unit","label_prefix":"Condition and unit evidence ","repeat":48,"expected_pointer":true},
+  {"kind":"korean","label_prefix":"검증된 한국어 근거 ","repeat":70,"expected_pointer":true},
+  {"kind":"html","label_prefix":"<article data-source=\"evidence\">HTML evidence ","repeat":60,"expected_pointer":true},
+  {"kind":"budget","label_prefix":"Budget-bound evidence ","repeat":110,"expected_pointer":true}
+]

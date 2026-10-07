@@ -1,0 +1,10 @@
+{
+  "HO26-D01":[{"source_suffix":"knowledge/knowledge-base-architecture-design.html","line":20,"atoms":["depends_on","dependency_revision_digest"]}],
+  "HO26-D02":[{"source_suffix":"knowledge/ontology-profile-selection.html","line":8,"atoms":["restricted OWL 2","not a quality score","intuition alone"]}],
+  "HO26-C01":[{"source_suffix":"knowledge/ontology-pilot.html","line":69,"atoms":["dependent Evidence/Claim/Conclusion IDs","stale candidates are not silently reused"]}],
+  "HO26-N01":[{"source_suffix":"knowledge/knowledge-base-architecture-design.html","line":21,"atoms":["[0,1]","missing values remain missing"]}],
+  "HO26-P01":[{"source_suffix":"knowledge/knowledge-base-architecture-design.html","line":30,"atoms":["ingest","query","review","rebuild","orphan records","broken locators"]}],
+  "HO26-M01":[{"source_suffix":"knowledge/knowledge-engineering.html","line":195,"atoms":["separate work","audio needs","speaker","images need","coordinates"]}],
+  "HO26-M02":[{"source_suffix":"knowledge/knowledge-engineering.html","line":205,"atoms":["observed","interpreted","embed failure"]}],
+  "HO26-A01":[{"source_suffix":"knowledge/knowledge-base-architecture-design.html","line":23,"atoms":["Metadata-only external observations","may produce only abstain","explicit rights evidence"]}]
+}

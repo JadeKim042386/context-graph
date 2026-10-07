@@ -1,0 +1,45 @@
+{
+  "D3": [
+    {
+      "source_suffix": "knowledge/ontology-collected-artifacts.html",
+      "line": 5,
+      "atoms": ["license"]
+    },
+    {
+      "source_suffix": "knowledge/ontology-collected-artifacts.html",
+      "line": 19,
+      "atoms": ["verification addendum"]
+    }
+  ],
+  "H1": [
+    {
+      "source_suffix": "knowledge/animal-target-tracking-and-inference.html",
+      "line": 51,
+      "atoms": ["two hops", "information gain"]
+    },
+    {
+      "source_suffix": "knowledge/animal-target-tracking-and-inference.html",
+      "line": 55,
+      "atoms": ["candidate score", "next candidate"]
+    }
+  ],
+  "S1": [
+    {
+      "source_suffix": "knowledge/animal-target-tracking-and-inference.html",
+      "line": 43,
+      "atoms": ["polar-bear windscape"]
+    },
+    {
+      "source_suffix": "knowledge/animal-target-tracking-and-inference.html",
+      "line": 32,
+      "atoms": ["crosswind", "high winds"]
+    }
+  ],
+  "S2": [
+    {
+      "source_suffix": "knowledge/animal-target-tracking-and-inference.html",
+      "line": 45,
+      "atoms": ["multiple extracts", "same original", "independent sources"]
+    }
+  ]
+}

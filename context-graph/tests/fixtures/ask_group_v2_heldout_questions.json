@@ -1,0 +1,10 @@
+[
+  {"id":"HO26-D01","class":"direct","question":"In the architecture's Conclusion record, which fields identify dependencies and their revision digest?"},
+  {"id":"HO26-D02","class":"direct","question":"How does the profile-selection note define a reasoning profile, and what must not determine its selection?"},
+  {"id":"HO26-C01","class":"condition","question":"In the proposed pilot CQ-KE-002, what records should be traced after a source revision changes, and how must stale conclusions be handled?"},
+  {"id":"HO26-N01","class":"negation","question":"Under the architecture's field rules, what range is used for scores, and may a missing value be filled with zero?"},
+  {"id":"HO26-P01","class":"provenance","question":"Which operations does the architecture require to append to the provenance log, and which faults should lint detect?"},
+  {"id":"HO26-M01","class":"multimedia","question":"What separate record layers does the multimedia guidance require, and which locator details distinguish audio from images?"},
+  {"id":"HO26-M02","class":"multimedia","question":"How does the multimedia guidance distinguish seeing text in an image from assigning it to an entity, and what text metadata must survive an embed failure?"},
+  {"id":"HO26-A01","class":"abstention","question":"An external URL returns HTTP 200 but provides no body, content locator, or content hash: does the architecture permit a content claim or verified rights from that observation?"}
+]

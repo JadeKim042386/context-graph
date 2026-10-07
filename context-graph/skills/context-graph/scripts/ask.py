@@ -6,6 +6,7 @@ report how many documents the map is behind.
 """
 import json
 import argparse
+import hashlib
 import os
 import re
 import subprocess
@@ -620,7 +621,290 @@ def dropped_notice(count, budget):
             f"narrow the words, or hand the topic to a subagent and take only the conclusion]")
 
 
-def condense_answer(raw_answer, budget=None, question="", direct=(), documents_named=None):
+def _selector_json(value):
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def render_pointer_stub(item):
+    """Render a complete, non-evidentiary pointer for an omitted item."""
+    label = str(item.get("label", ""))
+    pointer = {
+        "action": "pointer-only",
+        "source_file": item.get("source_file", ""),
+        "source_location": item.get("source_location"),
+        "label_sha256": hashlib.sha256(label.encode("utf-8")).hexdigest(),
+        "reason": "budget",
+        "requires_retrieval": True,
+        "evidence_status": item.get("evidence_status", "unverified"),
+    }
+    if item.get("source_sha256"):
+        pointer["source_sha256"] = item["source_sha256"]
+    return _selector_json(pointer)
+
+
+def select_answer_items(items, budget, selector="legacy"):
+    """Select complete answer items without mutating canonical evidence."""
+    candidates = list(items)
+    if selector == "legacy":
+        selected, spent = [], 0
+        for item in candidates:
+            payload = {"action": "keep", **item}
+            encoded = _selector_json(payload)
+            extra = len(encoded) + (1 if selected else 0)
+            if budget is not None and spent + extra > budget:
+                break
+            selected.append(payload)
+            spent += extra
+        omitted = len(candidates) - len(selected)
+        return {"items": selected, "omitted_count": omitted,
+                "status": "partial" if omitted else "complete"}
+
+    if selector != "pointer-v1":
+        raise ValueError(f"unknown selector: {selector}")
+
+    selected, spent, omitted = [], 0, 0
+    for item in candidates:
+        full = {"action": "keep", **item}
+        full_encoded = _selector_json(full)
+        extra = len(full_encoded) + (1 if selected else 0)
+        if budget is None or spent + extra <= budget:
+            selected.append(full)
+            spent += extra
+            continue
+        pointer = json.loads(render_pointer_stub(item))
+        pointer_encoded = _selector_json(pointer)
+        extra = len(pointer_encoded) + (1 if selected else 0)
+        if spent + extra <= budget:
+            selected.append(pointer)
+            spent += extra
+        else:
+            omitted += 1
+    return {"items": selected, "omitted_count": omitted,
+            "status": "abstain" if not selected and candidates else
+                      ("partial" if omitted else "complete")}
+
+
+def select_statement_groups(rows, budget, nearby=NEARBY_LINES):
+    """Select whole local evidence groups without inferring semantic support."""
+    if not rows:
+        return [], 0
+    anchors = [(index, row) for index, row in enumerate(rows) if row[1] < 0]
+    if anchors:
+        groups = {index: {index} for index, _row in anchors}
+        for index, row in enumerate(rows):
+            if row[1] < 0:
+                continue
+            eligible = [(abs(row[4] - anchor[1][4]), anchor[0], anchor[1])
+                        for anchor in anchors
+                        if row[3] == anchor[1][3] and abs(row[4] - anchor[1][4]) <= nearby]
+            if eligible:
+                _distance, anchor_index, _anchor = min(
+                    eligible, key=lambda candidate: (candidate[0], candidate[2][:3],
+                                                     candidate[2][3], candidate[2][4], index))
+                groups[anchor_index].add(index)
+        ordered_groups = []
+        for anchor_index, members in groups.items():
+            group_rows = sorted((rows[index] for index in members), key=lambda row: (row[4], row[2]))
+            ordered_groups.append((rows[anchor_index][:3], group_rows))
+    else:
+        ordered_groups = [(row[:3], [row]) for row in rows]
+    ordered_groups.sort(key=lambda group: (group[0], len(group[1]),
+                                           tuple((row[3], row[4], row[2]) for row in group[1])))
+    kept, spent, omitted = [], 0, 0
+    for _rank, group_rows in ordered_groups:
+        group_cost = sum(len(row[-1]) + 1 for row in group_rows)
+        if budget is not None and spent + group_cost > budget:
+            omitted += len(group_rows)
+            continue
+        kept.extend(group_rows)
+        spent += group_cost
+    return kept, omitted
+
+
+_CRITICAL_CUES = re.compile(
+    r"\b(?:not|no|never|without|only|unless|except|if|provided|subject to|must|"
+    r"prohibited|pending|unverified|unknown|stale|rights?|license|licensed|"
+    r"permission|copyright|revision|source|condition)\b",
+    re.IGNORECASE,
+)
+_VALUE_CUES = re.compile(
+    r"(?:\b\d+(?:\.\d+)?\b|%|\b(?:km|ms|seconds?|minutes?|hours?|days?|years?|"
+    r"hops?|bytes?|characters?)\b|\b(?:19|20)\d{2}\b)",
+    re.IGNORECASE,
+)
+
+
+def _row_cost(row):
+    return len(row[-1]) + 1
+
+
+def _row_label(row):
+    label = row[-1]
+    if label.startswith("NODE "):
+        label = label[5:]
+    return label.split("\n     [src=", 1)[0].strip()
+
+
+def _row_identity(row):
+    return (row[3], row[4], row[-1])
+
+
+def prioritize_identifier_rows(rows, question, max_rows=8, max_chars=1000):
+    """Prioritize a bounded structured-ID locator without changing evidence."""
+    token_pattern = r"\b[A-Za-z][A-Za-z0-9]*(?:[-_][A-Za-z0-9]+)+\b"
+    tokens = {token for token in re.findall(token_pattern, question)
+              if any(char.isdigit() for char in token)}
+    if not tokens:
+        return rows
+    by_locator = {}
+    for row in rows:
+        by_locator.setdefault((row[3], row[4]), []).append(row)
+    preferred = set()
+    for locator, members in by_locator.items():
+        labels = {_row_label(row) for row in members}
+        identifiers = {label for label in labels
+                       if re.fullmatch(token_pattern, label)
+                       and any(char.isdigit() for char in label)}
+        if (len(identifiers) == 1 and identifiers & tokens
+                and len(members) <= max_rows
+                and sum(_row_cost(row) for row in members) <= max_chars):
+            preferred.add(locator)
+    if not preferred:
+        return rows
+    return sorted(rows, key=lambda row: (
+        0 if row[1] < 0 and (row[3], row[4]) in preferred else 1, row[:3]))
+
+
+def _legacy_prefix(rows, budget):
+    selected, spent = [], 0
+    for row in rows:
+        cost = _row_cost(row)
+        if selected and spent + cost > budget:
+            break
+        if not selected and cost > budget:
+            return [row], True
+        selected.append(row)
+        spent += cost
+    return selected, False
+
+
+def _companion_value(row, carrier, question):
+    text = _row_label(row)
+    distance = abs(row[4] - carrier[4])
+    same_line = int(distance == 0)
+    adjacent_line = int(distance == 1)
+    literal_qualifier = int(bool(_CRITICAL_CUES.search(text)))
+    question_relevant_value = int(bool(_VALUE_CUES.search(text)) and
+                                  bool(set(asked_words(question)) &
+                                       set(asked_words(text))))
+    words = text.split()
+    bare_heading = int(len(words) <= 6 and not _VALUE_CUES.search(text) and
+                       not _CRITICAL_CUES.search(text) and
+                       not re.search(r"[.!?]$", text))
+    utility = (4 * same_line + 2 * adjacent_line + 6 * literal_qualifier +
+               4 * question_relevant_value - 6 * bare_heading)
+    return utility, distance
+
+
+def select_cost_aware_rows(rows, budget, question="", nearby=NEARBY_LINES):
+    """Protect carrier rows, then spend residual budget on valuable context."""
+    rows = list(rows)
+    diagnostics = {
+        "protected_carriers": 0,
+        "optional_companions": 0,
+        "fallback_legacy": False,
+        "selected_cost": 0,
+        "omission_reasons": {"budget": 0, "low_value": 0, "unattached": 0,
+                              "duplicate": 0},
+    }
+    if budget is None:
+        return rows, 0, diagnostics
+    if budget <= 0:
+        diagnostics["fallback_legacy"] = True
+        fallback_rows, _fallback = _legacy_prefix(rows, budget)
+        return fallback_rows, len(rows) - len(fallback_rows), diagnostics
+
+    legacy_prefix, fallback_legacy = _legacy_prefix(rows, budget)
+    diagnostics["fallback_legacy"] = fallback_legacy
+    protected = {row for row in legacy_prefix
+                 if row[1] < 0 or _CRITICAL_CUES.search(_row_label(row))}
+    if not any(row[1] < 0 for row in rows):
+        return legacy_prefix, len(rows) - len(legacy_prefix), diagnostics
+    selected = list(protected)
+    selected_ids = {_row_identity(row) for row in selected}
+    spent = sum(_row_cost(row) for row in selected)
+
+    # Admit every other carrier independently. Optional context can never evict it.
+    for row in rows:
+        if row[1] >= 0 or _row_identity(row) in selected_ids:
+            continue
+        cost = _row_cost(row)
+        if spent + cost <= budget:
+            selected.append(row)
+            selected_ids.add(_row_identity(row))
+            spent += cost
+        else:
+            diagnostics["omission_reasons"]["budget"] += 1
+
+    carriers = [row for row in selected if row[1] < 0]
+    optional = []
+    per_carrier = {id(row): 0 for row in carriers}
+    per_carrier_spent = {id(row): 0 for row in carriers}
+    total_optional_cap = max(1, budget // 10)
+    optional_spent = 0
+    for row in rows:
+        identity = _row_identity(row)
+        if row[1] < 0 or identity in selected_ids:
+            if identity in selected_ids and row[1] >= 0:
+                diagnostics["omission_reasons"]["duplicate"] += 1
+            continue
+        eligible = [carrier for carrier in carriers
+                    if row[3] == carrier[3] and abs(row[4] - carrier[4]) <= nearby]
+        if not eligible:
+            diagnostics["omission_reasons"]["unattached"] += 1
+            continue
+        carrier = min(eligible, key=lambda item: (abs(row[4] - item[4]), item[:3],
+                                                   item[3], item[4], item[-1]))
+        utility, distance = _companion_value(row, carrier, question)
+        if utility < 4 or per_carrier[id(carrier)] >= 2:
+            diagnostics["omission_reasons"]["low_value"] += 1
+            continue
+        cost = _row_cost(row)
+        if (optional_spent + cost > total_optional_cap or
+                per_carrier_spent[id(carrier)] + cost > 400 or spent + cost > budget):
+            diagnostics["omission_reasons"]["budget"] += 1
+            continue
+        byte_cost = len(row[-1].encode("utf-8")) + 1
+        optional.append((utility, cost, byte_cost, distance, carrier[:3], row))
+
+    optional.sort(key=lambda item: (-item[0] * 1_000_000 // item[2], -item[0], item[2],
+                                    item[3], item[4], item[5][3], item[5][4], item[5][-1]))
+    for _utility, cost, _byte_cost, _distance, carrier_key, row in optional:
+        identity = _row_identity(row)
+        if identity in selected_ids:
+            diagnostics["omission_reasons"]["duplicate"] += 1
+            continue
+        carrier = next((item for item in carriers if item[:3] == carrier_key), None)
+        if (carrier is None or per_carrier[id(carrier)] >= 2 or
+                optional_spent + cost > total_optional_cap or
+                per_carrier_spent[id(carrier)] + cost > 400 or spent + cost > budget):
+            continue
+        selected.append(row)
+        selected_ids.add(identity)
+        per_carrier[id(carrier)] += 1
+        per_carrier_spent[id(carrier)] += cost
+        optional_spent += cost
+        spent += cost
+        diagnostics["optional_companions"] += 1
+
+    selected.sort(key=lambda row: row[:3])
+    diagnostics["protected_carriers"] = len(carriers)
+    diagnostics["selected_cost"] = spent
+    return selected, len(rows) - len(selected), diagnostics
+
+
+def condense_answer(raw_answer, budget=None, question="", direct=(), documents_named=None,
+                    selector="legacy"):
     """Keep the statements out of a query answer and drop the traversal noise.
 
     The query tool prints its traversal header, every node it walked through and every
@@ -649,7 +933,7 @@ def condense_answer(raw_answer, budget=None, question="", direct=(), documents_n
     """
     seeds = matched_labels(raw_answer)
     words = asked_words(question)
-    statements, documents = [], []
+    statements, documents, raw_seen = [], [], []
     for line in raw_answer.splitlines():
         found = ANSWER_NODE_PATTERN.match(line)
         if not found:
@@ -667,6 +951,9 @@ def condense_answer(raw_answer, budget=None, question="", direct=(), documents_n
             if label not in documents:
                 documents.append(label)
             continue
+        # One HTML source line can contain several table cells or claims. Keep
+        # the original label in the merge identity before display folding.
+        raw_seen.append((source, _as_line(line_number), label))
         rank = seeds.index(label) if label in seeds else len(seeds)
         carried = matching_word_count(label, words)
         label = fold_long_label(label, source, line_number)
@@ -674,9 +961,9 @@ def condense_answer(raw_answer, budget=None, question="", direct=(), documents_n
                            _as_line(line_number),
                            f"NODE {label}\n     [src={source} loc={line_number}]"))
 
-    seen = {text.rsplit("[src=", 1)[-1] for *_head, text in statements}
+    seen = set(raw_seen)
     for _negative, _length, label, direct_source, direct_line in direct:
-        marker = f"{direct_source} loc={direct_line}]"
+        marker = (direct_source, _as_line(direct_line), label)
         if marker in seen:
             continue
         seen.add(marker)
@@ -728,6 +1015,7 @@ def condense_answer(raw_answer, budget=None, question="", direct=(), documents_n
                     chosen.append(row)
             near = sorted(chosen, key=lambda row: row[:3])
         ranked = near
+    ranked = prioritize_identifier_rows(ranked, question)
     ordered = [row[-1] for row in ranked]
     kept, dropped = ordered, 0
     if budget:
@@ -735,13 +1023,22 @@ def condense_answer(raw_answer, budget=None, question="", direct=(), documents_n
         # limit of its own, so a guess can be out by the length of four document names.
         notice = dropped_notice(len(ordered), budget)
         room = max(0, budget - len(tail) - len(notice))
-        kept, used = [], 0
-        for position, text in enumerate(ordered):
-            if kept and used + len(text) + 1 > room:
-                dropped = len(ordered) - position
-                break
-            kept.append(text)
-            used += len(text) + 1
+        if selector == "group-v1":
+            selected_rows, dropped = select_statement_groups(ranked, room)
+            kept = [row[-1] for row in selected_rows]
+        elif selector == "group-v2":
+            selected_rows, dropped, _diagnostics = select_cost_aware_rows(
+                ranked, room, question=question
+            )
+            kept = [row[-1] for row in selected_rows]
+        else:
+            kept, used = [], 0
+            for position, text in enumerate(ordered):
+                if kept and used + len(text) + 1 > room:
+                    dropped = len(ordered) - position
+                    break
+                kept.append(text)
+                used += len(text) + 1
     # Held as pieces to the last moment. Joining first and then slicing characters off the
     # end took the closing notice away instead of the tail, and left a half-written
     # "[also touched:" behind - the document list surviving at the cost of the statements,
@@ -777,7 +1074,7 @@ def truncation_notice(answer):
     return ""
 
 
-def run(mode, arguments, source_dirs, map_path, budget):
+def run(mode, arguments, source_dirs, map_path, budget, selector="legacy"):
     """Ask, then report a truncated answer or a map that lags the documents."""
     changed = stale_documents(source_dirs, map_path)
     completed = subprocess.run(build_graphify_command(mode, arguments, map_path, budget),
@@ -788,7 +1085,7 @@ def run(mode, arguments, source_dirs, map_path, budget):
     direct = (statements_carrying_the_words(map_path, asked_words(question))
               if mode == "query" else [])
     named = document_labels(map_path) if mode == "query" else None
-    sys.stdout.write(condense_answer(answer, budget, question, direct, named) + "\n"
+    sys.stdout.write(condense_answer(answer, budget, question, direct, named, selector) + "\n"
                      if mode == "query" else answer)
     notice = truncation_notice(answer)
     if notice:
@@ -812,6 +1109,7 @@ def main(argv):
     parser.add_argument("--config")
     parser.add_argument("--binding-only", action="store_true")
     parser.add_argument("--read-only", action="store_true")
+    parser.add_argument("--selector", choices=("legacy", "pointer-v1", "group-v1", "group-v2"), default="legacy")
     options, argv = parser.parse_known_args(argv)
     try:
         config, _binding, resolved, graph = load_project_config(options.project_root, options.config)
@@ -821,11 +1119,25 @@ def main(argv):
     if options.binding_only:
         print(json.dumps({"binding": resolved, "hits": []}, sort_keys=True))
         return 0
+    if options.selector == "pointer-v1" and not options.read_only:
+        print(json.dumps(binding_failure("selector_requires_read_only"), sort_keys=True))
+        return 2
+    if options.selector == "group-v2" and options.read_only:
+        print(json.dumps(binding_failure("selector_not_supported_in_read_only"), sort_keys=True))
+        return 2
     if options.read_only:
         if not argv or any(arg.startswith("--") for arg in argv):
             print(json.dumps(binding_failure("read_only_requires_plain_query")))
             return 2
         matches = statements_carrying_the_words(config["map_path"], asked_words(" ".join(argv)), nodes=graph["nodes"])
+        if options.selector == "pointer-v1":
+            candidates = [{"label": label, "source_file": source,
+                           "source_location": locator, "evidence_status": "unverified"}
+                          for _rank, _length, label, source, locator in matches]
+            selection = select_answer_items(candidates, config["answer_budget"], options.selector)
+            print(json.dumps({"binding": resolved, "retrieval": "lexical_read_only",
+                              "selection": selection}, ensure_ascii=False, sort_keys=True))
+            return 0
         hits, spent = [], 0
         for _rank, _length, label, source, locator in matches:
             if spent + len(label) > config["answer_budget"]:
@@ -867,7 +1179,7 @@ def main(argv):
         mode, arguments = "query", [" ".join(argv)]
 
     return run(mode, arguments, config["source_dirs"], config["map_path"],
-               config["answer_budget"])
+               config["answer_budget"], options.selector)
 
 
 if __name__ == "__main__":

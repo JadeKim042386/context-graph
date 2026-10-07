@@ -1,0 +1,6 @@
+{
+  "case_count": 8,
+  "variants_per_case": 6,
+  "expected_pointer_kinds": ["long-leading", "duplicate", "negative", "condition-unit", "korean", "html", "budget"],
+  "expected_keep_kind": "short"
+}
