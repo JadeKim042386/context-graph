@@ -291,7 +291,8 @@ def encode(pack):
 
 def build_pack(root, memory="knowledge-base/_ops/memory/index.json", *, max_entries=32,
                max_file_bytes=262144, max_total_bytes=1048576, max_pack_bytes=32768,
-               question_key=None, scope=None, as_of=None, expected_dependency_sha256=None):
+               question_key=None, scope=None, as_of=None, expected_dependency_sha256=None,
+               harness_context=None):
     limits = {"max_entries": max_entries, "max_file_bytes": max_file_bytes,
               "max_total_bytes": max_total_bytes, "max_pack_bytes": max_pack_bytes}
     for name, low, high in (("max_entries", 1, 128), ("max_file_bytes", 1, 1048576),
@@ -404,6 +405,9 @@ def build_pack(root, memory="knowledge-base/_ops/memory/index.json", *, max_entr
                 and (item["proof_type"], item["proof_status"]) in {
                     ("Review", "verified"), ("Decision", "accepted")})
         if len(encode(pack).encode("utf-8")) <= max_pack_bytes:
+            if harness_context is not None:
+                from role_access import filter_pack
+                pack = filter_pack(harness_context, pack)
             return pack
         if not pack["items"]:
             raise ValueError("output budget too small for envelope")
@@ -420,13 +424,34 @@ def main():
     parser.add_argument("--expected-dependency-sha256")
     parser.add_argument("--session-handoff", action="store_true",
                         help="read explicitly captured provisional session pointers instead of memory")
+    parser.add_argument("--session-id")
+    parser.add_argument("--session-runtime")
+    parser.add_argument("--task-invocation-id", action="append")
+    parser.add_argument("--agent-instance-id")
+    parser.add_argument("--task-id")
+    parser.add_argument("--assignment-id")
+    parser.add_argument("--include-attribution", action="store_true")
     for name, default in (("max-entries", 32), ("max-file-bytes", 262144),
                           ("max-total-bytes", 1048576), ("max-pack-bytes", 32768)):
         parser.add_argument("--" + name, type=int, default=default)
     args = vars(parser.parse_args())
-    if args.pop("session_handoff"):
+    session_handoff = args.pop("session_handoff")
+    session_id = args.pop("session_id")
+    session_runtime = args.pop("session_runtime")
+    invocation_ids = args.pop("task_invocation_id")
+    agent_instance_id = args.pop("agent_instance_id")
+    task_id = args.pop("task_id")
+    assignment_id = args.pop("assignment_id")
+    include_attribution = args.pop("include_attribution")
+    if not session_handoff and any(value is not None for value in (session_id, session_runtime, invocation_ids,
+                                                                    agent_instance_id, task_id, assignment_id)) or (include_attribution and not session_handoff):
+        parser.error("session selectors require --session-handoff")
+    if session_handoff:
         from session_events import handoff
-        pack = handoff(args["root"])
+        pack = handoff(args["root"], session_id=session_id, runtime=session_runtime,
+                       invocation_ids=invocation_ids, agent_instance_id=agent_instance_id,
+                       task_id=task_id, assignment_id=assignment_id,
+                       include_attribution=include_attribution)
         sys.stdout.write(encode(pack))
         return 2 if pack["pack_status"] == "unverified" else 0
     try:

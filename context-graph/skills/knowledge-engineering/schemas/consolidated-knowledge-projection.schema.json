@@ -1,0 +1,574 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_type",
+    "projection_state",
+    "source_overlay",
+    "source_overlay_sha256",
+    "items",
+    "excluded_exact_duplicates",
+    "excluded_provenance",
+    "review_queue",
+    "quality",
+    "held_items",
+    "omitted_count"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "record_type": {
+      "const": "ConsolidatedKnowledgeProjection"
+    },
+    "projection_state": {
+      "const": "generated_not_canonical"
+    },
+    "source_overlay": {
+      "type": "string"
+    },
+    "source_overlay_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "record_type",
+          "overlay_id",
+          "source_event_id",
+          "source_store",
+          "source_pointer",
+          "promotion_state",
+          "status"
+        ],
+        "properties": {
+          "schema_version": {
+            "const": 1
+          },
+          "record_type": {
+            "const": "SessionKnowledgeOverlay"
+          },
+          "overlay_id": {
+            "type": "string"
+          },
+          "source_event_id": {
+            "type": "string"
+          },
+          "source_store": {
+            "enum": [
+              "legacy",
+              "explicit"
+            ]
+          },
+          "source_pointer": {
+            "type": "string"
+          },
+          "source_revision_sha256": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "session_key": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "invocation_key": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "runtime": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "event_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "attribution": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "content_fingerprint": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "artifact_pointers": {
+            "type": "array"
+          },
+          "role_key": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "session_state": {
+            "type": "string"
+          },
+          "promotion_state": {
+            "const": "review_required"
+          },
+          "status": {
+            "const": "provisional"
+          },
+          "archive_segment_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "excluded_exact_duplicates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "excluded_provenance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "record_type",
+          "overlay_id",
+          "source_event_id",
+          "source_store",
+          "source_pointer",
+          "promotion_state",
+          "status",
+          "assessment"
+        ],
+        "properties": {
+          "schema_version": {
+            "const": 1
+          },
+          "record_type": {
+            "const": "SessionKnowledgeOverlay"
+          },
+          "overlay_id": {
+            "type": "string"
+          },
+          "source_event_id": {
+            "type": "string"
+          },
+          "source_store": {
+            "enum": [
+              "legacy",
+              "explicit"
+            ]
+          },
+          "source_pointer": {
+            "type": "string"
+          },
+          "source_revision_sha256": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "session_key": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "invocation_key": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "runtime": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "event_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "attribution": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "content_fingerprint": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "artifact_pointers": {
+            "type": "array"
+          },
+          "role_key": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "session_state": {
+            "type": "string"
+          },
+          "promotion_state": {
+            "const": "review_required"
+          },
+          "status": {
+            "const": "provisional"
+          },
+          "assessment": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "integrity",
+              "locator",
+              "rights",
+              "permission",
+              "eligible"
+            ],
+            "properties": {
+              "integrity": {
+                "enum": [
+                  "valid",
+                  "unverified",
+                  "stale",
+                  "unlocatable"
+                ]
+              },
+              "locator": {
+                "enum": [
+                  "oversize",
+                  "unlocatable",
+                  "unsupported",
+                  "unverified",
+                  "valid"
+                ]
+              },
+              "rights": {
+                "enum": [
+                  "restricted",
+                  "rights_verified",
+                  "unknown",
+                  "unverified"
+                ]
+              },
+              "permission": {
+                "enum": [
+                  "unverified",
+                  "allowed",
+                  "denied"
+                ]
+              },
+              "eligible": {
+                "type": "boolean"
+              }
+            }
+          },
+          "archive_segment_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "review_queue": {
+      "type": "array",
+      "items": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "record_type",
+          "proposal_id",
+          "kind",
+          "candidate_overlay_ids",
+          "recommended_representative",
+          "action",
+          "confidence",
+          "promotion_state",
+          "candidate_sha256",
+          "decision_state",
+          "decision_refs"
+        ],
+        "properties": {
+          "schema_version": {
+            "const": 1
+          },
+          "record_type": {
+            "const": "ConsolidationProposal"
+          },
+          "proposal_id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "exact_duplicate",
+              "possible_overlap",
+              "conflict"
+            ]
+          },
+          "candidate_overlay_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2
+          },
+          "recommended_representative": {
+            "type": "string"
+          },
+          "action": {
+            "enum": [
+              "review_merge",
+              "retain_separately"
+            ]
+          },
+          "confidence": {
+            "enum": [
+              "high",
+              "insufficient",
+              "unverified"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "promotion_state": {
+            "const": "review_required"
+          },
+          "candidate_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "decision_state": {
+            "enum": [
+              "open",
+              "accept",
+              "reject",
+              "hold",
+              "stale",
+              "conflict"
+            ]
+          },
+          "decision_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_preserved",
+        "automatic_promotion",
+        "automatic_deletion",
+        "conflicts_retained",
+        "semantic_equivalence"
+      ],
+      "properties": {
+        "source_preserved": {
+          "type": "boolean"
+        },
+        "automatic_promotion": {
+          "const": false
+        },
+        "automatic_deletion": {
+          "const": false
+        },
+        "conflicts_retained": {
+          "type": "boolean"
+        },
+        "semantic_equivalence": {
+          "const": "unverified"
+        }
+      }
+    },
+    "held_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "record_type",
+          "overlay_id",
+          "source_event_id",
+          "source_store",
+          "source_pointer",
+          "promotion_state",
+          "status",
+          "assessment"
+        ],
+        "properties": {
+          "schema_version": {
+            "const": 1
+          },
+          "record_type": {
+            "const": "SessionKnowledgeOverlay"
+          },
+          "overlay_id": {
+            "type": "string"
+          },
+          "source_event_id": {
+            "type": "string"
+          },
+          "source_store": {
+            "enum": [
+              "legacy",
+              "explicit"
+            ]
+          },
+          "source_pointer": {
+            "type": "string"
+          },
+          "source_revision_sha256": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "session_key": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "invocation_key": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "runtime": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "event_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "attribution": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "content_fingerprint": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "artifact_pointers": {
+            "type": "array"
+          },
+          "role_key": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "session_state": {
+            "type": "string"
+          },
+          "promotion_state": {
+            "const": "review_required"
+          },
+          "status": {
+            "const": "provisional"
+          },
+          "assessment": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "integrity",
+              "locator",
+              "rights",
+              "permission",
+              "eligible"
+            ],
+            "properties": {
+              "integrity": {
+                "enum": [
+                  "valid",
+                  "unverified",
+                  "stale",
+                  "unlocatable"
+                ]
+              },
+              "locator": {
+                "enum": [
+                  "oversize",
+                  "unlocatable",
+                  "unsupported",
+                  "unverified",
+                  "valid"
+                ]
+              },
+              "rights": {
+                "enum": [
+                  "restricted",
+                  "rights_verified",
+                  "unknown",
+                  "unverified"
+                ]
+              },
+              "permission": {
+                "enum": [
+                  "unverified",
+                  "allowed",
+                  "denied"
+                ]
+              },
+              "eligible": {
+                "type": "boolean"
+              }
+            }
+          },
+          "archive_segment_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "omitted_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

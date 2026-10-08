@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Explicit attributed session capture payload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "session_id", "invocation_id", "occurred_at", "attribution", "artifact_pointers", "required_constraints", "next_actions"],
+  "properties": {
+    "schema_version": {"const": 2},
+    "session_id": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"},
+    "invocation_id": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"},
+    "occurred_at": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "attribution": {"type": "object", "additionalProperties": false,
+      "required": ["agent_instance_id", "task_id", "assignment_id", "reassigned_from_event_id"],
+      "properties": {
+        "agent_instance_id": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"},
+        "task_id": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"},
+        "assignment_id": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"},
+        "reassigned_from_event_id": {"anyOf": [{"type": "null"}, {"type": "string", "pattern": "^SEV-[0-9a-f]{64}$"}]}
+      }},
+    "artifact_pointers": {"type": "array", "minItems": 1, "maxItems": 8},
+    "required_constraints": {"type": "array", "maxItems": 10},
+    "next_actions": {"type": "array", "maxItems": 7}
+  }
+}

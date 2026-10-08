@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "maxItems": 128,
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "segment_id",
+      "segment_sha256",
+      "overlay_sha256_before",
+      "overlay_sha256_after",
+      "schema_version",
+      "item_count",
+      "created_at",
+      "status"
+    ],
+    "properties": {
+      "segment_id": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "segment_sha256": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "overlay_sha256_before": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "overlay_sha256_after": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "schema_version": {
+        "const": 1
+      },
+      "item_count": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 5000
+      },
+      "created_at": {
+        "type": "string"
+      },
+      "status": {
+        "enum": [
+          "prepared",
+          "committed"
+        ]
+      }
+    }
+  }
+}

@@ -62,6 +62,14 @@ def run(root, *options):
     return result, json.loads(result.stdout)
 
 
+def test_session_selectors_require_session_handoff(tmp_path):
+    result = subprocess.run([sys.executable, "-B", str(CLI), "--root", str(tmp_path),
+                             "--session-id", "00000000-0000-4000-8000-000000000001"],
+                            cwd=tmp_path, capture_output=True, text=True)
+    assert result.returncode == 2
+    assert "session selectors require --session-handoff" in result.stderr
+
+
 def tree_bytes(root):
     return {p.relative_to(root).as_posix(): p.read_bytes() for p in root.rglob("*") if p.is_file()}
 

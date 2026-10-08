@@ -31,14 +31,18 @@ def project(root):
     return root
 
 
-def payload(root, session=1, invocation=1):
-    return {"schema_version": 1,
+def payload(root, session=1, invocation=1, attribution=None):
+    data = {"schema_version": 1,
         "session_id": f"00000000-0000-4000-8000-{session:012d}",
         "invocation_id": f"00000000-0000-4000-8000-{invocation:012d}",
         "occurred_at": "2026-09-25T01:00:00Z",
         "artifact_pointers": [{"pointer": "knowledge/result.html#result",
                                "revision_sha256": sha((root / "knowledge/result.html").read_bytes())}],
         "required_constraints": ["no_push", "no_commit"], "next_actions": ["review_evidence"]}
+    if attribution is not None:
+        data["schema_version"] = 2
+        data["attribution"] = attribution
+    return data
 
 
 def run(root, data=None, event="pre_compact", runtime="codex", cwd=None):
@@ -51,9 +55,26 @@ def run(root, data=None, event="pre_compact", runtime="codex", cwd=None):
     return result, json.loads(result.stdout)
 
 
-def handoff(root):
-    result = subprocess.run([sys.executable, "-B", str(SCRIPTS / "build_task_continuity.py"),
-                             "--root", str(root), "--session-handoff"], cwd=root,
+def handoff(root, *, session_id=None, runtime=None, invocation_ids=None,
+            agent_instance_id=None, task_id=None, assignment_id=None,
+            include_attribution=False):
+    args = [sys.executable, "-B", str(SCRIPTS / "build_task_continuity.py"),
+            "--root", str(root), "--session-handoff"]
+    if session_id is not None:
+        args += ["--session-id", session_id]
+    if runtime is not None:
+        args += ["--session-runtime", runtime]
+    if invocation_ids == []:
+        args += ["--task-invocation-id", ""]
+    for invocation_id in invocation_ids or []:
+        args += ["--task-invocation-id", invocation_id]
+    for flag, value in (("--agent-instance-id", agent_instance_id), ("--task-id", task_id),
+                        ("--assignment-id", assignment_id)):
+        if value is not None:
+            args += [flag, value]
+    if include_attribution:
+        args += ["--include-attribution"]
+    result = subprocess.run(args, cwd=root,
                             capture_output=True, text=True)
     assert result.stdout, result.stderr
     return result, json.loads(result.stdout)
@@ -93,7 +114,124 @@ def test_two_sessions_compact_close_replay_and_readonly_handoff(tmp_path):
         assert sha(raw) == i["revision_sha256"]
         record = json.loads(raw)
         assert record["status"] == "provisional" and record["schema_version"] == 3
-        assert payload(root)["session_id"] not in raw.decode()
+    assert payload(root)["session_id"] not in raw.decode()
+
+
+def test_scoped_handoff_filters_before_limits_and_keeps_selection_provisional(tmp_path):
+    root = project(tmp_path)
+    assert run(root, payload(root, session=1, invocation=1))[0].returncode == 0
+    assert run(root, payload(root, session=1, invocation=2), event="session_end")[0].returncode == 0
+    assert run(root, payload(root, session=2, invocation=3), runtime="claude-code")[0].returncode == 0
+    session_id = payload(root, session=1, invocation=1)["session_id"]
+    invocation_id = payload(root, session=1, invocation=1)["invocation_id"]
+    result, pack = handoff(root, session_id=session_id, runtime="codex",
+                           invocation_ids=[invocation_id])
+    assert result.returncode == 0
+    assert pack["total_count"] == pack["included_count"] == 1
+    assert pack["omitted_count"] == 0
+    assert pack["selection"]["mode"] == "session_and_invocations"
+    assert pack["selection"]["scope_matched"] is True
+    assert pack["selection"]["missing_invocation_count"] == 0
+    assert all(item["runtime"] == "codex" for item in pack["items"])
+    assert all(item["session_id"] != payload(root, session=2, invocation=3)["session_id"] for item in pack["items"])
+    assert all(not item["applicable"] for item in pack["items"])
+    assert session_id not in result.stdout and invocation_id not in result.stdout
+
+
+def test_attributed_capture_is_opt_in_and_legacy_events_remain_unknown(tmp_path):
+    root = project(tmp_path)
+    attr = {"agent_instance_id": "00000000-0000-4000-8000-000000000101",
+            "task_id": "00000000-0000-4000-8000-000000000102",
+            "assignment_id": "00000000-0000-4000-8000-000000000103",
+            "reassigned_from_event_id": None}
+    result, out = run(root, payload(root, attribution=attr))
+    assert result.returncode == 0 and out["status"] == "captured"
+    record = json.loads(next((root / STORE).glob("*.json")).read_text())
+    assert record["schema_version"] == 4
+    assert set(record["attribution"]) == {"agent_instance_id", "task_id", "assignment_id",
+                                           "reassigned_from_event_id", "basis"}
+    import jsonschema
+    jsonschema.validate(record, json.loads((SCRIPTS.parent / "schemas/session-event-v4.schema.json").read_text()))
+    session_id = payload(root)["session_id"]
+    result, pack = handoff(root, session_id=session_id, runtime="codex",
+                           invocation_ids=[payload(root)["invocation_id"]],
+                           agent_instance_id=attr["agent_instance_id"], task_id=attr["task_id"],
+                           assignment_id=attr["assignment_id"])
+    assert result.returncode == 0 and pack["items"][0]["actor_state"] == "declared"
+    assert pack["items"][0]["attribution"]["basis"] == "caller_supplied"
+
+    legacy_root = project(tmp_path / "legacy")
+    assert run(legacy_root, payload(legacy_root))[0].returncode == 0
+    result, pack = handoff(legacy_root, include_attribution=True)
+    assert result.returncode == 0 and pack["items"][0]["actor_state"] == "actor_unknown"
+    assert pack["items"][0]["attribution"] is None
+
+
+def test_attribution_reassignment_requires_existing_v4_predecessor(tmp_path):
+    root = project(tmp_path)
+    first = {"agent_instance_id": "00000000-0000-4000-8000-000000000111",
+             "task_id": "00000000-0000-4000-8000-000000000112",
+             "assignment_id": "00000000-0000-4000-8000-000000000113",
+             "reassigned_from_event_id": None}
+    assert run(root, payload(root, attribution=first))[0].returncode == 0
+    event = json.loads(next((root / STORE).glob("*.json")).read_text())
+    successor = {**first, "agent_instance_id": "00000000-0000-4000-8000-000000000114",
+                 "assignment_id": "00000000-0000-4000-8000-000000000115",
+                 "reassigned_from_event_id": event["event_id"]}
+    result, out = run(root, payload(root, invocation=2, attribution=successor), event="session_end")
+    assert result.returncode == 0 and out["status"] == "captured"
+    invalid = {**successor, "reassigned_from_event_id": "SEV-" + "f" * 64}
+    result, out = run(root, payload(root, invocation=3, attribution=invalid))
+    assert result.returncode == 2 and out["reason"] in {"invalid_attribution", "assignment_conflict"}
+
+
+def test_attribution_relation_loss_is_partial_and_duplicate_stays_acknowledged(tmp_path):
+    root = project(tmp_path)
+    first = {"agent_instance_id": "00000000-0000-4000-8000-000000000121",
+             "task_id": "00000000-0000-4000-8000-000000000122",
+             "assignment_id": "00000000-0000-4000-8000-000000000123",
+             "reassigned_from_event_id": None}
+    assert run(root, payload(root, attribution=first))[0].returncode == 0
+    predecessor = json.loads(next((root / STORE).glob("*.json")).read_text())
+    successor = {**first, "agent_instance_id": "00000000-0000-4000-8000-000000000124",
+                 "assignment_id": "00000000-0000-4000-8000-000000000125",
+                 "reassigned_from_event_id": predecessor["event_id"]}
+    successor_result, successor_out = run(root, payload(root, invocation=2, attribution=successor), event="session_end")
+    assert successor_result.returncode == 0 and successor_out["status"] == "captured"
+    repeated_result, repeated_out = run(root, payload(root, invocation=2, attribution=successor), event="pre_compact")
+    assert repeated_result.returncode == 0 and repeated_out["status"] == "captured"
+    predecessor_path = root / STORE / f"{predecessor['event_id']}.json"
+    predecessor_path.unlink()
+    result, pack = handoff(root, include_attribution=True)
+    assert result.returncode == 0 and pack["pack_status"] == "partial"
+    assert pack["items"][0]["attribution_status"] == "unverified"
+    retry, out = run(root, payload(root, invocation=2, attribution=successor), event="session_end")
+    assert retry.returncode == 0 and out["status"] == "duplicate"
+
+
+def test_same_assignment_cannot_change_actor(tmp_path):
+    root = project(tmp_path)
+    base = {"agent_instance_id": "00000000-0000-4000-8000-000000000131",
+            "task_id": "00000000-0000-4000-8000-000000000132",
+            "assignment_id": "00000000-0000-4000-8000-000000000133",
+            "reassigned_from_event_id": None}
+    assert run(root, payload(root, attribution=base))[0].returncode == 0
+    conflict = {**base, "agent_instance_id": "00000000-0000-4000-8000-000000000134"}
+    result, out = run(root, payload(root, invocation=2, attribution=conflict), event="session_end")
+    assert result.returncode == 2 and out["reason"] == "assignment_conflict"
+
+
+@pytest.mark.parametrize("kwargs", [
+    {"session_id": None, "runtime": "codex"},
+    {"session_id": "bad", "runtime": "codex"},
+    {"session_id": "00000000-0000-4000-8000-000000000001", "runtime": "other"},
+    {"session_id": "00000000-0000-4000-8000-000000000001", "runtime": "codex", "invocation_ids": []},
+])
+def test_invalid_scoped_selection_fails_without_echoing_identifiers(tmp_path, kwargs):
+    root = project(tmp_path)
+    result, pack = handoff(root, **kwargs)
+    assert result.returncode == 2 and pack["reason"] == "invalid_selection" and not pack["items"]
+    assert "00000000-0000-4000-8000-000000000001" not in result.stdout
 
 
 @pytest.mark.parametrize("change", ["prompt", "gold", "bad_hash", "missing_anchor", "external", "many", "id", "time", "duplicate_keys", "oversize"])

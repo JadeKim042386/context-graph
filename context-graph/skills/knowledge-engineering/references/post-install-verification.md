@@ -90,3 +90,38 @@ If a check fails, report the exact failed boundary (`files`, `discovery`,
 not create project records or claim that the skill is integrated. A file's
 presence, a host prompt, a spinner, or a generic successful answer is not
 evidence of skill loading.
+
+## Project-local worktree snapshots (no shared-cache changes)
+
+`install_project_payload.py --root PROJECT install` copies the current
+`PROJECT/context-graph/` runtime package into
+`.context-graph/plugins/context-graph/<payload_id>/context-graph/` and writes
+an immutable hash manifest alongside it. Tests and sealed gold are excluded.
+The payload ID binds every packaged path, byte length and SHA-256. It is a
+worktree identity, not a released commit. Identical installs return duplicate;
+existing snapshots are verified, never repaired or overwritten.
+
+```sh
+python -B context-graph/skills/knowledge-engineering/scripts/install_project_payload.py --root . install
+python -B context-graph/skills/knowledge-engineering/scripts/install_project_payload.py verify --snapshot .context-graph/plugins/context-graph/PAYLOAD_ID
+```
+
+For explicitly configured Codex CLI use, select the snapshot's
+`context-graph/skills/context-graph` and `context-graph/skills/knowledge-engineering`
+roots. Invoke binding, continuity, audit and portable validation by absolute
+paths from those roots. This does not register an automatic Codex lifecycle hook.
+
+For an authorized fresh Claude smoke, use a synthetic project and a separate
+project-local `CLAUDE_CONFIG_DIR`; pass `--plugin-dir` with the immutable plugin
+root, `--setting-sources ''`, `--strict-mcp-config --mcp-config '{"mcpServers":{}}'`,
+`--no-session-persistence`, `--tools ''`, and a harmless print-mode prompt.
+Record sanitized init/plugin and SessionStart hook receipts, process exit,
+result state, and protected before/after hashes. Do not copy authentication
+secrets into the isolated config. If authentication or hook registration is
+unavailable, leave that boundary unverified rather than falling back to the
+user-wide installation. A fresh process alone is not a successful host response.
+
+A direct hook-command subprocess proves local hook behavior only, not host
+loading, discovery or lifecycle delivery. Keep it separate from a real
+`claude -p --plugin-dir ...` receipt. Never install to or rewrite shared caches
+for this project-local check. Verify shared payload hashes remain unchanged.

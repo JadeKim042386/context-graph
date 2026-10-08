@@ -11,6 +11,7 @@ import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 from config import BindingError, binding_failure, load_project_config
 
@@ -23,6 +24,19 @@ for stream in (sys.stdout, sys.stderr):
         pass
 
 DOCUMENT_SUFFIXES = (".md", ".markdown", ".html", ".htm")
+
+
+def retrieval_gate(expected, trusted_context=None, *, context_gate=None):
+    """Harness-only, no-I/O delivery gate; it does not authorize knowledge access.
+
+    The launcher passes session_checkpoint.context_gate and its trusted current
+    epoch/dependency state. Without that adapter, request a bounded reload.
+    No CLI JSON or same-session identity alone establishes context presence.
+    """
+    if context_gate is None:
+        return {"decision": "bounded_reload", "reason": "context_adapter_missing",
+                "max_items": 32, "max_bytes": 32768}
+    return context_gate(expected, trusted_context)
 
 USAGE = """Ask the knowledge map.
 
@@ -1110,6 +1124,7 @@ def main(argv):
     parser.add_argument("--binding-only", action="store_true")
     parser.add_argument("--read-only", action="store_true")
     parser.add_argument("--selector", choices=("legacy", "pointer-v1", "group-v1", "group-v2"), default="legacy")
+    parser.add_argument("--harness-manifest", help="launcher-provided role authorization manifest")
     options, argv = parser.parse_known_args(argv)
     try:
         config, _binding, resolved, graph = load_project_config(options.project_root, options.config)
@@ -1119,6 +1134,15 @@ def main(argv):
     if options.binding_only:
         print(json.dumps({"binding": resolved, "hits": []}, sort_keys=True))
         return 0
+    harness_context = None
+    if options.harness_manifest:
+        try:
+            from knowledge_harness import load_manifest
+            harness_context = load_manifest(Path(options.project_root or Path.cwd()).resolve(),
+                                            options.harness_manifest)
+        except (OSError, ValueError, UnicodeError) as exc:
+            print(json.dumps(binding_failure("harness_denied:" + str(exc)), sort_keys=True))
+            return 2
     if options.selector == "pointer-v1" and not options.read_only:
         print(json.dumps(binding_failure("selector_requires_read_only"), sort_keys=True))
         return 2
@@ -1130,6 +1154,15 @@ def main(argv):
             print(json.dumps(binding_failure("read_only_requires_plain_query")))
             return 2
         matches = statements_carrying_the_words(config["map_path"], asked_words(" ".join(argv)), nodes=graph["nodes"])
+        if harness_context is not None:
+            from role_access import AccessDenied, authorize, authorize_pointer
+            try:
+                authorize(harness_context, action="read")
+                matches = [match for match in matches
+                           if authorize_pointer(harness_context, match[3])]
+            except AccessDenied as exc:
+                print(json.dumps(binding_failure("harness_denied:" + str(exc)), sort_keys=True))
+                return 2
         if options.selector == "pointer-v1":
             candidates = [{"label": label, "source_file": source,
                            "source_location": locator, "evidence_status": "unverified"}

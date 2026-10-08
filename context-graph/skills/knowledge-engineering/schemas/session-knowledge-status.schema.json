@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_type",
+    "step",
+    "ok",
+    "reason",
+    "elapsed_ms",
+    "failure_count"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "record_type": {
+      "const": "SessionKnowledgeStatus"
+    },
+    "step": {
+      "enum": [
+        "open",
+        "close",
+        "merge",
+        "session_proposal"
+      ]
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "reason": {
+      "enum": [
+        "ok",
+        "overlay_invalid",
+        "overlay_full",
+        "unsafe_path",
+        "projection_full",
+        "session_knowledge_failed",
+        "proposal_failed",
+        "invalid_attribution",
+        "archive_full",
+        "archive_invalid",
+        "archive_conflict",
+        "archive_recovery_conflict"
+      ]
+    },
+    "elapsed_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "failure_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "recent_steps": {
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "step",
+          "ok",
+          "reason",
+          "elapsed_ms"
+        ],
+        "properties": {
+          "step": {
+            "enum": [
+              "open",
+              "close",
+              "merge",
+              "session_proposal"
+            ]
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "reason": {
+            "enum": [
+              "ok",
+              "overlay_invalid",
+              "overlay_full",
+              "unsafe_path",
+              "projection_full",
+              "session_knowledge_failed",
+              "proposal_failed",
+              "invalid_attribution",
+              "archive_full",
+              "archive_invalid",
+              "archive_conflict",
+              "archive_recovery_conflict"
+            ]
+          },
+          "elapsed_ms": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}

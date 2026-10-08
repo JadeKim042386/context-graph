@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "record_type", "receipt_id", "outcome", "reason", "created_at"],
+  "properties": {
+    "schema_version": {"const": 1}, "record_type": {"const": "TaskReuseFeedback"},
+    "receipt_id": {"type": "string", "minLength": 1}, "outcome": {"enum": ["invalidated", "confirmed"]},
+    "reason": {"type": "string", "minLength": 1, "maxLength": 400}, "created_at": {"type": "string", "minLength": 1}
+  }
+}

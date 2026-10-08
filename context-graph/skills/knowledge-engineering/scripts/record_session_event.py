@@ -222,16 +222,99 @@ def init_project(root: Path, runtime: str, includes: list[str]) -> int:
     return 0
 
 
+def _step_status(root, step, started, ok, reason):
+    import time
+    from session_storage import safe_path, atomic_write, locked
+    status = {"schema_version": 1, "record_type": "SessionKnowledgeStatus", "step": step,
+              "ok": ok, "reason": reason, "elapsed_ms": round((time.perf_counter() - started) * 1000, 3)}
+    print(json.dumps(status, sort_keys=True))
+    try:
+        with locked(root, "session-knowledge-status"):
+            path = safe_path(root, "knowledge-base/_ops/session-knowledge-status.json")
+            old = json.loads(path.read_text()) if path.exists() and path.stat().st_size < 4096 else {}
+            status["failure_count"] = min(2147483647, int(old.get("failure_count", 0)) + int(not ok))
+            fields = ("step", "ok", "reason", "elapsed_ms")
+            previous = old.get("recent_steps", [])
+            recent = [{k: row[k] for k in fields} for row in previous[-3:]
+                      if isinstance(row, dict) and all(k in row for k in fields)] if isinstance(previous, list) else []
+            status["recent_steps"] = recent + [{k: status[k] for k in fields}]
+            atomic_write(path, (json.dumps(status, sort_keys=True) + "\n").encode(), max_bytes=4096)
+    except Exception:
+        print(json.dumps({"ok": False, "step": "status", "reason": "status_write_failed", "elapsed_ms": 0}))
+
+
 def record_project(root: Path, event_type: str, payload: dict[str, Any], compile_proposal: bool) -> int:
+    import time
     config = load_config(root)
     if not config:
         return 0
+    if config.get("checkpoint_mode") is not None:
+        # Opt-in route never scans the legacy journal or rebuilds all proposals.
+        started = time.perf_counter()
+        try:
+            if config["checkpoint_mode"] != "delta-v1":
+                raise ValueError("unsupported_checkpoint_mode")
+            from session_events import binding
+            from session_checkpoint import checkpoint, current_epoch
+            bound_root, _, _, _ = binding(root)
+            allowed = ("session_id", "checkpoint_epoch", "last_event_id", "work_status",
+                       "unresolved_count", "artifacts", "agent_instance_id", "task_id",
+                       "assignment_id", "role")
+            filtered = {key: payload[key] for key in allowed if key in payload}
+            raw_session = payload.get("session_id")
+            if not isinstance(raw_session, str) or not raw_session or len(raw_session) > 256:
+                raise ValueError("explicit_identity_required")
+            filtered["session_id"] = digest(raw_session)
+            if "checkpoint_epoch" not in filtered:
+                filtered["checkpoint_epoch"] = current_epoch(bound_root, filtered["session_id"], event_type)
+            if "last_event_id" not in filtered:
+                invocation = scalar(payload.get("invocation_id"))
+                occurred = scalar(payload.get("occurred_at")) or ""
+                filtered["last_event_id"] = digest(invocation or json.dumps(
+                    [event_type, filtered["session_id"], occurred], separators=(",", ":")))
+            result = checkpoint(bound_root, event_type, filtered)
+            _step_status(root, "checkpoint", started, result["status"] != "pending_invalid", result["status"])
+        except Exception:
+            # Lifecycle stays live; CLI emits one sanitized error object and the
+            # status file preserves failure. Never fall back to legacy capture.
+            _step_status(root, "checkpoint", started, False, "checkpoint_failed")
+        return 0
     event_path = root / "knowledge-base" / "_ops" / "session-events.jsonl"
     records = load_records(event_path)
-    append_locked(event_path, make_record(root, event_type, payload, records, config))
+    record = make_record(root, event_type, payload, records, config)
+    append_locked(event_path, record)
+    started = time.perf_counter()
+    step = "open" if event_type == "session_start" else "close" if event_type == "session_end" else "merge"
+    try:
+        from session_knowledge import close_agent, merge_session, open_agent
+        # Only the host payload supplies the raw session; retain aliases, never its raw bytes.
+        raw_session = payload.get("session_id") or record["session_id"]
+        declared = {}
+        names = ("agent_instance_id", "task_id", "assignment_id", "role")
+        if any(payload.get(name) is not None for name in names):
+            import re
+            if not all(isinstance(payload.get(name), str) and re.fullmatch(r"[A-Za-z0-9_.:-]{1,128}", payload[name]) for name in names):
+                raise ValueError("invalid_attribution")
+            declared = {name: payload[name] for name in names}
+        if step == "open":
+            result = open_agent(root, session_id=raw_session, session_key=record["session_id"], **declared)
+        elif step == "close":
+            result = close_agent(root, session_id=raw_session, session_key=record["session_id"], **declared)
+        else:
+            result = merge_session(root, session_key=record["session_id"], session_id=raw_session, rebuild_projection=False)
+        ok = result.get("status") != "overlay_full"
+        _step_status(root, step, started, ok, "ok" if ok else "overlay_full")
+    except Exception as exc:
+        reason = str(exc) if str(exc) in {"overlay_invalid", "overlay_full", "unsafe_path", "projection_full", "invalid_attribution", "archive_full", "archive_invalid", "archive_conflict", "archive_recovery_conflict"} else "session_knowledge_failed"
+        _step_status(root, step, started, False, reason)
     if compile_proposal:
-        from build_session_proposal import write_outputs
-        write_outputs(root)
+        started = time.perf_counter()
+        try:
+            from build_session_proposal import write_outputs
+            write_outputs(root)
+            _step_status(root, "session_proposal", started, True, "ok")
+        except Exception:
+            _step_status(root, "session_proposal", started, False, "proposal_failed")
     return 0
 
 
@@ -268,10 +351,27 @@ def main() -> int:
             return init_project(root, args.runtime, args.include)
         event_type = getattr(args, "event", None)
         if args.command == "record" or event_type:
-            return record_project(root, event_type, read_input(), getattr(args, "compile_proposal", False))
+            # Host hook stdout is one JSON document, not a stream of status objects.
+            # Keep direct API diagnostics and the durable status file unchanged.
+            import io
+            from contextlib import redirect_stdout
+            output = io.StringIO()
+            with redirect_stdout(output):
+                result = record_project(root, event_type, read_input(), getattr(args, "compile_proposal", False))
+            failures = []
+            for line in output.getvalue().splitlines():
+                try:
+                    diagnostic = json.loads(line)
+                    if diagnostic.get("ok") is False:
+                        failures.append(json.dumps(diagnostic, sort_keys=True))
+                except (ValueError, AttributeError):
+                    failures.append("context-graph invalid_status_output")
+            if failures:
+                print(json.dumps({"continue": True, "systemMessage": "\n".join(failures)}))
+            return result
         return 0
     except Exception:
-        # Recording must never block compaction or application exit.
+        print(json.dumps({"continue": True, "systemMessage": "context-graph record_failed"}))
         return 0
     return 0
 

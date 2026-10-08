@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object", "additionalProperties": false,
+  "required": ["effect", "action", "scope_ids", "policy_revision", "binding_id"],
+  "properties": {"effect": {"enum": ["allow", "deny", "insufficient"]}, "action": {"type": "string"}, "scope_ids": {"type": "array", "items": {"type": "string"}}, "policy_revision": {"type": "string"}, "binding_id": {"type": ["string", "null"]}}
+}

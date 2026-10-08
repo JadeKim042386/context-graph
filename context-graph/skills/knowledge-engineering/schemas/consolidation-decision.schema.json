@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_type",
+    "decision_id",
+    "proposal_id",
+    "proposal_sha256",
+    "outcome",
+    "review_pointer",
+    "review_sha256",
+    "canonical_promotion"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "record_type": {
+      "const": "ConsolidationDecision"
+    },
+    "decision_id": {
+      "type": "string"
+    },
+    "proposal_id": {
+      "type": "string"
+    },
+    "proposal_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "outcome": {
+      "enum": [
+        "accept",
+        "reject",
+        "hold"
+      ]
+    },
+    "review_pointer": {
+      "type": "string"
+    },
+    "review_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "canonical_promotion": {
+      "const": false
+    }
+  }
+}

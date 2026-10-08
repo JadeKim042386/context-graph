@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_type",
+    "payload_id",
+    "source",
+    "created_at",
+    "files",
+    "file_count",
+    "total_bytes",
+    "tool_version",
+    "excluded_globs",
+    "immutable"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "record_type": {
+      "const": "ProjectPluginSnapshot"
+    },
+    "payload_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "commit_sha",
+        "head_sha",
+        "worktree_dirty"
+      ],
+      "properties": {
+        "kind": {
+          "const": "worktree"
+        },
+        "commit_sha": {
+          "type": "null"
+        },
+        "head_sha": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "worktree_dirty": {
+          "type": "boolean"
+        }
+      }
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "files": {
+      "type": "array",
+      "maxItems": 2000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "sha256",
+          "bytes"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "file_count": {
+      "type": "integer",
+      "maximum": 2000
+    },
+    "total_bytes": {
+      "type": "integer",
+      "maximum": 67108864
+    },
+    "tool_version": {
+      "const": 1
+    },
+    "excluded_globs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "immutable": {
+      "const": true
+    }
+  }
+}

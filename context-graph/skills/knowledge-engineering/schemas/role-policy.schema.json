@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "project_id", "revision", "default_effect", "roles"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "project_id": {"type": "string", "pattern": "^[A-Za-z0-9_.-]{1,120}$"},
+    "revision": {"type": "string", "pattern": "^[A-Za-z0-9_.-]{1,120}$"},
+    "default_effect": {"const": "deny"},
+    "roles": {
+      "type": "object", "minProperties": 1,
+      "additionalProperties": {"type": "object", "additionalProperties": false,
+        "required": ["scope_ids"], "properties": {
+          "scope_ids": {"type": "array", "items": {"type": "string", "pattern": "^[A-Za-z0-9_.-]{1,80}$"}, "uniqueItems": true},
+          "child_roles": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+        }}
+    }
+  }
+}

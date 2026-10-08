@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_type",
+    "state",
+    "project_id",
+    "session_key",
+    "state_id"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "record_type": {
+      "const": "SessionAgentState"
+    },
+    "state": {
+      "enum": [
+        "open",
+        "closed"
+      ]
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "session_key": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$|^[A-Za-z0-9_.-]{1,120}$"
+    },
+    "agent_key": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "task_key": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "assignment_key": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "role_key": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "role_present": {
+      "type": "boolean"
+    },
+    "state_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "merged_count": {
+      "type": "integer"
+    },
+    "session_keys": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    }
+  }
+}

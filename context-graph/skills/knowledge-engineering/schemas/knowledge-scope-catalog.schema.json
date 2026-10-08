@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "artifacts"],
+  "properties": {"schema_version": {"const": 1}, "artifacts": {"type": "object", "additionalProperties": {"type": "object", "additionalProperties": false, "required": ["scope_ids"], "properties": {"scope_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}}}}}
+}

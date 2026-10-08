@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_type",
+    "overlay_id",
+    "source_event_id",
+    "source_store",
+    "source_pointer",
+    "promotion_state",
+    "status"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "record_type": {
+      "const": "SessionKnowledgeOverlay"
+    },
+    "overlay_id": {
+      "type": "string"
+    },
+    "source_event_id": {
+      "type": "string"
+    },
+    "source_store": {
+      "enum": [
+        "legacy",
+        "explicit"
+      ]
+    },
+    "source_pointer": {
+      "type": "string"
+    },
+    "source_revision_sha256": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "session_key": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "invocation_key": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "runtime": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "event_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "attribution": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "content_fingerprint": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "artifact_pointers": {
+      "type": "array"
+    },
+    "role_key": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "session_state": {
+      "type": "string"
+    },
+    "promotion_state": {
+      "const": "review_required"
+    },
+    "status": {
+      "const": "provisional"
+    },
+    "archive_segment_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

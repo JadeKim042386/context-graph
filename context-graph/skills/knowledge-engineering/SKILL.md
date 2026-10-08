@@ -56,6 +56,24 @@ python context-graph/skills/knowledge-engineering/scripts/validate_collection_st
 
 ## Role boundaries
 
+### Harness knowledge boundary
+
+Role names, session IDs, and agent IDs in a prompt or event payload are
+attribution only. A trusted launcher must provide a project-bound harness
+manifest containing a fail-closed role policy, trusted binding, and scope
+catalog. The effective read set is the intersection of project policy,
+session role, agent role, task cap, and assignment cap. Missing, unknown,
+revoked, stale, foreign, uncatalogued, or unsafe inputs deny the request;
+there is no wildcard or legacy bypass in harness mode. Filtering happens
+before ranking, truncation, graph expansion, or source replay. Harness access
+does not grant review, merge, promotion, or filesystem isolation authority.
+
+Use `scripts/knowledge_harness.py` for the read-only authorization boundary.
+The JSON contracts are `schemas/role-policy.schema.json`,
+`role-binding.schema.json`, `knowledge-scope-catalog.schema.json`, and
+`knowledge-access-decision.schema.json`. Legacy v3/v4 events remain unchanged
+and are treated as unknown-role data when a role-bound read is requested.
+
 ### analysis/proposal role
 
 Reason over the current graph and sources, distinguish `FACT`, `INFERENCE`,
@@ -124,6 +142,17 @@ invoked directly, and symlinked or malformed config paths are still validated. T
 changed artifact pointers, hashes, and verification state so the next session
 can recover work without copying the conversation.
 
+For projects that set `checkpoint_mode` to `delta-v1`, lifecycle events use the
+project-local checkpoint store instead of rereading the full journal. The first
+`PreCompact` or `SessionEnd` event writes a privacy-filtered delta; repeated
+events are idempotent by session, epoch, digest, and event identity. A later
+`SessionStart` reopens the same checkpoint epoch, while `PostCompact` advances
+the epoch once. A trusted current-context match returns `in_context` without
+disk reads; missing or untrusted context returns bounded query-scoped
+`bounded_reload`. This mode never stores raw prompts or transcripts and does
+not claim context presence when the host cannot provide a trusted epoch and
+dependency digest. See [`references/session-checkpoint.md`](references/session-checkpoint.md).
+
 Treat these events as provisional or unverified operational history. Never copy
 raw prompts, transcripts, model reasoning, secrets, absolute paths, or diff
 contents into the journal. Never update canonical Claim, Evidence, Decision,
@@ -135,6 +164,33 @@ completion evidence.
 Codex has no verified universal lifecycle-hook surface. Do not claim automatic
 Codex compaction or exit capture; use the CLI from an explicitly configured
 automation when needed.
+
+### Session/agent merge and split
+
+Session and agent knowledge follows a reversible overlay pattern. When a
+session or agent opens, its hashed identity and role boundary are registered.
+During lifecycle capture, provisional event pointers are merged into the
+project-wide `session-knowledge-overlay.jsonl` with their source store,
+revision, session, agent, task, assignment, and role provenance. When the
+session closes, the state is marked closed and the same overlay is rebuilt
+idempotently. A split view filters that overlay by the original selectors,
+so project-wide context can be assembled without losing per-session or
+per-agent history.
+
+This is a provisional merge, not automatic canonical-memory promotion. Only
+the existing reviewed `promote_session.py` flow may update durable memory.
+Use `scripts/session_knowledge.py open|close|merge|split`; denied or unknown
+role-bound data remains withheld by the harness.
+
+### Metacognitive consolidation loop
+
+After overlay merge or session close, `scripts/consolidate_knowledge.py
+compact` performs a bounded replay pass. It clusters exact source-revision
+repeats, scores provenance and utility, writes duplicate/overlap proposals, and
+rebuilds a separate compact projection. Exact duplicates are hidden only in
+that generated projection; sources, evidence, conflicts, and unresolved
+proposals remain available. Semantic equivalence is never assumed, canonical
+records are never deleted, and promotion still requires review.
 
 Read [`references/memory-update.md`](references/memory-update.md) for the
 journal schema, privacy boundary, deduplication, and promotion rules.
@@ -159,6 +215,16 @@ and audit `support_replay_complete` plus valid / stale / unlocatable /
 unverified and omission counts as distinct facts. Exit 0 means the audit ran,
 not that support is complete; `inputs_sha256` is not a cache key. Read
 [`references/memory-support-audit.md`](references/memory-support-audit.md).
+
+When the same work may have been attempted by another session, use the
+opt-in `scripts/plan_task_reuse.py` planner after this preflight. It computes
+separate task and evidence fingerprints and requires a trusted harness before
+revealing candidates. Only a reproducible accepted 작업 완료·검토 참조 기록 can produce
+`reuse` or `skip`; stale evidence produces `refresh`, a changed task produces
+`branch`, and missing authority, provenance, locator, or completion evidence
+produces `hold`/`abstain`. This planner never executes work, promotes records,
+or treats semantic similarity as proof. See
+[`references/task-reuse.md`](references/task-reuse.md).
 
 ## Post-install integration verification
 

@@ -99,7 +99,23 @@ A sibling temporary file is flushed/fsynced and atomically replaced; failed repl
 leaves original bytes and removes the temporary file. No update arguments is a
 byte-preserving no-op. Use a single writer: concurrent-writer locking and a lock on
 mutable target/review files are not provided. This updater does not rebuild indexes,
-edit AGENTS, or implement automatic approved/unresolved-list promotion.
+edit AGENTS, or implement automatic approved/unresolved-list promotion. For an
+explicit, review-gated session pointer transaction, use
+`scripts/promote_session.py`. It accepts only a canonical pointer-only request
+and a separately authored Review/Decision that binds the request hash. `check`
+is read-only; only `apply` can mutate memory. The apply path uses an
+inter-process lock, compares the expected memory hash again immediately before
+replacement, writes a flushed `prepared` receipt, replaces memory, and writes
+a separate `committed` receipt. A base mismatch is a conflict and never
+silently rebases. Receipts are operational evidence, not approval records, and
+a failed final receipt requires explicit recovery rather than an inferred
+success. The coordinator does not edit canonical claims, close unresolved
+items, modify host files, or run lifecycle hooks.
+
+The approval record must contain `promotion_request_sha256` equal to the
+canonical request hash and must be an accepted Decision or verified Review
+under the existing project authority rule. The tool cannot authenticate the
+reviewer or invent the authority record.
 
 ## Session lifecycle journal
 

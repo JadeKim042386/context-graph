@@ -22,11 +22,13 @@ MAX_PACK = 32768
 EVENTS = {"pre_compact", "post_compact", "session_end"}
 RUNTIMES = {"codex", "claude-code"}
 UUID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\Z")
-PAYLOAD_KEYS = {"schema_version", "session_id", "invocation_id", "occurred_at",
-                "artifact_pointers", "required_constraints", "next_actions"}
-RECORD_KEYS = {"schema_version", "record_type", "event_id", "project_id", "session_id",
+PAYLOAD_KEYS_V1 = {"schema_version", "session_id", "invocation_id", "occurred_at",
+                   "artifact_pointers", "required_constraints", "next_actions"}
+PAYLOAD_KEYS_V2 = PAYLOAD_KEYS_V1 | {"attribution"}
+RECORD_KEYS_V3 = {"schema_version", "record_type", "event_id", "project_id", "session_id",
                "invocation_id", "event_type", "occurred_at", "runtime", "status", "review_state",
                "artifact_pointers", "required_constraints", "next_actions", "provenance", "record_sha256"}
+RECORD_KEYS_V4 = RECORD_KEYS_V3 | {"attribution"}
 
 
 class CaptureError(ValueError):
@@ -130,19 +132,46 @@ def event_id(record):
     return "SEV-" + sha(encode([record[k] for k in ("project_id", "session_id", "invocation_id", "runtime", "event_type")]))
 
 
+def attribution_fields(project_id, data):
+    attribution = data.get("attribution")
+    if (not isinstance(attribution, dict)
+            or set(attribution) != {"agent_instance_id", "task_id", "assignment_id", "reassigned_from_event_id"}
+            or any(not isinstance(attribution[key], str) or not UUID.fullmatch(attribution[key])
+                   for key in ("agent_instance_id", "task_id", "assignment_id"))):
+        raise CaptureError("invalid_attribution")
+    predecessor = attribution["reassigned_from_event_id"]
+    if predecessor is not None and (not isinstance(predecessor, str)
+                                    or not re.fullmatch(r"SEV-[0-9a-f]{64}", predecessor)):
+        raise CaptureError("invalid_attribution")
+    task_key = sha(encode(["task-v1", project_id, attribution["task_id"]]))
+    return {"agent_instance_id": sha(encode(["agent-instance-v1", project_id, attribution["agent_instance_id"]])),
+            "task_id": task_key,
+            "assignment_id": sha(encode(["assignment-v1", project_id, task_key, attribution["assignment_id"]])),
+            "reassigned_from_event_id": predecessor, "basis": "caller_supplied"}
+
+
 def make_record(root, config, project_id, config_sha, event, runtime, raw):
     if len(raw) > MAX_INPUT or event not in EVENTS or runtime not in RUNTIMES:
         raise CaptureError("invalid_payload")
     data = strict_json(raw)
-    if (not isinstance(data, dict) or set(data) != PAYLOAD_KEYS or type(data["schema_version"]) is not int
-            or data["schema_version"] != 1 or not all(isinstance(data[k], str) and UUID.fullmatch(data[k]) for k in ("session_id", "invocation_id"))):
+    version = data.get("schema_version") if isinstance(data, dict) else None
+    payload_keys = PAYLOAD_KEYS_V2 if version == 2 else PAYLOAD_KEYS_V1
+    if (not isinstance(data, dict) or set(data) != payload_keys or type(data["schema_version"]) is not int
+            or version not in (1, 2) or not all(isinstance(data[k], str) and UUID.fullmatch(data[k]) for k in ("session_id", "invocation_id"))):
         raise CaptureError("invalid_payload")
+    if version not in (1, 2):
+        raise CaptureError("invalid_payload")
+    attribution = attribution_fields(project_id, data) if version == 2 else None
     record = {"schema_version": 3, "record_type": "SessionLifecycleEvent", "project_id": project_id,
               "session_id": sha(encode([project_id, data["session_id"]])),
               "invocation_id": sha(data["invocation_id"].encode()), "runtime": runtime, "event_type": event,
               "status": "provisional", "review_state": "not_reviewed",
               "provenance": {"method": "explicit_capture_v3", "config_sha256": config_sha},
               **content_fields(root, config, data)}
+    if attribution is not None:
+        record["schema_version"] = 4
+        record["provenance"]["method"] = "explicit_capture_v4"
+        record["attribution"] = attribution
     record["event_id"] = event_id(record)
     record["record_sha256"] = sha(encode(record))
     return record
@@ -151,8 +180,10 @@ def make_record(root, config, project_id, config_sha, event, runtime, raw):
 def validate_record(root, config, project_id, raw, name):
     try:
         record = strict_json(raw)
-        if (not isinstance(record, dict) or set(record) != RECORD_KEYS or type(record["schema_version"]) is not int
-                or record["schema_version"] != 3 or record["project_id"] != project_id
+        version = record.get("schema_version") if isinstance(record, dict) else None
+        expected_keys = RECORD_KEYS_V4 if version == 4 else RECORD_KEYS_V3
+        if (not isinstance(record, dict) or set(record) != expected_keys or type(record["schema_version"]) is not int
+                or version not in (3, 4) or record["project_id"] != project_id
                 or record["record_type"] != "SessionLifecycleEvent" or record["status"] != "provisional"
                 or record["review_state"] != "not_reviewed" or record["runtime"] not in RUNTIMES
                 or record["event_type"] not in EVENTS):
@@ -162,9 +193,19 @@ def validate_record(root, config, project_id, raw, name):
                 raise ValueError()
         provenance = record["provenance"]
         if (not isinstance(provenance, dict) or set(provenance) != {"method", "config_sha256"}
-                or provenance["method"] != "explicit_capture_v3" or not isinstance(provenance["config_sha256"], str)
+                or provenance["method"] != ("explicit_capture_v4" if version == 4 else "explicit_capture_v3")
+                or not isinstance(provenance["config_sha256"], str)
                 or not HASH.fullmatch(provenance["config_sha256"])):
             raise ValueError()
+        if version == 4:
+            attribution = record["attribution"]
+            if (set(attribution) != {"agent_instance_id", "task_id", "assignment_id", "reassigned_from_event_id", "basis"}
+                    or attribution["basis"] != "caller_supplied"
+                    or any(not isinstance(attribution[key], str) or not HASH.fullmatch(attribution[key])
+                           for key in ("agent_instance_id", "task_id", "assignment_id"))
+                    or (attribution["reassigned_from_event_id"] is not None
+                        and not re.fullmatch(r"SEV-[0-9a-f]{64}", attribution["reassigned_from_event_id"]))):
+                raise ValueError()
         fields = content_fields(root, config, record)
         if any(record[key] != value for key, value in fields.items()):
             raise ValueError()
@@ -240,6 +281,21 @@ def capture(root, event, runtime, raw):
                 if old_raw != serialized:
                     raise CaptureError("event_id_conflict")
                 return {"status": "duplicate", "event_id": record["event_id"], "pointer": target.relative_to(root).as_posix()}
+        attribution = record.get("attribution")
+        if attribution:
+            for old, _ in existing:
+                old_attr = old.get("attribution")
+                if (old_attr and old_attr["assignment_id"] == attribution["assignment_id"]
+                        and (old_attr["agent_instance_id"], old_attr["task_id"], old_attr["reassigned_from_event_id"])
+                        != (attribution["agent_instance_id"], attribution["task_id"], attribution["reassigned_from_event_id"])):
+                    raise CaptureError("assignment_conflict")
+        predecessor = record.get("attribution", {}).get("reassigned_from_event_id")
+        if predecessor:
+            prior = next((old for old, _ in existing if old["event_id"] == predecessor), None)
+            if (prior is None or prior.get("schema_version") != 4
+                    or prior["attribution"]["task_id"] != record["attribution"]["task_id"]
+                    or prior["attribution"]["assignment_id"] == record["attribution"]["assignment_id"]):
+                raise CaptureError("invalid_attribution")
         if len(existing) >= MAX_EVENTS:
             raise CaptureError("journal_limit")
         if pointer_state(root, record, BoundedReader(root, 262144, 2097152)) != "valid":
@@ -257,10 +313,20 @@ def capture(root, event, runtime, raw):
             except FileExistsError:
                 if read_bytes(target, MAX_INPUT) != serialized:
                     raise CaptureError("event_id_conflict")
+                try:
+                    from session_knowledge import merge_session
+                    merge_session(root, session_key=record["session_id"], rebuild_projection=(event == "session_end"))
+                except Exception:
+                    pass
                 return {"status": "duplicate", "event_id": record["event_id"], "pointer": target.relative_to(root).as_posix()}
         finally:
             if temporary is not None:
                 temporary.unlink(missing_ok=True)
+        try:
+            from session_knowledge import merge_session
+            merge_session(root, session_key=record["session_id"], rebuild_projection=(event == "session_end"))
+        except Exception:
+            pass
         return {"status": "captured", "event_id": record["event_id"], "pointer": target.relative_to(root).as_posix()}
     except CaptureError as exc:
         return {"status": "unverified", "reason": str(exc)}
@@ -270,7 +336,89 @@ def capture(root, event, runtime, raw):
         return {"status": "unverified", "reason": "invalid_or_unreadable"}
 
 
-def handoff(root):
+def _selection_keys(project_id, *, session_id=None, runtime=None, invocation_ids=None,
+                    agent_instance_id=None, task_id=None, assignment_id=None):
+    """Validate caller-supplied scope without inventing task or agent identity."""
+    scoped = any(value is not None for value in (session_id, runtime, invocation_ids,
+                                                agent_instance_id, task_id, assignment_id))
+    if not scoped:
+        return None
+    if not (isinstance(session_id, str) and UUID.fullmatch(session_id)
+            and runtime in RUNTIMES):
+        raise CaptureError("invalid_selection")
+    if invocation_ids is not None:
+        if (not isinstance(invocation_ids, (list, tuple)) or not invocation_ids
+                or len(invocation_ids) > MAX_EVENTS
+                or any(not isinstance(value, str) or not UUID.fullmatch(value) for value in invocation_ids)
+                or len(set(invocation_ids)) != len(invocation_ids)):
+            raise CaptureError("invalid_selection")
+    for value in (agent_instance_id, task_id, assignment_id):
+        if value is not None and (not isinstance(value, str) or not UUID.fullmatch(value)):
+            raise CaptureError("invalid_selection")
+    if assignment_id is not None and task_id is None:
+        raise CaptureError("invalid_selection")
+    invocation_keys = sorted({sha(value.encode()) for value in invocation_ids or []})
+    return {"version": 1, "mode": "session_and_invocations" if invocation_keys else "session",
+            "session_key": sha(encode([project_id, session_id])), "runtime": runtime,
+            "invocation_keys": invocation_keys, "membership_basis": "caller_supplied",
+            "agent_key": sha(encode(["agent-instance-v1", project_id, agent_instance_id])) if agent_instance_id else None,
+            "task_key": sha(encode(["task-v1", project_id, task_id])) if task_id else None,
+            "assignment_key": sha(encode(["assignment-v1", project_id,
+                                           sha(encode(["task-v1", project_id, task_id])), assignment_id]))
+            if assignment_id else None}
+
+
+def _matches_selection(record, selection):
+    if selection is None:
+        return True
+    attribution = record.get("attribution")
+    return (record["session_id"] == selection["session_key"]
+            and record["runtime"] == selection["runtime"]
+            and (not selection["invocation_keys"] or record["invocation_id"] in selection["invocation_keys"])
+            and (selection["agent_key"] is None or (attribution and attribution["agent_instance_id"] == selection["agent_key"]))
+            and (selection["task_key"] is None or (attribution and attribution["task_id"] == selection["task_key"]))
+            and (selection["assignment_key"] is None or (attribution and attribution["assignment_id"] == selection["assignment_key"])))
+
+
+def _assignment_relations(found):
+    """Classify bounded attribution links without inferring ownership."""
+    by_event = {record["event_id"]: record for record, _ in found}
+    by_assignment = {}
+    successors = {}
+    states = {}
+    for record, _ in found:
+        attribution = record.get("attribution")
+        if not attribution:
+            continue
+        event_id = record["event_id"]
+        assignment = attribution["assignment_id"]
+        signature = (attribution["agent_instance_id"], attribution["task_id"],
+                     attribution["reassigned_from_event_id"])
+        previous = by_assignment.get(assignment)
+        if previous and previous[1] != signature:
+            states[event_id] = "conflict"
+            states[previous[0]] = "conflict"
+        else:
+            by_assignment[assignment] = (event_id, signature)
+        predecessor = attribution["reassigned_from_event_id"]
+        if predecessor:
+            prior = by_event.get(predecessor)
+            if (prior is None or prior.get("schema_version") != 4
+                    or prior["attribution"]["task_id"] != attribution["task_id"]
+                    or prior["attribution"]["assignment_id"] == assignment):
+                states[event_id] = "unverified"
+            successors.setdefault(predecessor, []).append((event_id, assignment))
+    for children in successors.values():
+        assignments = {assignment for _, assignment in children}
+        if len(assignments) > 1:
+            for event_id, _ in children:
+                states[event_id] = "conflict"
+    return states
+
+
+def handoff(root, *, session_id=None, runtime=None, invocation_ids=None,
+            agent_instance_id=None, task_id=None, assignment_id=None,
+            include_attribution=False, harness_context=None):
     """Session evidence remains provisional even when its bytes/locators replay."""
     pack = {"schema_version": 1, "kind": "session_continuity", "read_only": True,
             "promotion_performed": False, "pack_status": "unverified", "reason": "unknown",
@@ -278,27 +426,75 @@ def handoff(root):
             "max_pack_bytes": MAX_PACK, "source_bytes_read": 0}
     try:
         root, config, project_id, config_sha = binding(root)
+        selection = _selection_keys(project_id, session_id=session_id, runtime=runtime,
+                                    invocation_ids=invocation_ids, agent_instance_id=agent_instance_id,
+                                    task_id=task_id, assignment_id=assignment_id)
+        if selection is not None:
+            pack["selection"] = {**selection, "scope_matched": False,
+                                  "missing_invocation_count": 0}
+            for key in ("agent_key", "task_key", "assignment_key"):
+                pack["selection"].pop(key, None)
+        attribution_view = include_attribution or any(value is not None for value in
+                                                      (agent_instance_id, task_id, assignment_id))
+        if attribution_view:
+            pack["schema_version"] = 2
         pack["binding"] = {"project_id": project_id, "config_sha256": config_sha,
                            "status": "verified", "config_map_state": "not_used"}
         found = records(root, config, project_id)
-        pack["total_count"] = len(found)
+        relation_states = _assignment_relations(found)
+        if selection is not None:
+            selected = [(record, raw) for record, raw in found if _matches_selection(record, selection)]
+            pack["selection"]["scope_matched"] = bool(selected)
+            if selection["invocation_keys"]:
+                present = {record["invocation_id"] for record, _ in selected}
+                pack["selection"]["missing_invocation_count"] = len(
+                    set(selection["invocation_keys"]) - present)
+        else:
+            selected = found
+        if harness_context is not None:
+            from role_access import AccessDenied, authorize, authorize_pointer
+            try:
+                decision = authorize(harness_context, action="handoff")
+                authorized = []
+                for record, raw in selected:
+                    pointers = [item["pointer"] for item in record.get("artifact_pointers", [])]
+                    if pointers and all(authorize_pointer(harness_context, pointer) for pointer in pointers):
+                        authorized.append((record, raw))
+                pack["harness"] = {"effect": decision["effect"], "scope_ids": decision["scope_ids"],
+                                    "denied_count": len(selected) - len(authorized),
+                                    "filtered_before_limits": True}
+                selected = authorized
+            except AccessDenied as exc:
+                pack.update(reason=str(exc), items=[])
+                return pack
+        pack["total_count"] = len(selected)
         reader = BoundedReader(root, 262144, 2097152)
-        for record, raw in found[-MAX_ITEMS:]:
+        for record, raw in selected[-MAX_ITEMS:]:
             state = pointer_state(root, record, reader)
             if record["provenance"]["config_sha256"] != config_sha:
                 state = "unverified"
-            pack["items"].append({"pointer": f"{STORE}/{record['event_id']}.json", "revision_sha256": sha(raw),
+            item = {"pointer": f"{STORE}/{record['event_id']}.json", "revision_sha256": sha(raw),
                 "event_id": record["event_id"], "session_id": record["session_id"], "event_type": record["event_type"],
                 "occurred_at": record["occurred_at"], "runtime": record["runtime"], "integrity_status": state,
                 "status": "provisional", "review_state": "not_reviewed", "applicable": False,
                 "artifact_pointers": record["artifact_pointers"], "required_constraints": record["required_constraints"],
-                "next_actions": record["next_actions"]})
+                "next_actions": record["next_actions"]}
+            if attribution_view:
+                item["actor_state"] = "declared" if record.get("schema_version") == 4 else "actor_unknown"
+                item["attribution"] = record.get("attribution")
+                item["attribution_status"] = relation_states.get(
+                    record["event_id"], "declared" if record.get("schema_version") == 4 else "unknown")
+            pack["items"].append(item)
         pack["source_bytes_read"] = reader.bytes_read
         while True:
             pack["included_count"] = len(pack["items"])
-            pack["omitted_count"] = len(found) - len(pack["items"])
-            ready = not pack["omitted_count"] and all(i["integrity_status"] == "valid" for i in pack["items"])
-            pack["pack_status"] = "empty" if not found else ("ready" if ready else "partial")
+            pack["omitted_count"] = len(selected) - len(pack["items"])
+            missing = pack.get("selection", {}).get("missing_invocation_count", 0)
+            relation_ok = not attribution_view or all(
+                i["attribution_status"] in {"declared", "unknown"} for i in pack["items"])
+            ready = (not pack["omitted_count"] and not missing and relation_ok
+                     and all(i["integrity_status"] == "valid" for i in pack["items"]))
+            pack["pack_status"] = "empty" if not selected else ("ready" if ready else "partial")
             pack["reason"] = "provisional_only"
             if len(encode(pack)) <= MAX_PACK:
                 return pack

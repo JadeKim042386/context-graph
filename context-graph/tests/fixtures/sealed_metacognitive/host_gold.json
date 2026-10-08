@@ -1,0 +1,22 @@
+{
+  "fixture_kind": "synthetic_host_shaped_not_real_host",
+  "expected_results": [
+    {
+      "exit_code": 0,
+      "status": "captured"
+    },
+    {
+      "exit_code": 0,
+      "status": "captured"
+    },
+    {
+      "exit_code": 0,
+      "status": "captured"
+    },
+    {
+      "exit_code": 0,
+      "status": "captured"
+    }
+  ],
+  "real_host_labelled": false
+}

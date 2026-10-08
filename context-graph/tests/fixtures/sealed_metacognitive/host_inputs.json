@@ -1,0 +1,94 @@
+{
+  "fixture_kind": "synthetic_host_shaped_not_real_host",
+  "revision_placeholder": "replaced with synthetic fixture hash at evaluation only",
+  "cases": [
+    {
+      "runtime": "claude-code",
+      "payload": {
+        "schema_version": 1,
+        "session_id": "00000000-0000-4000-8000-000000000001",
+        "invocation_id": "00000000-0000-4000-8000-000000000001",
+        "occurred_at": "2026-10-08T00:00:00Z",
+        "artifact_pointers": [
+          {
+            "pointer": "knowledge/result.html#result",
+            "revision_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        ],
+        "required_constraints": [
+          "no_commit",
+          "no_push"
+        ],
+        "next_actions": [
+          "review_evidence"
+        ]
+      }
+    },
+    {
+      "runtime": "codex",
+      "payload": {
+        "schema_version": 1,
+        "session_id": "00000000-0000-4000-8000-000000000001",
+        "invocation_id": "00000000-0000-4000-8000-000000000002",
+        "occurred_at": "2026-10-08T00:00:00Z",
+        "artifact_pointers": [
+          {
+            "pointer": "knowledge/result.html#result",
+            "revision_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        ],
+        "required_constraints": [
+          "no_commit",
+          "no_push"
+        ],
+        "next_actions": [
+          "review_evidence"
+        ]
+      }
+    },
+    {
+      "runtime": "claude-code",
+      "payload": {
+        "schema_version": 1,
+        "session_id": "00000000-0000-4000-8000-000000000002",
+        "invocation_id": "00000000-0000-4000-8000-000000000003",
+        "occurred_at": "2026-10-08T00:00:00Z",
+        "artifact_pointers": [
+          {
+            "pointer": "knowledge/result.html#result",
+            "revision_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        ],
+        "required_constraints": [
+          "no_commit",
+          "no_push"
+        ],
+        "next_actions": [
+          "review_evidence"
+        ]
+      }
+    },
+    {
+      "runtime": "codex",
+      "payload": {
+        "schema_version": 1,
+        "session_id": "00000000-0000-4000-8000-000000000002",
+        "invocation_id": "00000000-0000-4000-8000-000000000004",
+        "occurred_at": "2026-10-08T00:00:00Z",
+        "artifact_pointers": [
+          {
+            "pointer": "knowledge/result.html#result",
+            "revision_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        ],
+        "required_constraints": [
+          "no_commit",
+          "no_push"
+        ],
+        "next_actions": [
+          "review_evidence"
+        ]
+      }
+    }
+  ]
+}

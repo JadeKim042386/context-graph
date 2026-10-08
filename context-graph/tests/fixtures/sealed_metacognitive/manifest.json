@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "fixture_kind": "synthetic_local_not_real_host",
+  "gold_sha256": "e682ce6ddbc2c53f2d5e0962c25d8b56b682ccdff8a6aab8686c3ed04c418afe",
+  "input_count": 60,
+  "sessions": 2,
+  "runtimes": [
+    "codex",
+    "claude-code"
+  ],
+  "retrieval_allowed": false,
+  "host_shaped_files": {
+    "host_inputs.json": "28625909074b6737690247d5d6f36b34385a6e7aa63eda0c11e26a430f3995ac",
+    "host_gold.json": "b08133db2a64314231ce4d7ae93ca92df75f849c9c473771a26b2f9b40c83a4f"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://context-graph.local/schema/session-checkpoint-head.json",
+  "type": "object",
+  "required": ["schema_version", "session_id", "checkpoint_epoch", "closed", "awaiting_post"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "session_id": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "checkpoint_epoch": {"type": "integer", "minimum": 0},
+    "closed": {"type": "boolean"},
+    "awaiting_post": {"type": "boolean"},
+    "checkpoint_id": {"type": ["string", "null"]},
+    "context_digest": {"type": ["string", "null"]},
+    "last_event_id": {"type": ["string", "null"]}
+  },
+  "additionalProperties": true
+}

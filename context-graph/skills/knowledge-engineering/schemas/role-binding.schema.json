@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "binding_id", "project_id", "session_id", "agent_instance_id", "task_id", "assignment_id", "session_role", "agent_role", "task_scope_ids", "assignment_scope_ids", "policy_revision", "policy_sha256", "catalog_sha256", "issuer", "trusted"],
+  "properties": {
+    "schema_version": {"const": 1}, "binding_id": {"type": "string"}, "project_id": {"type": "string"},
+    "session_id": {"type": "string"}, "agent_instance_id": {"type": "string"}, "task_id": {"type": "string"}, "assignment_id": {"type": "string"},
+    "session_role": {"type": "string"}, "agent_role": {"type": "string"},
+    "task_scope_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "assignment_scope_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "policy_revision": {"type": "string"}, "policy_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "catalog_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "issuer": {"type": "string"},
+    "trusted": {"const": true}, "revoked": {"type": "boolean"}
+  }
+}

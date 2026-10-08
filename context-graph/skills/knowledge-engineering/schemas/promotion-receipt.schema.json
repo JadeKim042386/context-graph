@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "record_type", "transaction_id", "project_id", "phase", "request_ref", "approval_ref", "expected_memory_sha256", "intended_memory_sha256", "observed_memory_sha256", "created_at", "previous_receipt_ref", "reason", "authority_basis", "receipt_sha256"],
+  "properties": {
+    "schema_version": {"const": 1}, "record_type": {"const": "PromotionReceipt"},
+    "transaction_id": {"type": "string", "minLength": 1}, "project_id": {"type": "string", "minLength": 1},
+    "phase": {"enum": ["prepared", "committed", "conflict", "aborted"]},
+    "request_ref": {"type": "object"}, "approval_ref": {"type": "object"},
+    "expected_memory_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "intended_memory_sha256": {"type": ["string", "null"]}, "observed_memory_sha256": {"type": ["string", "null"]},
+    "created_at": {"type": "string"}, "previous_receipt_ref": {"type": ["object", "null"]}, "reason": {"type": "string"}, "authority_basis": {"const": "project_review_record"}, "receipt_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

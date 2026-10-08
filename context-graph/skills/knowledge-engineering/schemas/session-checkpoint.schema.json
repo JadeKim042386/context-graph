@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://context-graph.local/schema/session-checkpoint.json",
+  "type": "object",
+  "required": ["schema_version", "record_type", "checkpoint_id", "session_id", "checkpoint_epoch", "context_digest", "last_event_id", "status", "promotion_state"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "record_type": {"const": "SessionCheckpoint"},
+    "checkpoint_id": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "session_id": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "checkpoint_epoch": {"type": "integer", "minimum": 0},
+    "context_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "last_event_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "status": {"const": "provisional"},
+    "promotion_state": {"const": "review_required"},
+    "work_status": {"enum": ["unknown", "open", "complete", "blocked", "partial"]},
+    "unresolved_count": {"type": "integer", "minimum": 0},
+    "artifact_delta": {"type": "array"},
+    "removed_artifact_paths": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

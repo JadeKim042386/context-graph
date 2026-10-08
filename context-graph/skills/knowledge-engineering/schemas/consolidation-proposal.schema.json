@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_type",
+    "proposal_id",
+    "kind",
+    "candidate_overlay_ids",
+    "recommended_representative",
+    "action",
+    "confidence",
+    "promotion_state",
+    "candidate_sha256",
+    "decision_state",
+    "decision_refs"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "record_type": {
+      "const": "ConsolidationProposal"
+    },
+    "proposal_id": {
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "exact_duplicate",
+        "possible_overlap",
+        "conflict"
+      ]
+    },
+    "candidate_overlay_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 2
+    },
+    "recommended_representative": {
+      "type": "string"
+    },
+    "action": {
+      "enum": [
+        "review_merge",
+        "retain_separately"
+      ]
+    },
+    "confidence": {
+      "enum": [
+        "high",
+        "insufficient",
+        "unverified"
+      ]
+    },
+    "reason": {
+      "type": "string"
+    },
+    "promotion_state": {
+      "const": "review_required"
+    },
+    "candidate_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "decision_state": {
+      "enum": [
+        "open",
+        "accept",
+        "reject",
+        "hold",
+        "stale",
+        "conflict"
+      ]
+    },
+    "decision_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

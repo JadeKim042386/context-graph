@@ -303,6 +303,34 @@ Session success cannot upgrade missing/invalid memory to ready or override a cur
 instruction. Memory-specific CLI limit overrides do not change the fixed session
 limits described below.
 
+An optional scoped handoff can select one raw session UUID and runtime before the
+fixed item and byte limits are applied:
+
+```bash
+python -B context-graph/skills/knowledge-engineering/scripts/build_task_continuity.py \
+  --root . --session-handoff \
+  --session-id <raw-session-uuid> --session-runtime codex
+```
+
+Callers may further provide one or more explicit invocation UUIDs with repeated
+`--task-invocation-id` options. This is a caller-supplied allowlist, not an
+authenticated task or agent boundary; this phase does not add `task_id` or
+`agent_id` to historical events. Filters are applied after full project-bound
+event validation and before the session's item/byte limits. Unknown sessions
+return an empty scoped pack without project-wide fallback. Missing requested
+invocations make the pack partial and expose only a count, never the raw IDs.
+Existing invocations without these flags retain the unscoped behavior and output.
+
+New attributed capture is opt-in. A payload with `schema_version: 2` adds opaque
+caller-supplied `agent_instance_id`, `task_id`, `assignment_id`, and an optional
+`reassigned_from_event_id`; the persisted event is schema version 4 with
+project-bound hashes. These identifiers describe provenance only. They are not
+authentication, access control, role identity, or promotion authority. Existing
+v1 payloads continue to produce v3 events, and old events are reported as
+`actor_unknown` only when `--include-attribution` is requested. A reassignment
+must use a new assignment and invocation identifier and point to an existing
+validated attributed event; original events remain immutable.
+
 ### Opt-in and request contract
 
 The existing project-local `knowledge-base/_ops/session-capture.json` must have
