@@ -161,6 +161,38 @@ Promote durable knowledge only after a reviewed handoff, decision, verified
 snapshot, or explicit goal transition. A missing `SessionEnd` event is not
 completion evidence.
 
+### Actual knowledge partition lifecycle
+
+Lifecycle events and checkpoints remain provisional operational history. Actual
+knowledge is separated by explicit role- and scope-bound partitions. Use
+`scripts/knowledge_partitions.py` to create a partition, write evidence-linked
+`KnowledgeCandidate` records, freeze a partition, and query only explicitly
+authorized partition IDs. `session_knowledge.close_agent()` freezes matching
+knowledge partitions; it does not promote event logs into knowledge.
+
+Use `scripts/merge_knowledge.py` to plan and apply a review-gated merge. All
+input partitions must be frozen, conflicts remain visible, and approval must
+bind the exact merge plan. Applied `CanonicalKnowledgeRecord` records retain
+partition, session, agent, role, source, and approval provenance. The existing
+`merge_session()` function remains the provisional event-overlay operation and
+is not a canonical knowledge merge.
+
+## Context efficiency
+
+Use `scripts/context_efficiency.py` when preparing knowledge for a prompt.
+`query_key()` combines the project, canonical question, scope, as-of date, and
+dependency digest. `build_pack()` validates that query context, sorts inputs
+deterministically, removes exact duplicates, preserves version conflicts and
+governance fields, hashes raw provenance, applies item and final serialized-byte
+limits, and sends locators/provenance references first; full claim values are
+omitted for unverified, retracted, superseded, stale, or conflicting content.
+`reuse()` verifies the sealed pack hash, internal counts, query-key derivation,
+and dependency digest before reuse. Otherwise it returns `bounded_reload`, so
+the caller retrieves only the missing or changed evidence instead of replaying
+the whole knowledge base. Canonical JSON bytes and omitted items are measurable
+local metrics, not model token counts; actual token savings require host
+tokenizer measurement.
+
 Codex has no verified universal lifecycle-hook surface. Do not claim automatic
 Codex compaction or exit capture; use the CLI from an explicitly configured
 automation when needed.

@@ -63,7 +63,7 @@ For a project-local installation, clone the repository and keep that directory
 available from the project root:
 
 ```bash
-git clone --branch v0.9.3 https://github.com/JadeKim042386/context-graph.git
+git clone --branch v0.9.4 https://github.com/JadeKim042386/context-graph.git
 ```
 
 ### Claude Code
@@ -77,6 +77,19 @@ Install the repository as a local Claude Code marketplace:
 
 Claude Code uses the same `SKILL.md` and reads `CLAUDE.md` host instructions
 when present. It does not require `AGENTS.md`.
+
+### Knowledge partitions and context efficiency
+
+Knowledge candidates can be separated by session, agent, role, and scope with
+`knowledge_partitions.py`. Closing a session freezes its knowledge partition;
+`merge_knowledge.py` creates canonical knowledge only after conflict,
+provenance, permission, and approval checks.
+
+Use `context_efficiency.py` to build bounded, pointer-first Context Packs. It
+deduplicates and seals packs, preserves provenance references, withholds
+unverified content, and reuses a pack only when its query key and dependency
+digest still match. Serialized bytes are proxy measurements; actual model token
+savings require host tokenizer measurement.
 
 ### Use
 

@@ -109,6 +109,9 @@ def _close_agent(root: Path, **selectors) -> dict:
         return record
     _append(safe_path(root, REGISTRY), record)
     record["status"] = "closed"
+    from knowledge_partitions import close_session as close_knowledge_session
+    knowledge_close = close_knowledge_session(root, session_id=session_id, reason="agent_or_session_closed")
+    record["frozen_knowledge_partition_ids"] = knowledge_close["frozen_partition_ids"]
     merged = _merge_session(root, session_key=record["session_key"], session_id=session_id)
     record["merged_count"] = merged["merged_count"]
     return record

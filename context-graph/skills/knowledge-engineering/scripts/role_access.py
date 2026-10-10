@@ -96,7 +96,7 @@ def _scope_set(context: dict) -> set[str]:
 
 
 def authorize(context: dict, *, action: str = "read") -> dict:
-    if action not in {"read", "handoff", "continuity", "audit"}:
+    if action not in {"read", "handoff", "continuity", "audit", "candidate_write", "partition_freeze", "merge_propose", "merge_apply"}:
         raise AccessDenied("unsupported_action")
     scopes = _scope_set(context)
     if not scopes:
